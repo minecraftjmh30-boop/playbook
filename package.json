@@ -1,0 +1,17 @@
+{
+  "name": "playbook",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Jack Hackett",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "leo-profanity": "^1.9.0",
+    "mysql": "^2.18.1"
+  }
+}

@@ -1,0 +1,99 @@
+.scheduleTable {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 1rem;
+}
+
+.date{
+    background: gray;
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 1rem;
+    width: 100%;
+}
+
+.date:hover{
+    background: lightgray;
+}
+
+.dateTitle{
+    text-align: center;
+}
+
+.currentDate{
+    background-color:black;
+    color:white;
+}
+
+.freeSaved{
+ background-color: darkgreen;
+}
+
+.free{
+    background-color: lightgreen;
+}
+
+.currentDateFree{
+    color: green;
+}
+.currentDateBusy{
+    color:indianred;
+}
+
+.busySaved{
+    background-color: red;
+}
+
+.busy{
+    background-color: indianred;
+}
+
+.dateSkipped{
+    opacity:0;
+}
+
+
+
+button{
+    padding: .5rem;
+    border-radius: 2rem;
+}
+#freeBtn{
+    background-color: darkgreen;
+}
+#busyBtn{
+    background-color: red;
+}
+#removeBtn{
+    background-color: gray;
+}
+.active{
+    opacity: 0.8;
+    color:white;
+}
+
+button:hover{
+    background-color:white;
+    cursor:pointer;
+}
+
+h3{
+    font-size: 2rem;
+    text-align: center;
+}
+
+.weekdayTable{
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1rem;
+}
+
+.weekday{
+    text-align: center;
+
+}
+
+.hidden{
+    visibility: hidden;
+}

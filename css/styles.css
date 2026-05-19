@@ -1,0 +1,70 @@
+root{
+    --main-color: light_gray;
+    --link-color: light_blue;
+    --light-color: '#fffff';
+    --dark-color: '#00000';
+    --main-font: 'Roboto', sans-serif;
+    --max-width: 1000px;
+}
+/*main styles*/
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body{
+    font: var(--main-font);
+}
+
+body > header{
+    background-color: var(--main-color);
+    color: var(--light-color);
+    padding: 1rem;
+}
+
+body > main{
+    margin:0 auto;
+    min-width:500px;
+    max-width: 1000px;
+}
+body > footer{
+    background-color: var(--main-color);
+    color: var(--light-color);
+    padding: .5rem;
+}
+
+/*card styles*/
+
+.cards{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+.card{
+    background-color: var(--light-color);
+    padding: 1rem;
+}
+.card-title{
+    color: var(--link-color);
+}
+
+.row{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.flex-1{
+    flex: 1;
+}
+div{
+    margin-bottom:1rem;
+}
+.center{
+    text-align: center;
+    margin: 0 auto;
+}
+
+section{
+    margin-bottom: 2rem;
+}
