@@ -81,17 +81,17 @@ function monthMenu(targetDate){
     div.classList.add("row");
     div.classList.add("center")
     div.innerHTML = `
-    <button class="flex-1" id="backwards"> back </button>
+    <button class="flex-1" id="backwards"> &#8592; </button>
     <h3 class="flex-1">${monthFormat.format(targetDate)} ${yearFormat.format(targetDate)}</h3>
-    <button class="flex-1" id="forwards"> forward </button>  `
+    <button class="flex-1" id="forwards"> &#8594; </button>  `
 
-    if (targetDate.getMonth() === today.getMonth()) {
+    if (targetDate.getMonth() === today.getMonth() && targetDate.getFullYear() === today.getFullYear()) {
         div.querySelector("#backwards").classList.add("hidden");
     }
 
     div.querySelector("#backwards").addEventListener("click", function(){
         let lastMonth = new Date(targetDate.getFullYear(), targetDate.getMonth() -1, 1);
-        if (lastMonth.getMonth() === today.getMonth()) {
+        if (lastMonth.getMonth() === today.getMonth() && lastMonth.getFullYear() === today.getFullYear()) {
             lastMonth = today
         }
         generateSchedule(lastMonth);

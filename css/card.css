@@ -1,0 +1,34 @@
+/*card styles*/
+
+.cards{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+.card{
+    background-color: var(--light-color);
+    padding: 1rem;
+}
+.card-title{
+    color: var(--link-color);
+}
+
+.row{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.flex-1{
+    flex: 1;
+}
+div{
+    margin-bottom:1rem;
+}
+.center{
+    text-align: center;
+    margin: 0 auto;
+}
+
+section{
+    margin-bottom: 2rem;
+}

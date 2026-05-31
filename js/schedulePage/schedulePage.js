@@ -1,5 +1,4 @@
 let today
-let month
 const schedule = document.querySelector('#schedule');
 
 document.addEventListener("DOMContentLoaded", function() {

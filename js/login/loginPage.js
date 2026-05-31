@@ -1,16 +1,20 @@
 //MAIN PAGE FOR LOGIN AND SIGNUP
 //LOADS THE CORRECT FORM BASED ON USER ACTION
+import { login } from './login.js';
+import { uploadUser } from './uploadUser.js';
+$(document).ready(function(){
 
-const form = document.querySelector('form');
-const loginButton = document.getElementById('login');
+const $form = $('form');
 
-loginButton.addEventListener('click', () => {
-    loadLogin();
-})
+
+const loginButton = $('#login');
+
+loginButton.click(loadLogin)
+
 function loadLogin() {
-    form.innerHTML = ``;
+    $form.html(``);
 
-    form.innerHTML = `
+    $form.html( `
     <fieldset>
     <legend>Login</legend>
     <label for="username">Enter Username</label>
@@ -19,23 +23,25 @@ function loadLogin() {
     <input type="password">
     <button type="button" id="login-button" >Login</button>
     </fieldset>
-    `;
-    document.getElementById('login-button').addEventListener('click', () => {
-        //Start Login process
+    `);
+    $('#login-button').click(function(){
+        let unLocation = $('#username');
+        let pLocation = $('#password');
+        let username = unLocation.val();
+        let password = pLocation.val();
+        login(username, password);
     })
 }
 
 
-const signupButton = document.getElementById('signup');
+const signupButton = $('#signup');
 
-signupButton.addEventListener('click', () => {
-    loadSignUp();
-})
+signupButton.click(loadSignUp)
 
 function loadSignUp() {
-    form.innerHTML = ``;
-
-    form.innerHTML = `
+    $form.html(``);
+    $form.id = 'signupForm';
+    $form.html(`
     <fieldset>
     <legend>Sign Up</legend>
     <label for="username">Enter Username</label>
@@ -51,9 +57,8 @@ function loadSignUp() {
     
     <button type="button" id="signupStart">Sign Up</button>
     </fieldset>
-    `;
-document.getElementById('signupStart').addEventListener('click', () => {
-   uploadUser();
-})
+    `);
+    $('#signupStart').click(uploadUser);
 
 }
+})

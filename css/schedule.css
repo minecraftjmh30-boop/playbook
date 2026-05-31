@@ -3,8 +3,17 @@
     grid-template-columns: repeat(7, 1fr);
     grid-template-rows: repeat(6, 1fr);
     gap: 1rem;
+    margin-bottom: 2rem;
 }
 
+.free:hover{
+    background-color:lightgreen;
+    opacity: 0.8;
+}
+.busy:hover{
+    background-color: indianred;
+    opacity: 0.8;
+}
 .date{
     background: gray;
     border: 1px solid black;
@@ -55,7 +64,7 @@
 
 
 
-button{
+main button{
     padding: .5rem;
     border-radius: 2rem;
 }
@@ -73,7 +82,7 @@ button{
     color:white;
 }
 
-button:hover{
+main button:hover{
     background-color:white;
     cursor:pointer;
 }
