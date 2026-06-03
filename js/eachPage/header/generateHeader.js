@@ -1,3 +1,5 @@
+import { removeCookie } from '/js/checkAuth/cookie.js';
+window.removeCookie = removeCookie;
 $(document).ready(function() {
     let $header = $('body > header')
     let page = location.pathname.split('/').pop().split('.')[0]
@@ -21,7 +23,7 @@ $(document).ready(function() {
                     <button>my Profile</button>
                     <button>Add Friend</button>
                     <button>Settings</button>
-                    <button>Log-Out</button>
+                    <button onclick="removeCookie()">Log-Out</button>
                 </div>
                 </li> <!--will be pfp with drow down-->
             </ul>

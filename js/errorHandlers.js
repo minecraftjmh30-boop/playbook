@@ -8,5 +8,5 @@ function displayErrorMessages(location, message){
     const errorMessage = document.createElement('div');
     errorMessage.classList.add('error-message');
     errorMessage.textContent = message;
-    location.appendChild(errorMessage);
+    location.insertAdjacentElement('afterend', errorMessage);
 }

@@ -13,13 +13,13 @@ export async function login(username, password, unLocation, pLocation) {
 
     if (!response.ok) {
         if (data.error.includes('username')) {
-            displayErrorMessages(unLocation, data.error);
+            displayErrorMessages(unLocation, "username does not exist");
         } else {
-            displayErrorMessages(pLocation, data.error);
+            displayErrorMessages(pLocation, "incorrect password");
         }
         return;
     }
 
     setCookie('user', data.user.id, data.user.username, data.user.firstname, data.user.lastname);
-    window.location.href = './index.html';
+    window.location.href = '/index.html';
 }

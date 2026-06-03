@@ -12,6 +12,7 @@ export function getCookie() {
     return null;
 }
 
-function removeCookie() {
+export function removeCookie() {
     document.cookie = 'user=; max-age=0; path=/; SameSite=Strict';
+    window.location.reload();
 }

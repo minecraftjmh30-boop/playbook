@@ -15,21 +15,22 @@ function loadLogin() {
     $form.html(``);
 
     $form.html( `
+    <button onclick="window.location.href='login.html'">go back</button>
     <fieldset>
     <legend>Login</legend>
     <label for="username">Enter Username</label>
     <input id="username" type="text">
     <label for="password">Enter Password</label>
-    <input type="password">
+    <input id="password" type="password">
     <button type="button" id="login-button" >Login</button>
     </fieldset>
     `);
     $('#login-button').click(function(){
-        let unLocation = $('#username');
-        let pLocation = $('#password');
-        let username = unLocation.val();
-        let password = pLocation.val();
-        login(username, password);
+        let unLocation = $('#username')[0];
+        let pLocation = $('#password')[0];
+        let username = unLocation.value;
+        let password = pLocation.value;
+        login(username, password, unLocation, pLocation).then(r => console.log("login successful"));
     })
 }
 
@@ -51,7 +52,7 @@ function loadSignUp() {
     <label for="lastname">Enter Last Name</label>
     <input id="lastname" type="text">
     <label for="password">Enter Password</label>
-    <input type="password">
+    <input id="password" type="password">
     <label for="confirm">Confirm Password</label>
     <input id="confirm" type="password">
     
