@@ -1,22 +1,16 @@
-/* Bootstrap-integrated styles for Schedule page */
+// Bootstrap-integrated styles for Schedule page
 
 .scheduleTable,
 .weekdayTable {
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(7, 1fr);
     gap: 0.25rem;
-}
 
-@media (min-width: 576px) {
-    .scheduleTable,
-    .weekdayTable {
+    @media (min-width: 576px) {
         gap: 0.5rem;
     }
-}
 
-@media (min-width: 768px) {
-    .scheduleTable,
-    .weekdayTable {
+    @media (min-width: 768px) {
         gap: 1rem;
     }
 }
@@ -37,10 +31,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-}
 
-@media (min-width: 768px) {
-    .weekday {
+    @media (min-width: 768px) {
         font-size: 1rem;
     }
 }
@@ -60,25 +52,21 @@
     transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     user-select: none;
     box-sizing: border-box;
-}
 
-@media (min-width: 576px) {
-    .date {
+    @media (min-width: 576px) {
         min-height: 3.5rem;
         padding: 0.5rem;
     }
-}
 
-@media (min-width: 768px) {
-    .date {
+    @media (min-width: 768px) {
         min-height: 4.5rem;
         padding: 1rem;
     }
-}
 
-.date:hover {
-    background-color: var(--bs-secondary-bg, #e9ecef);
-    border-color: var(--bs-border-color-translucent, #ced4da);
+    &:hover {
+        background-color: var(--bs-secondary-bg, #e9ecef);
+        border-color: var(--bs-border-color-translucent, #ced4da);
+    }
 }
 
 .dateTitle {
@@ -86,10 +74,8 @@
     font-weight: 600;
     margin-bottom: 0;
     font-size: 0.875rem;
-}
 
-@media (min-width: 768px) {
-    .dateTitle {
+    @media (min-width: 768px) {
         font-size: 1rem;
     }
 }
@@ -98,55 +84,55 @@
     background-color: var(--bs-dark, #212529);
     color: var(--bs-light, #ffffff);
     border-color: var(--bs-dark, #212529);
-}
 
-.currentDate:hover {
-    background-color: var(--bs-gray-800, #343a40);
-    color: var(--bs-light, #ffffff);
+    &:hover {
+        background-color: var(--bs-gray-800, #343a40);
+        color: var(--bs-light, #ffffff);
+    }
 }
 
 .free {
     background-color: var(--bs-success-bg-subtle, #d1e7dd);
     color: var(--bs-success-text-emphasis, #0a3622);
     border-color: var(--bs-success-border-subtle, #a3cfbb);
-}
 
-.free:hover {
-    background-color: #b7e1cd;
-    opacity: 0.9;
+    &:hover {
+        background-color: #b7e1cd;
+        opacity: 0.9;
+    }
 }
 
 .freeSaved {
     background-color: var(--bs-success, #198754);
     color: #ffffff;
     border-color: var(--bs-success, #198754);
-}
 
-.freeSaved:hover {
-    background-color: #157347;
-    color: #ffffff;
+    &:hover {
+        background-color: #157347;
+        color: #ffffff;
+    }
 }
 
 .busy {
     background-color: var(--bs-danger-bg-subtle, #f8d7da);
     color: var(--bs-danger-text-emphasis, #58151c);
     border-color: var(--bs-danger-border-subtle, #f1aeb5);
-}
 
-.busy:hover {
-    background-color: #f1b0b7;
-    opacity: 0.9;
+    &:hover {
+        background-color: #f1b0b7;
+        opacity: 0.9;
+    }
 }
 
 .busySaved {
     background-color: var(--bs-danger, #dc3545);
     color: #ffffff;
     border-color: var(--bs-danger, #dc3545);
-}
 
-.busySaved:hover {
-    background-color: #bb2d3b;
-    color: #ffffff;
+    &:hover {
+        background-color: #bb2d3b;
+        color: #ffffff;
+    }
 }
 
 .currentDateFree {
@@ -161,21 +147,28 @@
     box-shadow: 0 0 0 2px var(--bs-danger, #dc3545);
 }
 
-.splitDate {
-    border-left: 4px solid var(--bs-primary);
-    background-color: var(--bs-info-bg-subtle);
+.dateSkipped {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
 }
 
-#freeBtn.active {
-    box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.5);
+#freeBtn {
+    &.active {
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.5);
+    }
 }
 
-#busyBtn.active {
-    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.5);
+#busyBtn {
+    &.active {
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.5);
+    }
 }
 
-#removeBtn.active {
-    box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.5);
+#removeBtn {
+    &.active {
+        box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.5);
+    }
 }
 
 .hidden {

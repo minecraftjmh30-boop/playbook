@@ -1,5 +1,7 @@
 
 
+let activeDateForModal = null;
+
 function generateSchedule(targetDate) {
     schedule.innerHTML = ``
     let month = targetDate.getMonth() + 1;
@@ -18,6 +20,7 @@ function generateFiller(amount) {
         const date = document.createElement("div");
         date.classList.add("date");
         date.classList.add("dateSkipped");
+        date.classList.add("opacity-0");
         date.innerHTML = `<div><p>skipped</p></div>`;
         schedule.appendChild(date);
     }
@@ -48,24 +51,33 @@ function generateDate(targetDate) {
 <p class="dateTitle">${i + 1}</p>
 `;
         date.addEventListener("click", () => {
-            if (date.classList.contains("currentDate")) {
-                if (free){date.classList.toggle("currentDateFree");}
-                if (busy){date.classList.toggle("currentDateBusy");}
-                if (remove){
-                    date.classList.remove("currentDateFree");
-                    date.classList.remove("currentDateBusy");
+            if (free || busy || remove) {
+                if (date.classList.contains("currentDate")) {
+                    if (free){date.classList.toggle("currentDateFree");}
+                    if (busy){date.classList.toggle("currentDateBusy");}
+                    if (remove){
+                        date.classList.remove("currentDateFree");
+                        date.classList.remove("currentDateBusy");
+                    }
+                }else {
+                    if (free) {
+                        date.classList.remove("busy");
+                        date.classList.toggle("free");
+                    }
+                    if (busy) {
+                        date.classList.remove("free")
+                        date.classList.toggle("busy");
+                    }
+                    if (remove) {
+                        date.classList.remove("free");
+                        date.classList.remove("busy");
+                    }
                 }
-            }else {
-                if (free) {
-                    date.classList.toggle("free");
-                }
-                if (busy) {
-                    date.classList.toggle("busy");
-                }
-                if (remove) {
-                    date.classList.remove("free");
-                    date.classList.remove("busy");
-                }
+            } else {
+                activeDateForModal = date;
+                const modalElement = document.getElementById('timeModal');
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
             }
         })
         schedule.appendChild(date);
@@ -79,11 +91,12 @@ function monthMenu(targetDate){
     const div = document.createElement("div");
     menu.innerHTML = ``;
     div.classList.add("row");
-    div.classList.add("center")
+    div.classList.add("justify-content-center");
+    div.classList.add("align-items-center");
     div.innerHTML = `
-    <button class="flex-1" id="backwards"> &#8592; </button>
-    <h3 class="flex-1">${monthFormat.format(targetDate)} ${yearFormat.format(targetDate)}</h3>
-    <button class="flex-1" id="forwards"> &#8594; </button>  `
+    <button class="btn btn-outline-secondary col-auto px-3 rounded-pill" id="backwards"> &#8592; </button>
+    <h3 class="col-auto text-center mx-3 my-0">${monthFormat.format(targetDate)} ${yearFormat.format(targetDate)}</h3>
+    <button class="btn btn-outline-secondary col-auto px-3 rounded-pill" id="forwards"> &#8594; </button>  `
 
     if (targetDate.getMonth() === today.getMonth() && targetDate.getFullYear() === today.getFullYear()) {
         div.querySelector("#backwards").classList.add("hidden");
@@ -109,19 +122,55 @@ function monthMenu(targetDate){
 
 function generateWeekDays(){
     const area = document.getElementById("weekdays");
+    area.innerHTML = ``;
     const weekdays = [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday"
-    ]
+        { full: "Sunday", short: "Sun" },
+        { full: "Monday", short: "Mon" },
+        { full: "Tuesday", short: "Tue" },
+        { full: "Wednesday", short: "Wed" },
+        { full: "Thursday", short: "Thu" },
+        { full: "Friday", short: "Fri" },
+        { full: "Saturday", short: "Sat" }
+    ];
     for (let i = 0; i < weekdays.length; i++) {
-        const weekday = document.createElement('p')
-        weekday.classList.add("weekday")
-        weekday.innerText = `${weekdays[i]}`;
+        const weekday = document.createElement('div');
+        weekday.classList.add("weekday", "text-center", "fw-bold", "mb-0");
+        weekday.innerHTML = `<span class="d-none d-md-inline">${weekdays[i].full}</span><span class="d-inline d-md-none">${weekdays[i].short}</span>`;
         area.appendChild(weekday);
     }
 }
+
+document.getElementById('saveTimeBtn').addEventListener('click', () => {
+    if (!activeDateForModal) return;
+
+    const mode = document.getElementById('modalMode').value;
+    const startTime = document.getElementById('modalStartTime').value;
+    const endTime = document.getElementById('modalEndTime').value;
+
+    if (!startTime || !endTime) {
+        alert("Please select both start and end times.");
+        return;
+    }
+
+    // Clear existing status classes
+    activeDateForModal.classList.remove('free', 'busy', 'currentDateFree', 'currentDateBusy', 'freeSaved', 'busySaved', 'splitDate');
+    
+    // Apply splitDate class
+    activeDateForModal.classList.add('splitDate');
+
+    // Store the time information in data attributes
+    activeDateForModal.dataset.startTime = startTime;
+    activeDateForModal.dataset.endTime = endTime;
+    activeDateForModal.dataset.mode = mode;
+
+    // Close the modal
+    const modalElement = document.getElementById('timeModal');
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    if (modal) {
+        modal.hide();
+    }
+    
+    // Reset modal inputs for next use
+    document.getElementById('modalStartTime').value = '';
+    document.getElementById('modalEndTime').value = '';
+});
