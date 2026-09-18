@@ -20,7 +20,7 @@ function generateSchedule(targetDate) {
         }
     });
 
-    schedule.innerHTML = ``
+    schedule.innerHTML = ``;
     let month = targetDate.getMonth() + 1;
     let firstWeekday = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
     console.log(`${month} - ${firstWeekday.getDay()}`);
@@ -230,4 +230,9 @@ $(document).on('click', '#saveTimeBtn', () => {
     // Reset modal inputs for next use
     startTime.val('');
     endTime.val('');
+});
+
+$('#resetBtn').on('click', () => {
+    schedule.innerHTML = ``;
+    startSchedulePage();
 });
