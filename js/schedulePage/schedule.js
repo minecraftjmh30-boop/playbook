@@ -1,8 +1,25 @@
 
 
 let activeDateForModal = null;
+let storedSchedules = {}; // To temporarily store schedules when switching months
 
 function generateSchedule(targetDate) {
+    // Save current dates before clearing
+    const currentDates = schedule.querySelectorAll(".date");
+    currentDates.forEach(el => {
+        if (el.dataset.year && el.dataset.month && el.dataset.date) {
+            const key = `${el.dataset.year}-${el.dataset.month}-${el.dataset.date}`;
+            storedSchedules[key] = {
+                startTime: el.dataset.startTime,
+                endTime: el.dataset.endTime,
+                mode: el.dataset.mode,
+                isSplit: el.classList.contains('splitDate'),
+                isFree: el.classList.contains('free') || el.classList.contains('currentDateFree'),
+                isBusy: el.classList.contains('busy') || el.classList.contains('currentDateBusy')
+            };
+        }
+    });
+
     schedule.innerHTML = ``
     let month = targetDate.getMonth() + 1;
     let firstWeekday = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
@@ -38,6 +55,30 @@ function generateDate(targetDate) {
         date.dataset.month = (targetDate.getMonth() + 1).toString();
         date.dataset.date = (i + 1).toString();
         date.dataset.year = targetDate.getFullYear();
+
+        // Re-add stored data if it exists
+        const key = `${date.dataset.year}-${date.dataset.month}-${date.dataset.date}`;
+        if (storedSchedules[key]) {
+            const data = storedSchedules[key];
+            if (data.startTime) date.dataset.startTime = data.startTime;
+            if (data.endTime) date.dataset.endTime = data.endTime;
+            if (data.mode) date.dataset.mode = data.mode;
+            if (data.isSplit) date.classList.add('splitDate');
+            if (data.isFree) {
+                if (date.classList.contains('currentDate')) {
+                    date.classList.add('currentDateFree');
+                } else {
+                    date.classList.add('free');
+                }
+            }
+            if (data.isBusy) {
+                if (date.classList.contains('currentDate')) {
+                    date.classList.add('currentDateBusy');
+                } else {
+                    date.classList.add('busy');
+                }
+            }
+        }
 
         if (
             i + 1 === targetDate.getDate() &&
