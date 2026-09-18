@@ -52,6 +52,12 @@ function generateDate(targetDate) {
 `;
         date.addEventListener("click", () => {
             if (free || busy || remove) {
+                // Quick buttons override existing time info
+                delete date.dataset.startTime;
+                delete date.dataset.endTime;
+                delete date.dataset.mode;
+                date.classList.remove('splitDate');
+
                 if (date.classList.contains("currentDate")) {
                     if (free){date.classList.toggle("currentDateFree");}
                     if (busy){date.classList.toggle("currentDateBusy");}
@@ -75,6 +81,12 @@ function generateDate(targetDate) {
                 }
             } else {
                 activeDateForModal = date;
+                
+                // Pre-populate modal with existing info
+                $('#modalMode').val(date.dataset.mode || 'free');
+                $('#modalStartTime').val(date.dataset.startTime || '');
+                $('#modalEndTime').val(date.dataset.endTime || '');
+
                 const modalElement = document.getElementById('timeModal');
                 if (modalElement && typeof bootstrap !== 'undefined') {
                     const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
