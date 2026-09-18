@@ -76,8 +76,10 @@ function generateDate(targetDate) {
             } else {
                 activeDateForModal = date;
                 const modalElement = document.getElementById('timeModal');
-                const modal = new bootstrap.Modal(modalElement);
-                modal.show();
+                if (modalElement && typeof bootstrap !== 'undefined') {
+                    const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                    modal.show();
+                }
             }
         })
         schedule.appendChild(date);
@@ -140,14 +142,14 @@ function generateWeekDays(){
     }
 }
 
-document.getElementById('saveTimeBtn').addEventListener('click', () => {
+$(document).on('click', '#saveTimeBtn', () => {
     if (!activeDateForModal) return;
 
-    const mode = document.getElementById('modalMode').value;
-    const startTime = document.getElementById('modalStartTime').value;
-    const endTime = document.getElementById('modalEndTime').value;
+    const mode = $('#modalMode');
+    const startTime = $('#modalStartTime');
+    const endTime = $('#modalEndTime');
 
-    if (!startTime || !endTime) {
+    if (!startTime.val() || !endTime.val()) {
         alert("Please select both start and end times.");
         return;
     }
@@ -159,18 +161,20 @@ document.getElementById('saveTimeBtn').addEventListener('click', () => {
     activeDateForModal.classList.add('splitDate');
 
     // Store the time information in data attributes
-    activeDateForModal.dataset.startTime = startTime;
-    activeDateForModal.dataset.endTime = endTime;
-    activeDateForModal.dataset.mode = mode;
+    activeDateForModal.dataset.startTime = startTime.val();
+    activeDateForModal.dataset.endTime = endTime.val();
+    activeDateForModal.dataset.mode = mode.val();
 
     // Close the modal
     const modalElement = document.getElementById('timeModal');
-    const modal = bootstrap.Modal.getInstance(modalElement);
-    if (modal) {
-        modal.hide();
+    if (modalElement && typeof bootstrap !== 'undefined') {
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+            modal.hide();
+        }
     }
     
     // Reset modal inputs for next use
-    document.getElementById('modalStartTime').value = '';
-    document.getElementById('modalEndTime').value = '';
+    startTime.val('');
+    endTime.val('');
 });
