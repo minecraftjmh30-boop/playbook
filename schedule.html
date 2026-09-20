@@ -4,46 +4,81 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Schedule</title>
-    <link rel="stylesheet" href="./css/styles.css">
-    <link rel="stylesheet" href="./css/nav.css">
-    <link rel="stylesheet" href="./css/flex.css">
+    <link href="https://unpkg.com/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="./css/schedule.css">
 </head>
 <body>
     <header>
-        <h3>Schedule</h3>
+
     </header>
-    <main>
-    <section class="row" id="tools">
-        <button type="button" class="flex-1" id="freeBtn">Quick Free</button>
-        <button type="button" class="flex-1" id="busyBtn">Quick Busy</button>
-        <button type="button" class="flex-1" id="removeBtn">Quick Remove</button>
+    <main class="container my-4">
+    <section class="row justify-content-center gap-2 mb-4" id="tools">
+        <button type="button" class="btn btn-success col-auto px-4 rounded-pill" id="freeBtn">Quick Free</button>
+        <button type="button" class="btn btn-danger col-auto px-4 rounded-pill" id="busyBtn">Quick Busy</button>
+        <button type="button" class="btn btn-secondary col-auto px-4 rounded-pill" id="removeBtn">Quick Remove</button>
     </section>
-    <div class="row" id="monthMenu">
+    <div class="row justify-content-center align-items-center mb-3" id="monthMenu">
 
     </div>
-        <div class="weekdayTable" id="weekdays">
+        <div class="weekdayTable mb-2" id="weekdays">
 
         </div>
     <section id="schedule" class="scheduleTable">
     <!-- printed schedule -->
     </section>
-        <section class="row">
-            <button type="button">reset</button>
-            <button type="button">Save</button>
+        <section class="row justify-content-center gap-2">
+            <button class="btn btn-secondary col-auto px-4 rounded-pill" type="button" id="resetBtn">Reset</button>
+            <button class="btn btn-primary col-auto px-4 rounded-pill" type="button">Save</button>
         </section>
 </main>
 <footer>
-<p>Jack</p>
+
 </footer>
-    <!--page scripts-->
+    <!--dependencies-->
 <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
-<script type="module" src="./js/eachPage/header/generateHeader.js"></script>
-<script src="./js/eachPage/header/dropDowns.js"></script>
+<script src="https://unpkg.com/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <!--page scripts-->
+<script src="/js/eachPage/header/generateHeader.js"></script>
+<script src="/js/eachPage/footer/generateFooter.js"></script>
+<script src="/js/eachPage/prefrences/darkmode.js"></script>
     <!--schedule scripts-->
-<script src="js/schedulePage/schedule.js"></script>
-<script src="js/schedulePage/schedulePage.js"></script>
-<script src="./js/schedulePage/scheduleTools.js"></script>
-<script src="./js/schedulePage/scheduleUpload.js"></script>
+    <script src="/js/schedulePage/schedule.js"></script>
+    <script src="/js/schedulePage/schedulePage.js"></script>
+    <script src="/js/schedulePage/scheduleTools.js"></script>
+
+    <!-- Modal for setting specific times -->
+    <div class="modal fade" id="timeModal" tabindex="-1" aria-labelledby="timeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="timeModalLabel">Set Time Range</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="modalMode" class="form-label">Type</label>
+                        <select class="form-select" id="modalMode">
+                            <option value="free">Free</option>
+                            <option value="busy">Busy</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <label for="modalStartTime" class="form-label">Start Time</label>
+                            <input type="time" class="form-control" id="modalStartTime">
+                        </div>
+                        <div class="col">
+                            <label for="modalEndTime" class="form-label">End Time</label>
+                            <input type="time" class="form-control" id="modalEndTime">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveTimeBtn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
