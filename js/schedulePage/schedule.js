@@ -190,7 +190,7 @@ function generateWeekDays(){
     for (let i = 0; i < weekdays.length; i++) {
         const weekday = document.createElement('div');
         weekday.classList.add("weekday", "text-center", "fw-bold", "mb-0");
-        weekday.innerHTML = `<span class="d-none d-md-inline">${weekdays[i].full}</span><span class="d-inline d-md-none">${weekdays[i].short}</span>`;
+        weekday.innerHTML = `<span class="d-inline">${weekdays[i].short}</span>`;
         area.appendChild(weekday);
     }
 }
