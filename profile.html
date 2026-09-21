@@ -3,20 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link href="https://unpkg.com/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
 </head>
 <body>
-<header>Profile</header>
-<main>
-    <!-- User PFP -->
-    <!-- User Name-->
-    <!-- Date Joined -->
+    <header></header>
 
+    <main class="container my-5">
+        <!-- Profile Tabs Navigation -->
+        <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main-pane" type="button" role="tab">Main</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="friends-tab" data-bs-toggle="tab" data-bs-target="#friends-pane" type="button" role="tab">Friends</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings-pane" type="button" role="tab">Settings</button>
+            </li>
+        </ul>
 
+        <!-- Tab Content -->
+        <div class="tab-content" id="profileTabsContent">
+            <!-- Main Section: Basic Info -->
+            <div class="tab-pane fade show active" id="main-pane" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">Profile Information</div>
+                    <div class="card-body">
+                        <p><strong class="me-2">Name:</strong> John Doe</p>
+                        <p><strong class="me-2">Email:</strong> john.doe@example.com</p>
+                        <p><strong class="me-2">Date Joined:</strong> September 19, 2026</p>
+                    </div>
+                </div>
+            </div>
 
+            <!-- Friends Section -->
+            <div class="tab-pane fade" id="friends-pane" role="tabpanel">
+                <!-- Friends List -->
+                <div class="card mb-4">
+                    <div class="card-header">Your Friends</div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Alice Smith
+                            <button class="btn btn-sm btn-outline-danger">Remove</button>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Bob Jones
+                            <button class="btn btn-sm btn-outline-danger">Remove</button>
+                        </li>
+                    </ul>
+                </div>
 
+                <!-- Pending Requests -->
+                <div class="card mb-4">
+                    <div class="card-header">Pending Friend Requests</div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Charlie Brown
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-success me-2">Add</button>
+                                <button class="btn btn-sm btn-secondary">Ignore</button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
 
+                <!-- Friend Code Sharing & Adding -->
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">Share Your Friend Code</h6>
+                        <p class="card-text mb-3">Your code: <span class="badge bg-light text-dark border">PLAY-9876</span></p>
+                        
+                        <hr>
+                        
+                        <h6 class="card-title">Add a Friend</h6>
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Enter friend code">
+                            <button class="btn btn-primary" type="button">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-</main>
+            <!-- Settings Section -->
+            <div class="tab-pane fade" id="settings-pane" role="tabpanel">
+                <!-- Update Profile -->
+                <div class="card mb-4">
+                    <div class="card-header">Account Settings</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" value="johndoe">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" placeholder="New password">
+                        </div>
+                        <button class="btn btn-primary">Update Profile</button>
+                    </div>
+                </div>
+
+                <!-- Account Actions -->
+                <div class="card">
+                    <div class="card-body d-flex justify-content-center gap-3">
+                        <button class="btn btn-outline-warning">Logout</button>
+                        <button class="btn btn-danger">Remove Account</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 <footer>Jack|2026</footer>
+    <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
+    <script src="https://unpkg.com/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <!--eachpage-->
+    <script type="module" src="/js/eachPage/header/generateHeader.js"></script>
+    <script type="module" src="/js/eachPage/footer/generateFooter.js"></script>
+    <script src="/js/eachPage/prefrences/darkmode.js"></script>
 </body>
 </html>
