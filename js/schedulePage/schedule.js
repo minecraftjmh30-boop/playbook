@@ -88,10 +88,24 @@ function generateDate(targetDate) {
             date.classList.add("currentDate");
         }
 
+        // Disable past dates
+        const currentDateObj = new Date(targetDate.getFullYear(), targetDate.getMonth(), i + 1);
+        currentDateObj.setHours(0, 0, 0, 0);
+        const todayObj = new Date();
+        todayObj.setHours(0, 0, 0, 0);
+
+        if (currentDateObj < todayObj) {
+            date.classList.add("disabled");
+            date.style.pointerEvents = "none";
+            date.style.opacity = "0.5";
+        }
+
         date.innerHTML = `
 <p class="dateTitle">${i + 1}</p>
 `;
         date.addEventListener("click", () => {
+            if (date.classList.contains("disabled")) return;
+
             if (free || busy || remove) {
                 // Quick buttons override existing time info
                 delete date.dataset.startTime;

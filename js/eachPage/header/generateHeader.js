@@ -31,9 +31,9 @@ $(document).ready(function() {
             Profile
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">My Profile</a></li>
-            <li><a class="dropdown-item" href="#">Add Friends</a></li>
-            <li><a class="dropdown-item" href="#">Settings</a></li>
+            <li><a class="dropdown-item" href="./profile.html#main-tab" role="button">My Profile</a></li>
+            <li><a class="dropdown-item" href="./profile.html#friends-tab" role="button">Add Friends</a></li>
+            <li><a class="dropdown-item" href="./profile.html#settings-tab" role="button">Settings</a></li>
             <li><a class="dropdown-item" href="#">Logout</a></li>
           </ul>
         </li>
