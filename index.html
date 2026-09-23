@@ -20,7 +20,7 @@
 <header>
     <div class="container d-flex justify-content-between align-items-center">
         <h1>My Rooms</h1>
-        <button class="btn btn-success" @click="openAddModal">Add Room</button>
+        <button class="btn btn-success" @click="showChoiceModal = true">Add Room</button>
     </div>
 </header>
 <section id="rooms">
@@ -73,16 +73,58 @@
                     <textarea class="form-control" v-model="currentRoom.description"></textarea>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Status</label>
-                    <select class="form-select" v-model="currentRoom.status">
-                        <option value="Online">Online</option>
-                        <option value="Offline">Offline</option>
-                    </select>
+                    <label class="form-label">Location</label>
+                    <input type="text" class="form-control" v-model="currentRoom.location">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Friends</label>
+                    <input type="text" class="form-control" v-model="currentRoom.friends">
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" @click="closeModal">Cancel</button>
                 <button type="button" class="btn btn-primary" @click="saveRoom">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Choice (Create or Join) -->
+<div v-if="showChoiceModal" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">What would you like to do?</h5>
+                <button type="button" class="btn-close" @click="showChoiceModal = false"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p>Choose an option to proceed.</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <button class="btn btn-primary" @click="showChoiceModal = false; openAddModal()">Create Room</button>
+                    <button class="btn btn-secondary" @click="showChoiceModal = false; openJoinModal()">Join Room</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Joining a Room -->
+<div v-if="showJoinModal" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Join a Room</h5>
+                <button type="button" class="btn-close" @click="showJoinModal = false"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Enter Room Code</label>
+                    <input type="text" class="form-control" v-model="joinCode" placeholder="e.g. 123">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @click="showJoinModal = false">Cancel</button>
+                <button type="button" class="btn btn-primary" @click="joinRoom">Join</button>
             </div>
         </div>
     </div>

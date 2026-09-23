@@ -4,15 +4,21 @@ createApp({
     data() {
         return {
             rooms: [
-                { id: 1, name: 'Virtual Room #123', description: 'This is a room where users can collaborate and chat. The schedule shows upcoming events for this room.', status: 'Planning' },
-                { id: 2, name: 'Design Workshop', description: 'Collaborative design session for the upcoming project.', status: 'Completed' }
+                { id: 1, name: 'Virtual Room #123', description: 'This is a room where users can collaborate and chat. The schedule shows upcoming events for this room.', status: 'Planning', location: 'Virtual', friends: '', code: '123' },
+                { id: 2, name: 'Design Workshop', description: 'Collaborative design session for the upcoming project.', status: 'Completed', location: 'Workshop', friends: '', code: '456' }
             ],
             showModal: false,
+            showChoiceModal: false,
+            showJoinModal: false,
+            joinCode: '',
             isEditMode: false,
             currentRoom: {
                 id: null,
                 name: '',
                 description: '',
+                location: '',
+                friends: '',
+                code: '',
                 status: 'Online'
             }
         };
@@ -24,6 +30,9 @@ createApp({
                 id: null,
                 name: '',
                 description: '',
+                location: '',
+                friends: '',
+                code: '',
                 status: 'Online'
             };
             this.showModal = true;
@@ -35,6 +44,20 @@ createApp({
         },
         closeModal() {
             this.showModal = false;
+            this.showJoinModal = false;
+        },
+        openJoinModal() {
+            this.showJoinModal = true;
+        },
+        joinRoom() {
+            const room = this.rooms.find(r => r.code === this.joinCode);
+            if (room) {
+                this.showJoinModal = false;
+                this.joinCode = '';
+                window.location.href = `room.html?id=${room.id}`;
+            } else {
+                alert('Invalid room code!');
+            }
         },
         saveRoom() {
             if (this.isEditMode) {
