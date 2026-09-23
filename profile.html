@@ -2,14 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayBook - Profile</title>
     <link href="https://unpkg.com/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-
+    <!-- Vue 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
-<body>
+<body id="app" class="d-flex flex-column min-vh-100">
     <header></header>
 
-    <main class="container my-5">
+    <main class="container my-5 flex-grow-1">
         <!-- Profile Tabs Navigation -->
         <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
             <li class="nav-item" role="presentation">
@@ -30,9 +32,9 @@
                 <div class="card">
                     <div class="card-header">Profile Information</div>
                     <div class="card-body">
-                        <p><strong class="me-2">Name:</strong> John Doe</p>
-                        <p><strong class="me-2">Email:</strong> john.doe@example.com</p>
-                        <p><strong class="me-2">Date Joined:</strong> September 19, 2026</p>
+                        <p><strong class="me-2">Name:</strong> {{ userInfo.name }}</p>
+                        <p><strong class="me-2">Email:</strong> {{ userInfo.email }}</p>
+                        <p><strong class="me-2">Date Joined:</strong> {{ userInfo.dateJoined }}</p>
                     </div>
                 </div>
             </div>
@@ -43,13 +45,9 @@
                 <div class="card mb-4">
                     <div class="card-header">Your Friends</div>
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Alice Smith
-                            <button class="btn btn-sm btn-outline-danger">Remove</button>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Bob Jones
-                            <button class="btn btn-sm btn-outline-danger">Remove</button>
+                        <li class="list-group-item d-flex justify-content-between align-items-center" v-for="friend in friends" :key="friend.id">
+                            {{ friend.name }}
+                            <button class="btn btn-sm btn-outline-danger" @click="removeFriend(friend.id)">Remove</button>
                         </li>
                     </ul>
                 </div>
@@ -58,11 +56,11 @@
                 <div class="card mb-4">
                     <div class="card-header">Pending Friend Requests</div>
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Charlie Brown
+                        <li class="list-group-item d-flex justify-content-between align-items-center" v-for="request in pendingRequests" :key="request.id">
+                            {{ request.name }}
                             <div class="btn-group" role="group">
-                                <button class="btn btn-sm btn-success me-2">Add</button>
-                                <button class="btn btn-sm btn-secondary">Ignore</button>
+                                <button class="btn btn-sm btn-success me-2" @click="handlePendingRequest(request.id, 'add')">Add</button>
+                                <button class="btn btn-sm btn-secondary" @click="handlePendingRequest(request.id, 'ignore')">Ignore</button>
                             </div>
                         </li>
                     </ul>
@@ -72,14 +70,14 @@
                 <div class="card">
                     <div class="card-body">
                         <h6 class="card-title">Share Your Friend Code</h6>
-                        <p class="card-text mb-3">Your code: <span class="badge bg-light text-dark border">PLAY-9876</span></p>
+                        <p class="card-text mb-3">Your code: <span class="badge bg-light text-dark border">{{ friendCode }}</span></p>
                         
                         <hr>
                         
                         <h6 class="card-title">Add a Friend</h6>
                         <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Enter friend code">
-                            <button class="btn btn-primary" type="button">Add</button>
+                            <input type="text" class="form-control" placeholder="Enter friend code" v-model="newFriendCode">
+                            <button class="btn btn-primary" type="button" @click="addFriend">Add</button>
                         </div>
                     </div>
                 </div>
@@ -100,7 +98,7 @@
                 <!-- Account Actions -->
                 <div class="card">
                     <div class="card-body d-flex justify-content-center gap-3">
-                        <button class="btn btn-outline-warning">Logout</button>
+                        <a href="login.html" class="btn btn-outline-warning">Logout</a>
                         <button class="btn btn-danger">Remove Account</button>
                     </div>
                 </div>
@@ -108,7 +106,6 @@
         </div>
     </main>
 
-    <!-- Modals -->
     <!-- Change Username Modal -->
     <div class="modal fade" id="changeUsernameModal" tabindex="-1" aria-labelledby="changeUsernameModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -195,14 +192,15 @@
         </div>
     </div>
 
-<footer>Jack|2026</footer>
-    <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
+    <footer class="mt-auto"></footer>
+
     <script src="https://unpkg.com/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <!--eachpage-->
+    <!-- eachpage -->
     <script type="module" src="/js/eachPage/header/generateHeader.js"></script>
     <script type="module" src="/js/eachPage/footer/generateFooter.js"></script>
     <script src="/js/eachPage/profile/profileHandler.js"></script>
     <script src="/js/eachPage/profile/profileSettingsHandler.js"></script>
     <script src="/js/eachPage/prefrences/darkmode.js"></script>
+    <script src="/js/profileApp.js"></script>
 </body>
 </html>
