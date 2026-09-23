@@ -81,6 +81,12 @@
     border-color: var(--bs-border-color-translucent, #ced4da);
 }
 
+.date.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: default;
+}
+
 .dateTitle {
     text-align: center;
     font-weight: 600;

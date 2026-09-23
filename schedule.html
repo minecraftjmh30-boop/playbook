@@ -14,54 +14,50 @@
     </header>
     <main class="container my-4">
         <section class="row justify-content-center gap-2 mb-4" id="tools">
-            <button type="button" class="btn col-auto px-4 rounded-pill" :class="{'btn-success active': mode === 'free', 'btn-success': mode !== 'free'}" @click="setMode('free')">Quick Free</button>
-            <button type="button" class="btn col-auto px-4 rounded-pill" :class="{'btn-danger active': mode === 'busy', 'btn-danger': mode !== 'busy'}" @click="setMode('busy')">Quick Busy</button>
-            <button type="button" class="btn col-auto px-4 rounded-pill" :class="{'btn-secondary active': mode === 'remove', 'btn-secondary': mode !== 'remove'}" @click="setMode('remove')">Quick Remove</button>
+            <button type="button" id="freeBtn" class="btn btn-success col-auto px-4 rounded-pill" :class="{ active: mode === 'free' }" @click="setMode('free')">Quick Free</button>
+            <button type="button" id="busyBtn" class="btn btn-danger col-auto px-4 rounded-pill" :class="{ active: mode === 'busy' }" @click="setMode('busy')">Quick Busy</button>
+            <button type="button" id="removeBtn" class="btn btn-secondary col-auto px-4 rounded-pill" :class="{ active: mode === 'remove' }" @click="setMode('remove')">Quick Remove</button>
         </section>
 
         <div class="row justify-content-center align-items-center mb-3">
-            <button class="btn btn-sm btn-outline-primary me-3" @click="changeMonth(-1)">&lt; Prev</button>
-            <h3 class="mb-0">{{ monthInfo.month }} / {{ monthInfo.year }}</h3>
-            <button class="btn btn-sm btn-outline-primary ms-3" @click="changeMonth(1)">Next &gt;</button>
+            <button class="btn btn-outline-secondary col-auto px-3 rounded-pill" :class="{ invisible: isCurrentMonth }" @click="changeMonth(-1)"> &#8592; </button>
+            <h3 class="col-auto text-center mx-3 my-0">{{ monthInfo.monthName }} {{ monthInfo.year }}</h3>
+            <button class="btn btn-outline-secondary col-auto px-3 rounded-pill" @click="changeMonth(1)"> &#8594; </button>
         </div>
 
         <div class="weekdayTable mb-2" id="weekdays">
-            <div class="row text-center fw-bold">
-                <div class="col">Sun</div>
-                <div class="col">Mon</div>
-                <div class="col">Tue</div>
-                <div class="col">Wed</div>
-                <div class="col">Thu</div>
-                <div class="col">Fri</div>
-                <div class="col">Sat</div>
-            </div>
+            <div class="weekday">Sun</div>
+            <div class="weekday">Mon</div>
+            <div class="weekday">Tue</div>
+            <div class="weekday">Wed</div>
+            <div class="weekday">Thu</div>
+            <div class="weekday">Fri</div>
+            <div class="weekday">Sat</div>
         </div>
 
         <section id="schedule" class="scheduleTable">
-            <div class="row g-0" v-for="(day, index) in displayedDays" :key="index">
+            <template v-for="(day, index) in displayedDays" :key="index">
                 <!-- Filler Day -->
-                <div v-if="day.type === 'filler'" class="col border-0 opacity-0">
-                    <div class="date"><p>skipped</p></div>
+                <div v-if="day.type === 'filler'" class="date dateSkipped opacity-0">
+                    <div><p>skipped</p></div>
                 </div>
 
                 <!-- Actual Day -->
                 <div v-else 
-                     class="col date" 
+                     class="date" 
                      :class="{
                         'disabled': day.isPast,
                         'currentDate': day.isToday,
                         'free': day.mode === 'free' || day.isFree,
                         'busy': day.mode === 'busy' || day.isBusy,
-                        'currentDateFree': day.isToday && day.mode === 'free',
-                        'currentDateBusy': day.isToday && day.mode === 'busy'
+                        'currentDateFree': day.isToday && (day.mode === 'free' || day.isFree),
+                        'currentDateBusy': day.isToday && (day.mode === 'busy' || day.isBusy),
+                        'splitDate': day.startTime && day.endTime
                      }"
                      @click="handleDayClick(day)">
                     <p class="dateTitle">{{ day.day }}</p>
-                    <div v-if="day.mode" class="day-info">
-                        <small>{{ day.startTime }} - {{ day.endTime }}</small>
-                    </div>
                 </div>
-            </div>
+            </template>
         </section>
 
         <section class="row justify-content-center gap-2 mt-4">
