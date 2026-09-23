@@ -23,7 +23,7 @@ function renderHeader() {
           </a>
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="./createRoom.html">Create Room</a></li>
-            <li><a class="dropdown-item" href="./room.html">Join Room</a></li>
+            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#navbarJoinRoomModal">Join Room</a></li>
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -40,7 +40,43 @@ function renderHeader() {
       </ul>
     </div>
   </div>
-</nav>`;
+</nav>
+
+<!-- Modal for Join Room from Navbar -->
+<div class="modal fade" id="navbarJoinRoomModal" tabindex="-1" aria-labelledby="navbarJoinRoomModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-start text-dark">
+      <div class="modal-header">
+        <h5 class="modal-title" id="navbarJoinRoomModalLabel">Join a Room</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="navbarJoinRoomForm">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="navbarJoinRoomCode" class="form-label">Enter Room Code</label>
+            <input type="text" class="form-control" id="navbarJoinRoomCode" placeholder="e.g. 123" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Join</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>`;
+
+        const joinForm = document.getElementById('navbarJoinRoomForm');
+        if (joinForm) {
+            joinForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const codeInput = document.getElementById('navbarJoinRoomCode');
+                const code = codeInput ? codeInput.value.trim() : '';
+                if (code) {
+                    window.location.href = `room.html?code=${encodeURIComponent(code)}`;
+                }
+            });
+        }
     }
 }
 

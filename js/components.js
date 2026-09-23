@@ -20,7 +20,7 @@ Vue.component('app-header', {
               </a>
               <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="./createRoom.html">Create Room</a></li>
-                <li><a class="dropdown-item" href="#">Join Room</a></li>
+                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#navbarJoinRoomModal">Join Room</a></li>
               </ul>
             </li>
             <li class="nav-item dropdown">

@@ -2,12 +2,15 @@ const { createApp } = Vue;
 
 createApp({
     data() {
+        const urlParams = typeof window !== 'undefined' && window.location ? new URLSearchParams(window.location.search) : null;
+        const code = urlParams ? (urlParams.get('code') || urlParams.get('id') || '123') : '123';
+
         return {
             // Room data
             room: {
-                name: 'Virtual Room #123',
+                name: `Virtual Room #${code}`,
                 description: 'This is a room where users can collaborate and chat. The schedule shows upcoming events for this room.',
-                location: 'Virtual Room #123',
+                location: `Virtual Room #${code}`,
                 status: 'Online'
             },
             participants: [
