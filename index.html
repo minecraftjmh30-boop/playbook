@@ -37,7 +37,10 @@
                         <p class="card-text text-muted">{{ room.description }}</p>
                         <div class="d-flex justify-content-between">
                             <a href="room.html" class="btn btn-primary btn-sm">Go to Room</a>
-                            <div>
+                            <div v-if="room.status === 'Completed'">
+                                <button class="btn btn-danger btn-sm" @click="leaveRoom(room)">Leave</button>
+                            </div>
+                            <div v-else>
                                 <button class="btn btn-warning btn-sm me-1" @click="editRoom(room)">Edit</button>
                                 <button class="btn btn-danger btn-sm" @click="deleteRoom(room.id)">Delete</button>
                             </div>

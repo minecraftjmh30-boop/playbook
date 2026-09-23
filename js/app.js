@@ -4,8 +4,8 @@ createApp({
     data() {
         return {
             rooms: [
-                { id: 1, name: 'Virtual Room #123', description: 'This is a room where users can collaborate and chat. The schedule shows upcoming events for this room.', status: 'Online' },
-                { id: 2, name: 'Design Workshop', description: 'Collaborative design session for the upcoming project.', status: 'Offline' }
+                { id: 1, name: 'Virtual Room #123', description: 'This is a room where users can collaborate and chat. The schedule shows upcoming events for this room.', status: 'Planning' },
+                { id: 2, name: 'Design Workshop', description: 'Collaborative design session for the upcoming project.', status: 'Completed' }
             ],
             showModal: false,
             isEditMode: false,
@@ -55,6 +55,9 @@ createApp({
             if (confirm('Are you sure you want to delete this room?')) {
                 this.rooms = this.rooms.filter(room => room.id !== id);
             }
+        },
+        leaveRoom(room) {
+            console.log('Leaving room:', room.name);
         }
     },
     computed: {
