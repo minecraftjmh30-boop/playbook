@@ -8,9 +8,9 @@
     <!-- Vue 3 CDN -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
-<body id="app">
+<body id="app" class="d-flex flex-column min-vh-100">
     <header class="bg-primary-subtle"><h2 class="container">PlayBook</h2></header>
-    <main class="container">
+    <main class="container flex-grow-1">
         <header>
             <h1>Welcome!</h1>
         </header>
@@ -28,7 +28,7 @@
             <button type="button" class="btn btn-outline-secondary w-100" id="signup" @click="handleSignup">Sign-Up</button>
         </form>
     </main>
-    <footer class="mt-5">
+    <footer class="mt-auto">
     </footer>
 
     <script src="https://unpkg.com/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>

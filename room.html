@@ -8,10 +8,10 @@
     <!-- Vue 3 CDN -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
-<body id="app">
+<body id="app" class="d-flex flex-column min-vh-100">
     <header></header>
 
-    <main class="container my-4">
+    <main class="container my-4 flex-grow-1">
         <div class="row">
             <!-- Left Column: Mini Schedule and Participants -->
             <div class="col-md-4">
@@ -103,8 +103,10 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </main>
 
-    <footer class="mt-4">
+    <footer class="mt-auto">
     </footer>
 
     <!-- Dependencies -->

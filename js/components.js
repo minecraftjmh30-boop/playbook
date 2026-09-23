@@ -43,8 +43,8 @@ Vue.component('app-header', {
 
 Vue.component('app-footer', {
     template: `
-    <footer class="text-center bg-primary-subtle py-3 mt-5">
-        <p>Jack Hackett | {{ currentYear }}</p>
+    <footer class="text-center bg-primary-subtle py-4 mt-auto">
+        <p class="mb-0">Jack Hackett | {{ currentYear }}</p>
     </footer>
     `,
     data() {
