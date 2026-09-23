@@ -4,30 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PlayBook</title>
-
+    <link href="https://unpkg.com/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <!-- Vue 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
-<body>
-    <header class=".bg-primary-subtle"><h2 class="container">PlayBook</h2></header>
+<body id="app">
+    <header class="bg-primary-subtle"><h2 class="container">PlayBook</h2></header>
     <main class="container">
         <header>
             <h1>Welcome!</h1>
         </header>
-        <form>
-            <button type="button" class="btn" id="login">Login</button>
-            <span>OR</span>
-            <button type="button" class="btn" id="signup">Sign-Up</button>
-
-
+        <form @submit.prevent="handleSubmit">
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" v-model="email" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-control" v-model="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mb-2" id="login">Login</button>
+            <div class="text-center my-2">OR</div>
+            <button type="button" class="btn btn-outline-secondary w-100" id="signup" @click="handleSignup">Sign-Up</button>
         </form>
     </main>
-    <footer>
-        
+    <footer class="mt-5">
     </footer>
 
-<script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
-<script src="./js/eachPage/footer/generateFooter.js"></script>
-<script src="./js/eachPage/prefrences/darkmode.js"></script>
-    <link href="https://unpkg.com/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <script src="https://unpkg.com/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <!-- eachpage -->
+    <script type="module" src="/js/eachPage/footer/generateFooter.js"></script>
+    <script src="/js/eachPage/prefrences/darkmode.js"></script>
+    <!-- Login App -->
+    <script src="/js/loginApp.js"></script>
 </body>
 </html>

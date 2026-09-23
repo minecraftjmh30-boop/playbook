@@ -1,6 +1,13 @@
 
 let isDarkMode;
-$(document).ready(function() {
+
+function initDarkMode() {
     isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    $('html').attr('data-bs-theme', isDarkMode ? 'dark' : 'light');
-});
+    document.documentElement.setAttribute('data-bs-theme', isDarkMode ? 'dark' : 'light');
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDarkMode);
+} else {
+    initDarkMode();
+}
