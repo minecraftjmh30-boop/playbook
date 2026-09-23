@@ -6,7 +6,7 @@ createApp({
             room: {
                 name: '',
                 description: '',
-                status: 'Online'
+                location: ''
             }
         };
     },
