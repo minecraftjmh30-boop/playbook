@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Room</title>
     <link href="https://unpkg.com/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="./css/schedule.css">
     <!-- Vue 3 CDN -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
@@ -20,44 +21,40 @@
                     <div class="card-header">Schedule Preview</div>
                     <div class="card-body">
                         
-                        <div class="row justify-content-center align-items-center mb-2" style="font-size: 0.75rem;">
-                            <button class="btn btn-sm btn-outline-primary me-3" @click="changeMonth(-1)">&lt;</button>
-                            <h6 class="mb-0">{{ monthInfo.month }} / {{ monthInfo.year }}</h6>
-                            <button class="btn btn-sm btn-outline-primary ms-3" @click="changeMonth(1)">&gt;</button>
+                        <div class="row justify-content-center align-items-center mb-3">
+                            <button class="btn btn-sm btn-outline-secondary col-auto px-2 rounded-pill" :class="{ invisible: isCurrentMonth }" @click="changeMonth(-1)"> &#8592; </button>
+                            <h6 class="col-auto text-center mx-2 my-0">{{ monthInfo.monthName }} {{ monthInfo.year }}</h6>
+                            <button class="btn btn-sm btn-outline-secondary col-auto px-2 rounded-pill" @click="changeMonth(1)"> &#8594; </button>
                         </div>
 
                         <div class="weekdayTable mb-2">
-                            <div class="row text-center fw-bold" style="font-size: 0.7rem;">
-                                <div class="col">Sun</div>
-                                <div class="col">Mon</div>
-                                <div class="col">Tue</div>
-                                <div class="col">Wed</div>
-                                <div class="col">Thu</div>
-                                <div class="col">Fri</div>
-                                <div class="col">Sat</div>
-                            </div>
+                            <div class="weekday">Sun</div>
+                            <div class="weekday">Mon</div>
+                            <div class="weekday">Tue</div>
+                            <div class="weekday">Wed</div>
+                            <div class="weekday">Thu</div>
+                            <div class="weekday">Fri</div>
+                            <div class="weekday">Sat</div>
                         </div>
-                        <section class="scheduleTable">
-                            <div class="row g-0" v-for="(day, index) in displayedDays" :key="index">
-                                <div v-if="day.type === 'filler'" class="col border-0 opacity-0">
-                                    <div class="date"><p>skipped</p></div>
+                        <section class="scheduleTable mb-0">
+                            <template v-for="(day, index) in displayedDays" :key="index">
+                                <div v-if="day.type === 'filler'" class="date dateSkipped opacity-0">
+                                    <div><p>skipped</p></div>
                                 </div>
                                 <div v-else 
-                                     class="col date" 
+                                     class="date" 
                                      :class="{
                                         'disabled': day.isPast,
                                         'currentDate': day.isToday,
                                         'free': day.mode === 'free' || day.isFree,
                                         'busy': day.mode === 'busy' || day.isBusy,
-                                        'currentDateFree': day.isToday && day.mode === 'free',
-                                        'currentDateBusy': day.isToday && day.mode === 'busy'
+                                        'currentDateFree': day.isToday && (day.mode === 'free' || day.isFree),
+                                        'currentDateBusy': day.isToday && (day.mode === 'busy' || day.isBusy),
+                                        'splitDate': day.startTime && day.endTime
                                      }">
                                     <p class="dateTitle">{{ day.day }}</p>
-                                    <div v-if="day.mode" class="day-info">
-                                        <small>{{ day.startTime }} - {{ day.endTime }}</small>
-                                    </div>
                                 </div>
-                            </div>
+                            </template>
                         </section>
                     </div>
                 </div>
@@ -110,17 +107,12 @@
     </footer>
 
     <!-- Dependencies -->
-<script
-src="https://unpkg.com/vue@3/dist/vue.global.js">
-</script>
     <script src="https://unpkg.com/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <!-- eachpage -->
     <script type="module" src="/js/eachPage/header/generateHeader.js"></script>
     <script type="module" src="/js/eachPage/footer/generateFooter.js"></script>
     <script src="/js/eachPage/prefrences/darkmode.js"></script>
-    <!-- Schedule -->
-    <link rel="stylesheet" href="./css/schedule.css">
-    <!-- Reusing schedule logic for mini schedule, but we need the full app logic or a simplified version -->
+    <!-- Room and Schedule logic -->
     <script src="/js/roomApp.js"></script>
 </body>
 </html>

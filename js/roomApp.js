@@ -39,24 +39,29 @@ createApp({
     },
     computed: {
         // Schedule computed properties
+        isCurrentMonth() {
+            return this.currentMonthView.getFullYear() === this.today.getFullYear() &&
+                   this.currentMonthView.getMonth() === this.today.getMonth();
+        },
         monthInfo() {
             const year = this.currentMonthView.getFullYear();
-            const month = this.currentMonthView.getMonth();
-            const firstDayOfMonth = new Date(year, month, 1);
-            const lastDayOfMonth = new Date(year, month + 1, 0);
+            const monthIndex = this.currentMonthView.getMonth();
+            const firstDayOfMonth = new Date(year, monthIndex, 1);
+            const lastDayOfMonth = new Date(year, monthIndex + 1, 0);
             const firstDayOfWeek = firstDayOfMonth.getDay(); // 0 = Sunday, 1 = Monday, etc.
+            const monthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(this.currentMonthView);
             
             return {
                 year,
-                month: month + 1,
+                monthIndex,
+                monthName,
+                month: monthIndex + 1,
                 firstDayOfWeek,
-                lastDay: lastDayOfMonth.getDate(),
-                prevMonth: new Date(year, month - 1, 1),
-                nextMonth: new Date(year, month + 1, 1)
+                lastDay: lastDayOfMonth.getDate()
             };
         },
         displayedDays() {
-            const { firstDayOfWeek, lastDay, year, month } = this.monthInfo;
+            const { firstDayOfWeek, lastDay, year, monthIndex } = this.monthInfo;
             const days = [];
 
             // Add filler days for previous month
@@ -64,12 +69,14 @@ createApp({
                 days.push({ type: 'filler', date: null });
             }
 
+            const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate()).getTime();
+
             // Add actual days of the current month
             for (let d = 1; d <= lastDay; d++) {
-                const dateObj = new Date(year, month, d);
+                const dateObj = new Date(year, monthIndex, d);
                 const dateKey = this.getDateKey(dateObj);
-                const isToday = this.isSameDay(dateObj, new Date());
-                const isPast = dateObj < new Date().setHours(0,0,0,0);
+                const isToday = this.isSameDay(dateObj, this.today);
+                const isPast = dateObj.getTime() < todayStart;
 
                 days.push({
                     type: 'actual',
@@ -111,8 +118,13 @@ createApp({
                    d1.getDate() === d2.getDate();
         },
         changeMonth(offset) {
-            const newDate = new Date(this.currentMonthView);
-            newDate.setMonth(newDate.getMonth() + offset);
+            const newDate = new Date(this.currentMonthView.getFullYear(), this.currentMonthView.getMonth() + offset, 1);
+            if (offset < 0) {
+                const minDate = new Date(this.today.getFullYear(), this.today.getMonth(), 1);
+                if (newDate < minDate) {
+                    return;
+                }
+            }
             this.currentMonthView = newDate;
         },
         setMode(newMode) {
