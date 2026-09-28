@@ -1,5 +1,17 @@
 const { createApp } = Vue;
 
+// Helper to get cookie
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
 createApp({
     data() {
         return {
@@ -16,6 +28,9 @@ createApp({
             // Mock data for schedules
             schedules: {} 
         };
+    },
+    async mounted() {
+        await this.loadSchedule();
     },
     computed: {
         isCurrentMonth() {
@@ -82,6 +97,58 @@ createApp({
             return d1.getFullYear() === d2.getFullYear() &&
                    d1.getMonth() === d2.getMonth() &&
                    d1.getDate() === d2.getDate();
+        },
+        async loadSchedule() {
+            const userId = getCookie('currentUser') || 'User1';
+            const storageKey = `schedule_${userId}`;
+            
+            try {
+                const savedData = localStorage.getItem(storageKey);
+                if (savedData) {
+                    this.schedules = JSON.parse(savedData);
+                } else {
+                    // If no localStorage, try to fetch from CSV for initial sync if possible, 
+                    // but primarily rely on localStorage for the demo's persistence.
+                    const url = `/debug/debugLogins/${userId}/schedule.csv`;
+                    try {
+                        const response = await fetch(url);
+                        if (response.ok) {
+                            const text = await response.text();
+                            const lines = text.trim().split('\n');
+                            const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate()).getTime();
+                            const newSchedules = {};
+                            for (const line of lines) {
+                                if (!line.trim()) continue;
+                                const [dateStr, mode, startTime, endTime] = line.split(',');
+                                const [y, m, d] = dateStr.split('-').map(Number);
+                                const dateObj = new Date(y, m - 1, d);
+                                if (dateObj.getTime() >= todayStart) {
+                                    newSchedules[dateStr] = { mode, startTime, endTime };
+                                }
+                            }
+                            this.schedules = newSchedules;
+                            localStorage.setItem(storageKey, JSON.stringify(this.schedules));
+                        }
+                    } catch (e) {
+                        console.warn('CSV fetch failed, starting with empty schedule.');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading schedule:', error);
+            }
+        },
+        async saveSchedule() {
+            const userId = getCookie('currentUser') || 'User1';
+            const storageKey = `schedule_${userId}`;
+            
+            try {
+                localStorage.setItem(storageKey, JSON.stringify(this.schedules));
+                alert('Schedule saved successfully to local storage!');
+                console.log('Simulated upload to schedule.csv:', this.schedules);
+            } catch (error) {
+                console.error('Error saving schedule:', error);
+                alert('Error saving schedule.');
+            }
         },
         changeMonth(offset) {
             const newDate = new Date(this.currentMonthView.getFullYear(), this.currentMonthView.getMonth() + offset, 1);
