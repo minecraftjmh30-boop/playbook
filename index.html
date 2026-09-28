@@ -96,31 +96,31 @@
             <div class="modal-body text-center">
                 <p>Choose an option to proceed.</p>
                 <div class="d-flex justify-content-center gap-3">
-                    <button class="btn btn-primary" @click="showChoiceModal = false; openAddModal()">Create Room</button>
-                    <button class="btn btn-secondary" @click="showChoiceModal = false; openJoinModal()">Join Room</button>
+                    <button class="btn btn-primary" @click="showChoiceModal = false; openAddModal()">Create Huddle</button>
+                    <button class="btn btn-secondary" @click="showChoiceModal = false; openJoinModal()">Join Huddle</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal for Joining a Room -->
+<!-- Modal for Joining a Huddle -->
 <div v-if="showJoinModal" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Join a Room</h5>
+                <h5 class="modal-title">Join a Huddle</h5>
                 <button type="button" class="btn-close" @click="showJoinModal = false"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label">Enter Room Code</label>
+                    <label class="form-label">Enter Huddle Code</label>
                     <input type="text" class="form-control" v-model="joinCode" placeholder="e.g. 123">
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" @click="showJoinModal = false">Cancel</button>
-                <button type="button" class="btn btn-primary" @click="joinRoom">Join</button>
+                <button type="button" class="btn btn-primary" @click="joinHuddle">Join</button>
             </div>
         </div>
     </div>
