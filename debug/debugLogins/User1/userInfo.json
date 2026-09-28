@@ -1,0 +1,11 @@
+{
+  "name": "User1",
+  "email": "user1@example.com",
+  "dateJoined": "2026-01-01",
+  "friends": [
+    "User2",
+    "User3",
+    "User4"
+  ],
+  "friendCode": "U1-ABC"
+}
