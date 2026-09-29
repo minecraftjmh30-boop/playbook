@@ -6,11 +6,11 @@ createApp({
         const code = urlParams ? (urlParams.get('code') || urlParams.get('id') || '123') : '123';
 
         return {
-            // Room data
-            room: {
-                name: `Virtual Room #${code}`,
-                description: 'This is a room where users can collaborate and chat. The schedule shows upcoming events for this room.',
-                location: `Virtual Room #${code}`,
+            // Huddle data
+            huddle: {
+                name: `Virtual Huddle #${code}`,
+                description: 'This is a huddle where users can collaborate and chat. The schedule shows upcoming events for this huddle.',
+                location: `Virtual Huddle #${code}`,
                 status: 'Online'
             },
             participants: [
@@ -20,7 +20,7 @@ createApp({
                 { name: 'User 4' }
             ],
             messages: [
-                { user: 'User 1', text: 'Welcome to the room!', time: 'Yesterday' },
+                { user: 'User 1', text: 'Welcome to the huddle!', time: 'Yesterday' },
                 { user: 'User 2', text: 'Thanks!', time: 'Yesterday' },
                 { user: 'User 3', text: 'Is there a schedule here?', time: 'Yesterday' }
             ],
@@ -96,7 +96,7 @@ createApp({
         }
     },
     methods: {
-        // Room methods
+        // Huddle methods
         sendMessage() {
             if (this.newMessage.trim()) {
                 this.messages.push({

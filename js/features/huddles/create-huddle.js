@@ -3,7 +3,7 @@ const { createApp } = Vue;
 createApp({
     data() {
         return {
-            room: {
+            huddle: {
                 name: '',
                 description: '',
                 location: ''
@@ -12,9 +12,9 @@ createApp({
     },
     methods: {
         handleSubmit() {
-            if (this.room.name && this.room.description) {
-                console.log('Creating room with:', this.room);
-                alert(`Room "${this.room.name}" created successfully! (Simulated)`);
+            if (this.huddle.name && this.huddle.description) {
+                console.log('Creating huddle with:', this.huddle);
+                alert(`Huddle "${this.huddle.name}" created successfully! (Simulated)`);
                 // In a real app, you would send this data to a server and then redirect.
                 window.location.href = 'index.html';
             } else {

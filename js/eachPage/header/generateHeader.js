@@ -19,11 +19,11 @@ function renderHeader() {
         
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Room
+            Huddle
           </a>
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="./createHuddle.html">Create Huddle</a></li>
-            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#navbarJoinRoomModal">Join Huddle</a></li>
+            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#navbarJoinHuddleModal">Join Huddle</a></li>
           </ul>
         </li>
         <li class="nav-item dropdown">
@@ -42,19 +42,19 @@ function renderHeader() {
   </div>
 </nav>
 
-<!-- Modal for Join Room from Navbar -->
-<div class="modal fade" id="navbarJoinRoomModal" tabindex="-1" aria-labelledby="navbarJoinRoomModalLabel" aria-hidden="true">
+<!-- Modal for Join Huddle from Navbar -->
+<div class="modal fade" id="navbarJoinHuddleModal" tabindex="-1" aria-labelledby="navbarJoinHuddleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content text-start text-dark">
       <div class="modal-header">
-        <h5 class="modal-title" id="navbarJoinRoomModalLabel">Join a Room</h5>
+        <h5 class="modal-title" id="navbarJoinHuddleModalLabel">Join a Huddle</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form id="navbarJoinRoomForm">
+      <form id="navbarJoinHuddleForm">
         <div class="modal-body">
           <div class="mb-3">
-            <label for="navbarJoinRoomCode" class="form-label">Enter Room Code</label>
-            <input type="text" class="form-control" id="navbarJoinRoomCode" placeholder="e.g. 123" required>
+            <label for="navbarJoinHuddleCode" class="form-label">Enter Huddle Code</label>
+            <input type="text" class="form-control" id="navbarJoinHuddleCode" placeholder="e.g. 123" required>
           </div>
         </div>
         <div class="modal-footer">
@@ -66,14 +66,14 @@ function renderHeader() {
   </div>
 </div>`;
 
-        const joinForm = document.getElementById('navbarJoinRoomForm');
+        const joinForm = document.getElementById('navbarJoinHuddleForm');
         if (joinForm) {
             joinForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                const codeInput = document.getElementById('navbarJoinRoomCode');
+                const codeInput = document.getElementById('navbarJoinHuddleCode');
                 const code = codeInput ? codeInput.value.trim() : '';
                 if (code) {
-                    window.location.href = `room.html?code=${encodeURIComponent(code)}`;
+                    window.location.href = `huddle.html?code=${encodeURIComponent(code)}`;
                 }
             });
         }

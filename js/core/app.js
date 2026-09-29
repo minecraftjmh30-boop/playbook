@@ -3,8 +3,8 @@ const { createApp } = Vue;
 createApp({
     data() {
         return {
-            rooms: [
-                { id: 1, name: 'Virtual Room #123', description: 'This is a room where users can collaborate and chat. The schedule shows upcoming events for this room.', status: 'Planning', location: 'Virtual', friends: '', code: '123' },
+            huddles: [
+                { id: 1, name: 'Virtual Huddle #123', description: 'This is a huddle where users can collaborate and chat. The schedule shows upcoming events for this huddle.', status: 'Planning', location: 'Virtual', friends: '', code: '123' },
                 { id: 2, name: 'Design Workshop', description: 'Collaborative design session for the upcoming project.', status: 'Completed', location: 'Workshop', friends: '', code: '456' }
             ],
             showModal: false,
@@ -12,7 +12,7 @@ createApp({
             showJoinModal: false,
             joinCode: '',
             isEditMode: false,
-            currentRoom: {
+            currentHuddle: {
                 id: null,
                 name: '',
                 description: '',
@@ -26,7 +26,7 @@ createApp({
     methods: {
         openAddModal() {
             this.isEditMode = false;
-            this.currentRoom = {
+            this.currentHuddle = {
                 id: null,
                 name: '',
                 description: '',
@@ -37,9 +37,9 @@ createApp({
             };
             this.showModal = true;
         },
-        editRoom(room) {
+        editHuddle(huddle) {
             this.isEditMode = true;
-            this.currentRoom = { ...room };
+            this.currentHuddle = { ...huddle };
             this.showModal = true;
         },
         closeModal() {
@@ -49,38 +49,38 @@ createApp({
         openJoinModal() {
             this.showJoinModal = true;
         },
-        joinRoom() {
-            const room = this.rooms.find(r => r.code === this.joinCode);
-            if (room) {
+        joinHuddle() {
+            const huddle = this.huddles.find(r => r.code === this.joinCode);
+            if (huddle) {
                 this.showJoinModal = false;
                 this.joinCode = '';
-                window.location.href = `room.html?id=${room.id}`;
+                window.location.href = `huddle.html?id=${huddle.id}`;
             } else {
-                alert('Invalid room code!');
+                alert('Invalid huddle code!');
             }
         },
-        saveRoom() {
+        saveHuddle() {
             if (this.isEditMode) {
-                const index = this.rooms.findIndex(r => r.id === this.currentRoom.id);
+                const index = this.huddles.findIndex(r => r.id === this.currentHuddle.id);
                 if (index !== -1) {
-                    this.rooms[index] = { ...this.currentRoom };
+                    this.huddles[index] = { ...this.currentHuddle };
                 }
             } else {
-                const newRoom = {
-                    ...this.currentRoom,
+                const newHuddle = {
+                    ...this.currentHuddle,
                     id: Date.now()
                 };
-                this.rooms.push(newRoom);
+                this.huddles.push(newHuddle);
             }
             this.closeModal();
         },
-        deleteRoom(id) {
-            if (confirm('Are you sure you want to delete this room?')) {
-                this.rooms = this.rooms.filter(room => room.id !== id);
+        deleteHuddle(id) {
+            if (confirm('Are you sure you want to delete this huddle?')) {
+                this.huddles = this.huddles.filter(huddle => huddle.id !== id);
             }
         },
-        leaveRoom(room) {
-            console.log('Leaving room:', room.name);
+        leaveHuddle(huddle) {
+            console.log('Leaving huddle:', huddle.name);
         }
     },
     computed: {
