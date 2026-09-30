@@ -10,6 +10,7 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body id="app" class="d-flex flex-column min-vh-100">
+    <app-header></app-header>
     <header class="bg-primary text-white py-3 mb-4">
         <div class="container">
             <h1>Create a New Huddle</h1>
@@ -45,14 +46,12 @@
         </div>
     </main>
 
-    <footer class="mt-auto py-4 bg-primary-subtle text-center">
-        <div class="container">
-            <p class="mb-0">Jack Hackett | 2026</p>
-        </div>
-    </footer>
+    <app-footer></app-footer>
 
     <!-- Bootstrap Bundle JS -->
     <script src="https://unpkg.com/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <!-- components -->
+    <script src="/js/components/components.js"></script>
     <script src="/js/eachPage/prefrences/darkmode.js"></script>
     <!-- App Logic -->
     <script src="/js/features/huddles/create-huddle.js"></script>

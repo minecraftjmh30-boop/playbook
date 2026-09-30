@@ -9,10 +9,8 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body id="app" class="d-flex flex-column min-vh-100">
-<header>
-</header>
-<section id="hero" class="bg-primary text-white py-5 mb-4">
-</section>
+<app-header></app-header>
+<app-hero></app-hero>
 <main class="flex-grow-1">
     <section>
 
@@ -126,15 +124,11 @@
     </div>
 </div>
 </main>
-<footer>
-
-</footer>
+<app-footer></app-footer>
 <!--dependencies-->
 <script src="https://unpkg.com/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-<!--eachpage-->
-<script type="module" src="/js/eachPage/header/generateHeader.js"></script>
-<script type="module" src="/js/eachPage/footer/generateFooter.js"></script>
-<script type="module" src="/js/eachPage/hero/generateHero.js"></script>
+<!--components-->
+<script src="/js/components/components.js"></script>
 <script src="/js/eachPage/prefrences/darkmode.js"></script>
 <!--Huddles-->
 <script src="/js/core/app.js"></script>

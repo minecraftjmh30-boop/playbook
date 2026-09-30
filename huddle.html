@@ -10,7 +10,7 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body id="app" class="d-flex flex-column min-vh-100">
-    <header></header>
+    <app-header></app-header>
 
     <main class="container my-4 flex-grow-1">
         <div class="row">
@@ -111,14 +111,12 @@
         </div>
     </main>
 
-    <footer class="mt-auto">
-    </footer>
+    <app-footer></app-footer>
 
     <!-- Dependencies -->
     <script src="https://unpkg.com/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <!-- eachpage -->
-    <script type="module" src="/js/eachPage/header/generateHeader.js"></script>
-    <script type="module" src="/js/eachPage/footer/generateFooter.js"></script>
+    <!-- components -->
+    <script src="/js/components/components.js"></script>
     <script src="/js/eachPage/prefrences/darkmode.js"></script>
     <!-- Huddle and Schedule logic -->
     <script src="/js/features/huddles/huddle.js"></script>

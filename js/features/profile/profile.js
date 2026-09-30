@@ -45,8 +45,6 @@ createApp({
                     dateJoined: data.dateJoined
                 };
                 this.friendCode = data.friendCode;
-                // For simplicity in this demo, we use the friendCode as a dummy ID for friends in this list
-                // or we could just use the strings for names as in the original code.
                 this.friends = data.friends.map(fName => ({ id: fName, name: fName }));
                 
             } catch (error) {
