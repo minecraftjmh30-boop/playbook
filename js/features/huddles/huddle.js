@@ -1,9 +1,22 @@
 const { createApp } = Vue;
 
+
+function getCookie(name) {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i].trim();
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+}
+
 createApp({
     data() {
         const urlParams = typeof window !== 'undefined' && window.location ? new URLSearchParams(window.location.search) : null;
         const code = urlParams ? (urlParams.get('code') || urlParams.get('id') || '123') : '123';
+
+        const currentUser = getCookie('currentUser');
 
         return {
             // Huddle data
@@ -25,6 +38,7 @@ createApp({
                 { user: 'User 3', text: 'Is there a schedule here?', time: 'Yesterday' }
             ],
             newMessage: '',
+            currentUser,
 
             // Schedule data (from scheduleApp.js)
             today: new Date(),
@@ -96,11 +110,23 @@ createApp({
         }
     },
     methods: {
+        displayUser(user) {
+            if (this.currentUser && (this.currentUser === user || this.currentUser === `User ${user.split(' ')[1]}`)) {
+                 return 'Me';
+            }
+            // Handle edge cases like 'User1' vs 'User 1'
+            const normalizedUser = user.replace(/\s+/g, '');
+            const normalizedCurrent = this.currentUser ? this.currentUser.replace(/\s+/g, '') : '';
+            if (normalizedUser === normalizedCurrent) {
+                return 'Me';
+            }
+            return user;
+        },
         // Huddle methods
         sendMessage() {
             if (this.newMessage.trim()) {
                 this.messages.push({
-                    user: 'Me',
+                    user: this.currentUser || 'User 1',
                     text: this.newMessage,
                     time: 'Just now'
                 });
