@@ -107,8 +107,6 @@ createApp({
                 if (savedData) {
                     this.schedules = JSON.parse(savedData);
                 } else {
-                    // If no localStorage, try to fetch from CSV for initial sync if possible, 
-                    // but primarily rely on localStorage for the demo's persistence.
                     const url = `/debug/debugLogins/${userId}/schedule.csv`;
                     try {
                         const response = await fetch(url);

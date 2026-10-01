@@ -12,10 +12,7 @@
 <app-header></app-header>
 <app-hero></app-hero>
 <main class="flex-grow-1">
-    <section>
-
-    </section>
-<header>
+<header class="mt-4">
     <div class="container d-flex justify-content-between align-items-center">
         <h1>My Huddles</h1>
         <button class="btn btn-success" @click="showChoiceModal = true">Add Huddle</button>
@@ -25,27 +22,14 @@
     <div class="container my-4">
         <div class="row">
             <!-- Huddle Card -->
-            <div class="col-md-4" v-for="huddle in huddles" :key="huddle.id">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="card-title mb-0">{{ huddle.name }}</h5>
-                            <span :class="['badge', huddle.status === 'Online' ? 'bg-success' : 'bg-secondary']">{{ huddle.status }}</span>
-                        </div>
-                        <p class="card-text text-muted">{{ huddle.description }}</p>
-                        <div class="d-flex justify-content-between">
-                            <a href="huddle.html" class="btn btn-primary btn-sm">Go to Huddle</a>
-                            <div v-if="huddle.status === 'Completed'">
-                                <button class="btn btn-danger btn-sm" @click="leaveHuddle(huddle)">Leave</button>
-                            </div>
-                            <div v-else>
-                                <button class="btn btn-warning btn-sm me-1" @click="editHuddle(huddle)">Edit</button>
-                                <button class="btn btn-danger btn-sm" @click="deleteHuddle(huddle.id)">Delete</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <huddle-card 
+                v-for="huddle in huddles" 
+                :key="huddle.id" 
+                :huddle="huddle" 
+                @edit="editHuddle" 
+                @delete="deleteHuddle" 
+                @leave="leaveHuddle">
+            </huddle-card>
         </div>
         <div v-if="huddles.length === 0" class="text-center text-muted">
             No huddles available. Add one!
@@ -53,87 +37,26 @@
     </div>
 </section>
 
-<!-- Modal for Add/Edit Huddle -->
-<div v-if="showModal" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">{{ isEditMode ? 'Edit Huddle' : 'Add New Huddle' }}</h5>
-                <button type="button" class="btn-close" @click="closeModal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Name</label>
-                    <input type="text" class="form-control" v-model="currentHuddle.name">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Description</label>
-                    <textarea class="form-control" v-model="currentHuddle.description"></textarea>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Location</label>
-                    <input type="text" class="form-control" v-model="currentHuddle.location">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" @click="closeModal">Cancel</button>
-                <button type="button" class="btn btn-primary" @click="saveHuddle">Save</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Modal for Choice (Create or Join) -->
-<div v-if="showChoiceModal" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">What would you like to do?</h5>
-                <button type="button" class="btn-close" @click="showChoiceModal = false"></button>
-            </div>
-            <div class="modal-body text-center">
-                <p>Choose an option to proceed.</p>
-                <div class="d-flex justify-content-center gap-3">
-                    <button class="btn btn-primary" @click="showChoiceModal = false; openAddModal()">Create Huddle</button>
-                    <button class="btn btn-secondary" @click="showChoiceModal = false; openJoinModal()">Join Huddle</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<choice-modal :show="showChoiceModal" @close="showChoiceModal = false" @open-join="showChoiceModal = false; openJoinModal()"></choice-modal>
 
 <!-- Modal for Joining a Huddle -->
-<div v-if="showJoinModal" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Join a Huddle</h5>
-                <button type="button" class="btn-close" @click="showJoinModal = false"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Enter Huddle Code</label>
-                    <input type="text" class="form-control" v-model="joinCode" placeholder="e.g. 123">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" @click="showJoinModal = false">Cancel</button>
-                <button type="button" class="btn btn-primary" @click="joinHuddle">Join</button>
-            </div>
-        </div>
-    </div>
-</div>
+<join-huddle-modal :show="showJoinModal" v-model="joinCode" @close="showJoinModal = false" @join="joinHuddle"></join-huddle-modal>
 </main>
 <app-footer></app-footer>
 <!--dependencies-->
 <script src="https://unpkg.com/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 <!--components-->
-<script src="/js/components/components.js"></script>
-<script src="/js/eachPage/prefrences/darkmode.js"></script>
+<script src="js/components/main/header.js"></script>
+<script src="js/components/main/hero.js"></script>
+<script src="js/components/main/footer.js"></script>
+<script src="js/components/huddle/huddleCard.js"></script>
+<script src="js/components/modals/choiceModal.js"></script>
+<script src="js/components/modals/joinHuddleModal.js"></script>
+<script src="js/core/darkmode.js"></script>
 <!--Huddles-->
-<script src="/js/core/app.js"></script>
-<!-- Debugger / Tyler doesn't want me to add a database yet so I have to make my own using JavaScript instead because he wants to wait on it but my app does not work properly without one -->
-<script src="/debug/addDebugger.js"></script>
-
+<script src="js/core/app.js"></script>
+<!-- Debugger / Tyler doesn't want me to add a database yet so I have to make my own using JavaScript instead because he wants to wait on it but my app does not work properly without one :( -->
+<script src="debug/addDebugger.js"></script>
 </body>
 </html>

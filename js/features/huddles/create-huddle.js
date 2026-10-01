@@ -15,7 +15,6 @@ createApp({
             if (this.huddle.name && this.huddle.description) {
                 console.log('Creating huddle with:', this.huddle);
                 alert(`Huddle "${this.huddle.name}" created successfully! (Simulated)`);
-                // In a real app, you would send this data to a server and then redirect.
                 window.location.href = 'index.html';
             } else {
                 alert('Please fill in all fields.');

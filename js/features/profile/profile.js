@@ -22,14 +22,26 @@ createApp({
             },
             friends: [],
             pendingRequests: [],
-            friendCode: '',
-            newFriendCode: ''
+            friendCode: ''
         };
     },
     async mounted() {
+        this.activateTabFromHash();
+        window.addEventListener('hashchange', () => this.activateTabFromHash());
         await this.loadUserData();
     },
     methods: {
+        activateTabFromHash() {
+            const hash = window.location.hash;
+            if (hash) {
+                const tabId = hash.substring(1);
+                const tabTriggerEl = document.querySelector(`#${tabId}`);
+                if (tabTriggerEl && typeof bootstrap !== 'undefined') {
+                    const tab = bootstrap.Tab.getOrCreateInstance(tabTriggerEl);
+                    tab.show();
+                }
+            }
+        },
         async loadUserData() {
             const userId = getCookie('currentUser') || 'User1'; // Default to User1 if no cookie
             try {
@@ -72,10 +84,9 @@ createApp({
                 this.pendingRequests = this.pendingRequests.filter(p => p.id !== id);
             }
         },
-        addFriend() {
-            if (this.newFriendCode.trim()) {
-                alert(`Friend request sent to: ${this.newFriendCode}`);
-                this.newFriendCode = '';
+        addFriend(code) {
+            if (code && code.trim()) {
+                alert(`Friend request sent to: ${code.trim()}`);
             }
         }
     }

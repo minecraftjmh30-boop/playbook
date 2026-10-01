@@ -9,7 +9,7 @@ createApp({
     },
     methods: {
         handleSubmit() {
-            console.log('Logging in with:', this.email, this.password);
+            console.log('Logging in with:', this.email);
             alert(`Logged in as ${this.email}`);
         },
         handleSignup() {

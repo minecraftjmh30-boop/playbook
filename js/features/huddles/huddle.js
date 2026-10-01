@@ -24,6 +24,7 @@ createApp({
                 name: `Virtual Huddle #${code}`,
                 description: 'This is a huddle where users can collaborate and chat. The schedule shows upcoming events for this huddle.',
                 location: `Virtual Huddle #${code}`,
+                code: code,
                 status: 'Online'
             },
             participants: [
@@ -37,20 +38,11 @@ createApp({
                 { user: 'User 2', text: 'Thanks!', time: 'Yesterday' },
                 { user: 'User 3', text: 'Is there a schedule here?', time: 'Yesterday' }
             ],
-            newMessage: '',
             currentUser,
 
-            // Schedule data (from scheduleApp.js)
+            // Schedule preview data
             today: new Date(),
             currentMonthView: new Date(),
-            mode: null, // 'free', 'busy', or 'remove'
-            showTimeModal: false,
-            modalData: {
-                date: null,
-                mode: 'free',
-                startTime: '',
-                endTime: ''
-            },
             schedules: {} 
         };
     },
@@ -110,31 +102,18 @@ createApp({
         }
     },
     methods: {
-        displayUser(user) {
-            if (this.currentUser && (this.currentUser === user || this.currentUser === `User ${user.split(' ')[1]}`)) {
-                 return 'Me';
-            }
-            // Handle edge cases like 'User1' vs 'User 1'
-            const normalizedUser = user.replace(/\s+/g, '');
-            const normalizedCurrent = this.currentUser ? this.currentUser.replace(/\s+/g, '') : '';
-            if (normalizedUser === normalizedCurrent) {
-                return 'Me';
-            }
-            return user;
-        },
         // Huddle methods
-        sendMessage() {
-            if (this.newMessage.trim()) {
+        sendMessage(text) {
+            if (text && text.trim()) {
                 this.messages.push({
                     user: this.currentUser || 'User 1',
-                    text: this.newMessage,
+                    text: text.trim(),
                     time: 'Just now'
                 });
-                this.newMessage = '';
             }
         },
 
-        // Schedule methods (from scheduleApp.js)
+        // Schedule methods
         getDateKey(date) {
             const y = date.getFullYear();
             const m = date.getMonth() + 1;
@@ -155,56 +134,6 @@ createApp({
                 }
             }
             this.currentMonthView = newDate;
-        },
-        setMode(newMode) {
-            this.mode = (this.mode === newMode) ? null : newMode;
-        },
-        handleDayClick(dayObj) {
-            if (dayObj.isPast) return;
-
-            if (this.mode === 'remove') {
-                this.deleteSchedule(dayObj.dateKey);
-            } else if (this.mode) {
-                // Quick action: Apply mode directly to the day
-                this.schedules[dayObj.dateKey] = {
-                    ...this.schedules[dayObj.dateKey],
-                    mode: this.mode
-                };
-            } else {
-                // Open modal for detailed time setting
-                this.openTimeModal(dayObj);
-            }
-        },
-        openTimeModal(dayObj) {
-            this.modalData = {
-                date: dayObj.date,
-                mode: dayObj.mode || 'free',
-                startTime: dayObj.startTime || '',
-                endTime: dayObj.endTime || ''
-            };
-            this.showTimeModal = true;
-        },
-        closeModal() {
-            this.showTimeModal = false;
-        },
-        saveTime() {
-            const key = this.getDateKey(this.modalData.date);
-            this.schedules[key] = {
-                mode: this.modalData.mode,
-                startTime: this.modalData.startTime,
-                endTime: this.modalData.endTime
-            };
-            this.closeModal();
-        },
-        deleteSchedule(key) {
-            if (confirm('Remove this schedule entry?')) {
-                delete this.schedules[key];
-            }
-        },
-        resetSchedule() {
-            if (confirm('Are you sure you want to reset the entire schedule?')) {
-                this.schedules = {};
-            }
         }
     }
 }).mount('#app');
