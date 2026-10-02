@@ -14,24 +14,30 @@ function getCookie(name) {
 createApp({
     data() {
         const urlParams = typeof window !== 'undefined' && window.location ? new URLSearchParams(window.location.search) : null;
-        const code = urlParams ? (urlParams.get('code') || urlParams.get('id') || '123') : '123';
+        const idParam = urlParams ? (urlParams.get('id') || urlParams.get('code')) : null;
+        
+        const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
+        const huddleData = huddles.find(h => h.id == idParam || h.code == idParam) || {
+            name: 'Huddle Not Found',
+            description: 'The requested huddle could not be found.',
+            location: 'Unknown',
+            code: idParam || '',
+            status: 'Offline',
+            owner: null,
+            startDate: null,
+            endDate: null
+        };
 
         const currentUser = getCookie('currentUser');
 
         return {
             // Huddle data
-            huddle: {
-                name: `Virtual Huddle #${code}`,
-                description: 'This is a huddle where users can collaborate and chat. The schedule shows upcoming events for this huddle.',
-                location: `Virtual Huddle #${code}`,
-                code: code,
-                status: 'Online'
-            },
+            huddle: huddleData,
             participants: [
-                { name: 'User 1' },
-                { name: 'User 2' },
-                { name: 'User 3' },
-                { name: 'User 4' }
+                { name: 'User 1', id: 'User1' },
+                { name: 'User 2', id: 'User2' },
+                { name: 'User 3', id: 'User3' },
+                { name: 'User 4', id: 'User4' }
             ],
             messages: [
                 { user: 'User 1', text: 'Welcome to the huddle!', time: 'Yesterday' },
@@ -73,6 +79,9 @@ createApp({
             const { firstDayOfWeek, lastDay, year, monthIndex } = this.monthInfo;
             const days = [];
 
+            const startDate = this.huddle.startDate ? new Date(this.huddle.startDate) : null;
+            const endDate = this.huddle.endDate ? new Date(this.huddle.endDate) : null;
+
             // Add filler days for previous month
             for (let i = 0; i < firstDayOfWeek; i++) {
                 days.push({ type: 'filler', date: null });
@@ -87,15 +96,30 @@ createApp({
                 const isToday = this.isSameDay(dateObj, this.today);
                 const isPast = dateObj.getTime() < todayStart;
 
-                days.push({
-                    type: 'actual',
-                    day: d,
-                    date: dateObj,
-                    dateKey: dateKey,
-                    isToday,
-                    isPast,
-                    ...this.schedules[dateKey] || { mode: null, startTime: '', endTime: '' }
-                });
+                // Check if the date is within the huddle's time frame if provided
+                let isWithinFrame = true;
+                if (startDate && dateObj < startDate) {
+                    isWithinFrame = false;
+                }
+                if (endDate && dateObj > endDate) {
+                    isWithinFrame = false;
+                }
+
+                if (isWithinFrame) {
+                    days.push({
+                        type: 'actual',
+                        day: d,
+                        date: dateObj,
+                        dateKey: dateKey,
+                        isToday,
+                        isPast,
+                        ...this.schedules[dateKey] || { mode: null, startTime: '', endTime: '' }
+                    });
+                } else {
+                    // Add a placeholder for skipped days within the month view if it's part of the month 
+                    // so the grid doesn't break, but mark it as skipped.
+                    days.push({ type: 'filler', date: null }); 
+                }
             }
 
             return days;

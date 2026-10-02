@@ -3,9 +3,9 @@ const { createApp } = Vue;
 createApp({
     data() {
         return {
-            huddles: [
-                { id: 1, name: 'Virtual Huddle #123', description: 'This is a huddle where users can collaborate and chat. The schedule shows upcoming events for this huddle.', status: 'Planning', location: 'Virtual', friends: '', code: '123' },
-                { id: 2, name: 'Design Workshop', description: 'Collaborative design session for the upcoming project.', status: 'Completed', location: 'Workshop', friends: '', code: '456' }
+            huddles: JSON.parse(localStorage.getItem('huddles')) || [
+                { id: 1, name: 'Virtual Huddle #123', description: 'This is a huddle where users can collaborate and chat. The schedule shows upcoming events for this huddle.', status: 'Planning', location: 'Virtual', friends: '', code: '123', owner: 'User 1' },
+                { id: 2, name: 'Design Workshop', description: 'Collaborative design session for the upcoming project.', status: 'Completed', location: 'Workshop', friends: '', code: '456', owner: 'User 2' }
             ],
             showChoiceModal: false,
             showJoinModal: false,

@@ -35,6 +35,16 @@
                                 <label for="location" class="form-label">Location</label>
                                 <input type="text" class="form-control" id="location" v-model="huddle.location" required>
                             </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="startDate" class="form-label">Time Frame Start (Optional)</label>
+                                    <input type="datetime-local" class="form-control" id="startDate" v-model="huddle.startDate">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="endDate" class="form-label">Time Frame End (Optional)</label>
+                                    <input type="datetime-local" class="form-control" id="endDate" v-model="huddle.endDate">
+                                </div>
+                            </div>
                             <div class="d-flex justify-content-between">
                                 <a href="index.html" class="btn btn-secondary">Cancel</a>
                                 <button type="submit" class="btn btn-success">Create Huddle</button>
