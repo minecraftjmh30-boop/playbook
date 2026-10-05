@@ -30,20 +30,35 @@ createApp({
         };
     },
     async mounted() {
-        // Smooth scroll for navigation links
-        document.querySelectorAll('.profile-nav a').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const targetId = link.getAttribute('href').substring(1);
-                const targetEl = document.getElementById(targetId);
-                if (targetEl) {
-                    targetEl.scrollIntoView({ behavior: 'smooth' });
-                    window.history.pushState(null, '', `#${targetId}`);
-                }
-            });
-        });
         await this.loadUserData();
         await this.loadHuddleData();
+        
+        // Smooth scroll for navigation links - set up after Vue renders
+        await this.$nextTick(() => {
+            document.querySelectorAll('.profile-nav a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href').substring(1);
+                    const targetEl = document.getElementById(targetId);
+                    if (targetEl) {
+                        targetEl.scrollIntoView({behavior: 'smooth', block: 'start'});
+                        window.history.pushState(null, '', `#${targetId}`);
+                    }
+                });
+            });
+        });
+        
+        // Handle initial hash in URL
+        if (window.location.hash) {
+            await this.$nextTick(() => {
+                const targetEl = document.getElementById(window.location.hash.substring(1));
+                if (targetEl) {
+                    setTimeout(() => {
+                        targetEl.scrollIntoView({behavior: 'smooth', block: 'start'});
+                    }, 100);
+                }
+            });
+        }
     },
     methods: {
         async loadUserData() {

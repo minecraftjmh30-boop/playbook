@@ -33,6 +33,18 @@ createApp({
 
         const currentUser = getCookie('currentUser');
 
+        // Check if user is authorized to access this huddle
+        const participantIds = huddleData.participants || [huddleData.owner];
+        const isOwner = currentUser && huddleData.owner === currentUser;
+        const isParticipant = currentUser && participantIds.includes(currentUser);
+        const isAuthorized = isOwner || isParticipant || huddleData.name === 'Huddle Not Found';
+
+        if (!isAuthorized && huddleData.name !== 'Huddle Not Found') {
+            // Redirect unauthorized users to index page
+            alert('You are not a participant of this huddle and cannot access it.');
+            window.location.href = 'index.html';
+        }
+
         // Build participants list from huddle data
         const participants = (huddleData.participants || [huddleData.owner]).map(id => ({
             name: id,
@@ -41,6 +53,13 @@ createApp({
 
         // Load messages from huddle data, default to empty array
         const messages = huddleData.messages || [];
+
+        // Initialize currentMonthView to the huddle's start month if available, otherwise current month
+        let initialMonthView = new Date();
+        if (huddleData.startDate) {
+            const startDate = new Date(huddleData.startDate);
+            initialMonthView = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+        }
 
         return {
             // Huddle data
@@ -52,7 +71,7 @@ createApp({
 
             // Schedule preview data
             today: new Date(),
-            currentMonthView: new Date(),
+            currentMonthView: initialMonthView,
             schedules: {},
 
             // Huddle schedule overlay modal
@@ -164,6 +183,12 @@ createApp({
                 localStorage.setItem('huddles', JSON.stringify(this.huddles));
             }
         },
+        deleteMessage(index) {
+            if (index >= 0 && index < this.messages.length) {
+                this.messages.splice(index, 1);
+                this.saveHuddleData();
+            }
+        },
 
         // Schedule methods
         getDateKey(date) {
@@ -176,6 +201,18 @@ createApp({
             return d1.getFullYear() === d2.getFullYear() &&
                    d1.getMonth() === d2.getMonth() &&
                    d1.getDate() === d2.getDate();
+        },
+        formatDate(dateStr) {
+            if (!dateStr) return '';
+            const parts = dateStr.split(/[-/]/);
+            if (parts.length >= 3) {
+                const year = parseInt(parts[0]);
+                const month = parseInt(parts[1]) - 1;
+                const day = parseInt(parts[2]);
+                const date = new Date(year, month, day);
+                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            }
+            return dateStr;
         },
         changeMonth(offset) {
             const newDate = new Date(this.currentMonthView.getFullYear(), this.currentMonthView.getMonth() + offset, 1);
@@ -231,6 +268,14 @@ createApp({
                         id: id
                     }));
                     
+                    // Add kick system message to chat
+                    this.messages.push({
+                        user: 'System',
+                        text: `${participantId} was removed from the huddle by ${this.currentUser}.`,
+                        time: new Date().toLocaleTimeString(),
+                        system: true
+                    });
+                    
                     // Persist to localStorage
                     this.saveHuddleData();
                 }
@@ -247,8 +292,22 @@ createApp({
             const index = this.huddle.selectedDates.indexOf(dateKey);
             if (index !== -1) {
                 this.huddle.selectedDates.splice(index, 1);
+                // Add date removed system message
+                this.messages.push({
+                    user: 'System',
+                    text: `${this.currentUser} removed ${this.formatDate(dateKey)} from the planned dates.`,
+                    time: new Date().toLocaleTimeString(),
+                    system: true
+                });
             } else {
                 this.huddle.selectedDates.push(dateKey);
+                // Add date picked system message
+                this.messages.push({
+                    user: 'System',
+                    text: `${this.currentUser} selected ${this.formatDate(dateKey)} as a planned date.`,
+                    time: new Date().toLocaleTimeString(),
+                    system: true
+                });
             }
             
             this.saveHuddleData();

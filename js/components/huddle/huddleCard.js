@@ -16,15 +16,15 @@ const HuddleCard = {
             // Show selected dates if available
             if (this.huddle.selectedDates && this.huddle.selectedDates.length > 0) {
                 const dates = this.huddle.selectedDates;
-                if (dates.length === 1) return dates[0];
+                if (dates.length === 1) return this.formatDate(dates[0]);
                 return `${dates.length} dates selected`;
             }
             // Show time frame if set
             if (this.huddle.startDate && this.huddle.endDate) {
-                return `${this.huddle.startDate} to ${this.huddle.endDate}`;
+                return `${this.formatDate(this.huddle.startDate)} to ${this.formatDate(this.huddle.endDate)}`;
             }
-            if (this.huddle.startDate) return `Starts ${this.huddle.startDate}`;
-            if (this.huddle.endDate) return `Ends ${this.huddle.endDate}`;
+            if (this.huddle.startDate) return `Starts ${this.formatDate(this.huddle.startDate)}`;
+            if (this.huddle.endDate) return `Ends ${this.formatDate(this.huddle.endDate)}`;
             // Fall back to status
             return this.huddle.status || 'Ongoing';
         },
@@ -39,6 +39,19 @@ const HuddleCard = {
     methods: {
         getHuddleStatus(huddle) {
             return this.huddleStatus;
+        },
+        formatDate(dateStr) {
+            if (!dateStr) return '';
+            // Handle various date formats: "2024-1-15", "2024-01-15", "2024/1/15", etc.
+            const parts = dateStr.split(/[-/]/);
+            if (parts.length >= 3) {
+                const year = parseInt(parts[0]);
+                const month = parseInt(parts[1]) - 1;
+                const day = parseInt(parts[2]);
+                const date = new Date(year, month, day);
+                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            }
+            return dateStr;
         }
     },
     template: `

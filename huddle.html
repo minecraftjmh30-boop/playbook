@@ -38,7 +38,7 @@
                     <div class="card-header">Planned Dates</div>
                     <ul class="list-group list-group-flush">
                         <li v-for="date in huddle.selectedDates" :key="date" class="list-group-item">
-                            {{ date }}
+                            {{ formatDate(date) }}
                         </li>
                     </ul>
                 </div>
@@ -62,7 +62,7 @@
                 </huddle-details>
 
                 <!-- Section 4: Group Chat -->
-                <huddle-chat :messages="messages" :current-user="currentUser" @send-message="sendMessage"></huddle-chat>
+                <huddle-chat :messages="messages" :current-user="currentUser" :owner-id="huddle.owner" @send-message="sendMessage" @delete-message="deleteMessage"></huddle-chat>
             </div>
         </div>
     </main>
@@ -72,7 +72,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Schedule for {{ overlayDate }}</h5>
+                    <h5 class="modal-title">Schedule for {{ formatDate(overlayDate) }}</h5>
                     <button type="button" class="btn-close" @click="closeOverlayModal"></button>
                 </div>
                 <div class="modal-body">

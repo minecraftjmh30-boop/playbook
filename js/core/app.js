@@ -48,6 +48,14 @@ createApp({
                 }
                 if (this.currentUser && !huddle.participants.includes(this.currentUser)) {
                     huddle.participants.push(this.currentUser);
+                    // Add join system message to chat
+                    if (!huddle.messages) huddle.messages = [];
+                    huddle.messages.push({
+                        user: 'System',
+                        text: `${this.currentUser} joined the huddle.`,
+                        time: new Date().toLocaleTimeString(),
+                        system: true
+                    });
                 }
                 localStorage.setItem('huddles', JSON.stringify(this.allHuddles));
                 this.showJoinModal = false;
@@ -87,6 +95,14 @@ createApp({
             if (confirm(`Leave "${huddle.name}"?`)) {
                 if (huddle.participants) {
                     huddle.participants = huddle.participants.filter(id => id !== this.currentUser);
+                    // Add leave system message to chat
+                    if (!huddle.messages) huddle.messages = [];
+                    huddle.messages.push({
+                        user: 'System',
+                        text: `${this.currentUser} left the huddle.`,
+                        time: new Date().toLocaleTimeString(),
+                        system: true
+                    });
                 }
                 localStorage.setItem('huddles', JSON.stringify(this.allHuddles));
             }

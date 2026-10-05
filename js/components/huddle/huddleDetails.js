@@ -43,9 +43,9 @@ const HuddleDetails = {
                         <p>Huddle Code: <strong>{{ huddle.code }}</strong></p>
                     </div>
                 </div>
-                <p v-if="huddle.startDate && huddle.endDate">Time frame: {{ huddle.startDate }} to {{ huddle.endDate }}</p>
-                <p v-else-if="huddle.startDate">Starts: {{ huddle.startDate }}</p>
-                <p v-else-if="huddle.endDate">Ends: {{ huddle.endDate }}</p>
+                <p v-if="huddle.startDate && huddle.endDate">Time frame: {{ formatDate(huddle.startDate) }} to {{ formatDate(huddle.endDate) }}</p>
+                <p v-else-if="huddle.startDate">Starts: {{ formatDate(huddle.startDate) }}</p>
+                <p v-else-if="huddle.endDate">Ends: {{ formatDate(huddle.endDate) }}</p>
                 <p v-else class="text-muted">No time frame set</p>
             </div>
             <div v-else>
@@ -70,6 +70,18 @@ const HuddleDetails = {
     </div>
     `,
     methods: {
+        formatDate(dateStr) {
+            if (!dateStr) return '';
+            const parts = dateStr.split(/[-/]/);
+            if (parts.length >= 3) {
+                const year = parseInt(parts[0]);
+                const month = parseInt(parts[1]) - 1;
+                const day = parseInt(parts[2]);
+                const date = new Date(year, month, day);
+                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            }
+            return dateStr;
+        },
         startEdit() {
             if (this.currentUser && this.huddle.owner === this.currentUser) {
                 this.editName = this.huddle.name;

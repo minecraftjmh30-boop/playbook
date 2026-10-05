@@ -8,9 +8,13 @@ const HuddleChat = {
         currentUser: {
             type: String,
             default: ''
+        },
+        ownerId: {
+            type: String,
+            default: null
         }
     },
-    emits: ['send-message'],
+    emits: ['send-message', 'delete-message'],
     data() {
         return {
             newMessage: ''
@@ -33,6 +37,21 @@ const HuddleChat = {
                 this.$emit('send-message', this.newMessage.trim());
                 this.newMessage = '';
             }
+        },
+        canDeleteMessage(msg) {
+            // Owner can delete any message
+            if (this.ownerId && this.currentUser === this.ownerId) {
+                return true;
+            }
+            // Users can delete their own messages
+            if (this.currentUser && msg.user === this.currentUser) {
+                return true;
+            }
+            // System messages cannot be deleted by non-owners
+            return false;
+        },
+        deleteMessage(index) {
+            this.$emit('delete-message', index);
         }
     },
     template: `
@@ -42,7 +61,19 @@ const HuddleChat = {
             <div v-for="(msg, index) in messages" :key="index" class="mb-2">
                 <div v-if="msg.time !== messages[index-1]?.time" class="text-muted small mb-1">{{ msg.time }}</div>
                 <div v-else class="d-none"></div>
-                <strong class="me-1">{{ displayUser(msg.user) }}:</strong> {{ msg.text }}
+                <div :class="{'text-muted fst-italic': msg.system}">
+                    <span v-if="!msg.system">
+                        <strong class="me-1">{{ displayUser(msg.user) }}:</strong> {{ msg.text }}
+                    </span>
+                    <span v-else>{{ msg.text }}</span>
+                    <button 
+                        v-if="canDeleteMessage(msg)" 
+                        class="btn btn-sm text-danger ms-2 p-0" 
+                        @click="deleteMessage(index)" 
+                        title="Delete message">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
             </div>
         </div>
         <div class="card-footer">
