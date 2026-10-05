@@ -16,9 +16,46 @@ const ScheduleCalendar = {
         interactive: {
             type: Boolean,
             default: false
+        },
+        // Huddle schedule overlay support
+        overlayStatus: {
+            type: Function,
+            default: null
+        },
+        selectedDates: {
+            type: Array,
+            default: () => []
         }
     },
     emits: ['change-month', 'day-click'],
+    methods: {
+        getDayClasses(day) {
+            const classes = {};
+            if (day.isPast) classes.disabled = true;
+            if (day.isToday) classes.currentDate = true;
+            if (day.mode === 'free' || day.isFree) classes.free = true;
+            if (day.mode === 'busy' || day.isBusy) classes.busy = true;
+            if (day.isToday && (day.mode === 'free' || day.isFree)) classes.currentDateFree = true;
+            if (day.isToday && (day.mode === 'busy' || day.isBusy)) classes.currentDateBusy = true;
+            if (day.startTime && day.endTime) classes.splitDate = true;
+            if (day.type === 'outside-frame') classes['outside-frame'] = true;
+
+            // Overlay status for huddle schedule
+            if (this.overlayStatus && day.dateKey) {
+                const status = this.overlayStatus(day.dateKey);
+                if (status === 'green') classes['overlay-green'] = true;
+                else if (status === 'yellow') classes['overlay-yellow'] = true;
+                else if (status === 'red') classes['overlay-red'] = true;
+            }
+
+            // Selected date highlight
+            if (this.selectedDates && this.selectedDates.includes(day.dateKey)) {
+                classes['selected-date'] = true;
+            }
+
+            return classes;
+        }
+    },
     template: `
     <div>
         <div class="row justify-content-center align-items-center mb-3">
@@ -43,17 +80,13 @@ const ScheduleCalendar = {
                 <div v-if="day.type === 'filler'" class="date dateSkipped opacity-0">
                     <div><p>skipped</p></div>
                 </div>
-                <div v-else 
-                     class="date" 
-                     :class="{
-                        'disabled': day.isPast,
-                        'currentDate': day.isToday,
-                        'free': day.mode === 'free' || day.isFree,
-                        'busy': day.mode === 'busy' || day.isBusy,
-                        'currentDateFree': day.isToday && (day.mode === 'free' || day.isFree),
-                        'currentDateBusy': day.isToday && (day.mode === 'busy' || day.isBusy),
-                        'splitDate': day.startTime && day.endTime
-                     }"
+                <div v-else-if="day.type === 'outside-frame'"
+                     class="date outside-frame">
+                    <p class="dateTitle">{{ day.date ? day.date.getDate() : '' }}</p>
+                </div>
+                <div v-else
+                     class="date"
+                     :class="getDayClasses(day)"
                      @click="$emit('day-click', day)">
                     <p class="dateTitle">{{ day.day }}</p>
                 </div>

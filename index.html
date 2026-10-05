@@ -15,7 +15,15 @@
 <header class="mt-4">
     <div class="container d-flex justify-content-between align-items-center">
         <h1>My Huddles</h1>
-        <button class="btn btn-success" @click="showChoiceModal = true">Add Huddle</button>
+        <div>
+            <button class="btn btn-success me-2" @click="showChoiceModal = true">Add Huddle</button>
+            <button 
+                class="btn" 
+                :class="showMyHuddlesOnly ? 'btn-primary' : 'btn-secondary'"
+                @click="toggleMyHuddles()">
+                {{ showMyHuddlesOnly ? 'Show All Huddles' : 'My Huddles Only' }}
+            </button>
+        </div>
     </div>
 </header>
 <section id="huddles">
@@ -26,6 +34,7 @@
                 v-for="huddle in huddles" 
                 :key="huddle.id" 
                 :huddle="huddle" 
+                :current-user="currentUser"
                 @edit="editHuddle" 
                 @delete="deleteHuddle" 
                 @leave="leaveHuddle">

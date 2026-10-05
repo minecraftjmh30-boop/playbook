@@ -187,3 +187,34 @@
 .hidden {
     visibility: hidden !important;
 }
+
+/* Huddle Schedule Overlay Colors */
+.overlay-green {
+    background-color: var(--bs-success-bg-subtle, #d1e7dd) !important;
+    border-color: var(--bs-success, #198754) !important;
+    box-shadow: inset 0 0 0 2px var(--bs-success, #198754);
+}
+
+.overlay-yellow {
+    background-color: var(--bs-warning-bg-subtle, #fff3cd) !important;
+    border-color: var(--bs-warning, #ffc107) !important;
+    box-shadow: inset 0 0 0 2px var(--bs-warning, #ffc107);
+}
+
+.overlay-red {
+    background-color: var(--bs-danger-bg-subtle, #f8d7da) !important;
+    border-color: var(--bs-danger, #dc3545) !important;
+    box-shadow: inset 0 0 0 2px var(--bs-danger, #dc3545);
+}
+
+.selected-date {
+    background-color: var(--bs-primary-bg-subtle, #cfe2ff) !important;
+    border-color: var(--bs-primary, #0d6efd) !important;
+    box-shadow: inset 0 0 0 2px var(--bs-primary, #0d6efd);
+}
+
+.outside-frame {
+    opacity: 0.3;
+    pointer-events: none;
+    cursor: not-allowed;
+}

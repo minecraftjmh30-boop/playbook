@@ -4,28 +4,97 @@ const HuddleDetails = {
         huddle: {
             type: Object,
             required: true
+        },
+        currentUser: {
+            type: String,
+            default: null
         }
+    },
+    emits: ['save'],
+    data() {
+        return {
+            editing: false,
+            editName: '',
+            editDescription: '',
+            editLocation: ''
+        };
     },
     template: `
     <div class="card mb-4">
-        <div class="card-header">Huddle Details</div>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Huddle Details</span>
+            <!-- Owner edit button -->
+            <button 
+                v-if="currentUser && huddle.owner === currentUser && !editing" 
+                class="btn btn-warning btn-sm" 
+                @click="startEdit">Edit</button>
+        </div>
         <div class="card-body">
-            <h5 class="mt-0">{{ huddle.name }}</h5>
-            <p>{{ huddle.description }}</p>
-            <hr>
-            <h5 class="mt-0">Location & Date</h5>
-            <div class="row">
-                <div class="col-6">
-                    <p><i class="bi bi-geo-alt"></i> {{ huddle.location }}</p>
+            <div v-if="!editing">
+                <h5 class="mt-0">{{ huddle.name }}</h5>
+                <p>{{ huddle.description }}</p>
+                <hr>
+                <h6 class="mt-0">Location & Code</h6>
+                <div class="row">
+                    <div class="col-6">
+                        <p><i class="bi bi-geo-alt"></i> {{ huddle.location }}</p>
+                    </div>
+                    <div class="col-6">
+                        <p>Huddle Code: <strong>{{ huddle.code }}</strong></p>
+                    </div>
                 </div>
-                <div class="col-6">
-                    <p>Huddle Code: <strong>{{ huddle.code }}</strong></p>
+                <p v-if="huddle.startDate && huddle.endDate">Time frame: {{ huddle.startDate }} to {{ huddle.endDate }}</p>
+                <p v-else-if="huddle.startDate">Starts: {{ huddle.startDate }}</p>
+                <p v-else-if="huddle.endDate">Ends: {{ huddle.endDate }}</p>
+                <p v-else class="text-muted">No time frame set</p>
+            </div>
+            <div v-else>
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-control" v-model="editName">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" rows="3" v-model="editDescription"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Location</label>
+                    <input type="text" class="form-control" v-model="editLocation">
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary btn-sm" @click="saveEdit">Save</button>
+                    <button class="btn btn-secondary btn-sm" @click="cancelEdit">Cancel</button>
                 </div>
             </div>
-            <p>Planned date: not determined yet</p>
         </div>
     </div>
-    `
+    `,
+    methods: {
+        startEdit() {
+            if (this.currentUser && this.huddle.owner === this.currentUser) {
+                this.editName = this.huddle.name;
+                this.editDescription = this.huddle.description;
+                this.editLocation = this.huddle.location;
+                this.editing = true;
+            } else {
+                alert('You must be the owner to edit this huddle.');
+            }
+        },
+        saveEdit() {
+            if (!this.editName.trim()) {
+                alert('Name cannot be empty.');
+                return;
+            }
+            this.huddle.name = this.editName.trim();
+            this.huddle.description = this.editDescription.trim();
+            this.huddle.location = this.editLocation.trim() || 'Virtual';
+            this.editing = false;
+            this.$emit('save');
+        },
+        cancelEdit() {
+            this.editing = false;
+        }
+    }
 };
 
 if (typeof window !== 'undefined') {

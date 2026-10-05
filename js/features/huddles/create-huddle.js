@@ -31,6 +31,7 @@ createApp({
                 const newId = huddles.length > 0 ? Math.max(...huddles.map(h => h.id)) + 1 : 1;
                 const newCode = Math.random().toString(36).substring(2, 7).toUpperCase();
                 
+                // Creating a new huddle with the owner as the only participant
                 const newHuddle = {
                     id: newId,
                     name: this.huddle.name,
@@ -40,7 +41,8 @@ createApp({
                     code: newCode,
                     owner: currentUser,
                     startDate: this.huddle.startDate || null,
-                    endDate: this.huddle.endDate || null
+                    endDate: this.huddle.endDate || null,
+                    participants: [currentUser] // Owner is the only participant initially (task #9)
                 };
                 
                 huddles.push(newHuddle);
