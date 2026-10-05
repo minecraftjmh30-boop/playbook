@@ -18,32 +18,83 @@
             <div class="col-md-4">
                 <!-- Section 1: Mini Schedule -->
                 <div class="card mb-4">
-                    <div class="card-header">Schedule Preview</div>
+                    <div class="card-header">Huddle Schedule</div>
                     <div class="card-body">
                         <schedule-calendar 
                             :month-info="monthInfo" 
                             :displayed-days="displayedDays" 
                             :is-current-month="isCurrentMonth" 
-                            :interactive="false" 
-                            @change-month="changeMonth">
+                            :interactive="false"
+                            :overlay-status="getOverlayStatus"
+                            :selected-dates="huddle.selectedDates || []"
+                            @change-month="changeMonth"
+                            @day-click="handleDayClick">
                         </schedule-calendar>
                     </div>
                 </div>
 
+                <!-- Planned Dates Section -->
+                <div class="card mb-4" v-if="huddle.selectedDates && huddle.selectedDates.length > 0">
+                    <div class="card-header">Planned Dates</div>
+                    <ul class="list-group list-group-flush">
+                        <li v-for="date in huddle.selectedDates" :key="date" class="list-group-item">
+                            {{ formatDate(date) }}
+                        </li>
+                    </ul>
+                </div>
+
                 <!-- Section 3: Participants -->
-                <huddle-participants :participants="participants" :owner-id="huddle.owner"></huddle-participants>
+                <huddle-participants 
+                    :participants="participants" 
+                    :owner-id="huddle.owner"
+                    :current-user="currentUser"
+                    @remove-participant="removeParticipant">
+                </huddle-participants>
             </div>
 
             <!-- Right Column: Huddle Description and Group Chat -->
             <div class="col-md-8">
                 <!-- Section 2: Huddle Details -->
-                <huddle-details :huddle="huddle"></huddle-details>
+                <huddle-details 
+                    :huddle="huddle" 
+                    :current-user="currentUser"
+                    @save="saveHuddleData">
+                </huddle-details>
 
                 <!-- Section 4: Group Chat -->
-                <huddle-chat :messages="messages" :current-user="currentUser" @send-message="sendMessage"></huddle-chat>
+                <huddle-chat :messages="messages" :current-user="currentUser" :owner-id="huddle.owner" @send-message="sendMessage" @delete-message="deleteMessage"></huddle-chat>
             </div>
         </div>
     </main>
+
+    <!-- Huddle Schedule Overlay Modal -->
+    <div v-if="showOverlayModal" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Schedule for {{ formatDate(overlayDate) }}</h5>
+                    <button type="button" class="btn-close" @click="closeOverlayModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div v-if="overlayData.length === 0" class="text-muted text-center">
+                        No schedule data available for this date.
+                    </div>
+                    <div v-else>
+                        <div v-for="(detail, index) in overlayData" :key="index" class="mb-2 p-2 border rounded">
+                            <strong>{{ detail.participant }}</strong>
+                            <span :class="['badge', detail.mode === 'free' ? 'bg-success' : detail.mode === 'busy' ? 'bg-danger' : 'bg-secondary']">
+                                {{ detail.mode || 'undetermined' }}
+                            </span>
+                            <span v-if="detail.startTime" class="ms-2">{{ detail.startTime }} - {{ detail.endTime }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @click="closeOverlayModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <app-footer></app-footer>
 

@@ -4,26 +4,78 @@ const HuddleCard = {
         huddle: {
             type: Object,
             required: true
+        },
+        currentUser: {
+            type: String,
+            default: null
         }
     },
     emits: ['edit', 'delete', 'leave'],
+    computed: {
+        huddleStatus() {
+            // Show selected dates if available
+            if (this.huddle.selectedDates && this.huddle.selectedDates.length > 0) {
+                const dates = this.huddle.selectedDates;
+                if (dates.length === 1) return this.formatDate(dates[0]);
+                return `${dates.length} dates selected`;
+            }
+            // Show time frame if set
+            if (this.huddle.startDate && this.huddle.endDate) {
+                return `${this.formatDate(this.huddle.startDate)} to ${this.formatDate(this.huddle.endDate)}`;
+            }
+            if (this.huddle.startDate) return `Starts ${this.formatDate(this.huddle.startDate)}`;
+            if (this.huddle.endDate) return `Ends ${this.formatDate(this.huddle.endDate)}`;
+            // Fall back to status
+            return this.huddle.status || 'Ongoing';
+        },
+        statusBadgeClass() {
+            if (this.huddle.selectedDates && this.huddle.selectedDates.length > 0) return 'bg-primary';
+            if (this.huddle.status === 'Online') return 'bg-success';
+            if (this.huddle.status === 'Planning') return 'bg-warning';
+            if (this.huddle.status === 'Completed') return 'bg-secondary';
+            return 'bg-info';
+        }
+    },
+    methods: {
+        getHuddleStatus(huddle) {
+            return this.huddleStatus;
+        },
+        formatDate(dateStr) {
+            if (!dateStr) return '';
+            // Handle various date formats: "2024-1-15", "2024-01-15", "2024/1/15", etc.
+            const parts = dateStr.split(/[-/]/);
+            if (parts.length >= 3) {
+                const year = parseInt(parts[0]);
+                const month = parseInt(parts[1]) - 1;
+                const day = parseInt(parts[2]);
+                const date = new Date(year, month, day);
+                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            }
+            return dateStr;
+        }
+    },
     template: `
     <div class="col-md-4">
         <div class="card mb-4">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <h5 class="card-title mb-0">{{ huddle.name }}</h5>
-                    <span :class="['badge', huddle.status === 'Online' ? 'bg-success' : 'bg-secondary']">{{ huddle.status }}</span>
+                    <span :class="['badge', statusBadgeClass]">{{ huddleStatus }}</span>
                 </div>
                 <p class="card-text text-muted">{{ huddle.description }}</p>
+                <div class="mb-2 small text-muted">
+                    <span>Participants: {{ huddle.participants ? huddle.participants.length : 1 }}</span>
+                    <span v-if="huddle.owner" class="ms-2">Owner: {{ huddle.owner }}</span>
+                </div>
                 <div class="d-flex justify-content-between">
                     <a :href="'huddle.html?id=' + huddle.id" class="btn btn-primary btn-sm">Go to Huddle</a>
-                    <div v-if="huddle.status === 'Completed'">
-                        <button class="btn btn-danger btn-sm" @click="$emit('leave', huddle)">Leave</button>
-                    </div>
-                    <div v-else>
-                        <button class="btn btn-warning btn-sm me-1" @click="$emit('edit', huddle)">Edit</button>
-                        <button class="btn btn-danger btn-sm" @click="$emit('delete', huddle.id)">Delete</button>
+                    <div>
+                        <!-- Edit and Delete buttons only shown if current user is owner -->
+                        <template v-if="currentUser && currentUser === huddle.owner">
+                            <button class="btn btn-warning btn-sm me-1" @click="$emit('edit', huddle)">Edit</button>
+                            <button class="btn btn-danger btn-sm" @click="$emit('delete', huddle.id)">Delete</button>
+                        </template>
+                        <button v-else-if="huddle.status === 'Completed'" class="btn btn-danger btn-sm" @click="$emit('leave', huddle)">Leave</button>
                     </div>
                 </div>
             </div>

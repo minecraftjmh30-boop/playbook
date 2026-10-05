@@ -22,35 +22,54 @@ createApp({
             },
             friends: [],
             pendingRequests: [],
-            friendCode: ''
+            friendCode: '',
+            // Huddle invitations
+            myHuddles: [],
+            pendingInvitations: [],
+            joinHuddleCode: ''
         };
     },
     async mounted() {
-        this.activateTabFromHash();
-        window.addEventListener('hashchange', () => this.activateTabFromHash());
         await this.loadUserData();
+        await this.loadHuddleData();
+        
+        // Smooth scroll for navigation links - set up after Vue renders
+        await this.$nextTick(() => {
+            document.querySelectorAll('.profile-nav a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href').substring(1);
+                    const targetEl = document.getElementById(targetId);
+                    if (targetEl) {
+                        targetEl.scrollIntoView({behavior: 'smooth', block: 'start'});
+                        window.history.pushState(null, '', `#${targetId}`);
+                    }
+                });
+            });
+        });
+        
+        // Handle initial hash in URL
+        if (window.location.hash) {
+            await this.$nextTick(() => {
+                const targetEl = document.getElementById(window.location.hash.substring(1));
+                if (targetEl) {
+                    setTimeout(() => {
+                        targetEl.scrollIntoView({behavior: 'smooth', block: 'start'});
+                    }, 100);
+                }
+            });
+        }
     },
     methods: {
-        activateTabFromHash() {
-            const hash = window.location.hash;
-            if (hash) {
-                const tabId = hash.substring(1);
-                const tabTriggerEl = document.querySelector(`#${tabId}`);
-                if (tabTriggerEl && typeof bootstrap !== 'undefined') {
-                    const tab = bootstrap.Tab.getOrCreateInstance(tabTriggerEl);
-                    tab.show();
-                }
-            }
-        },
         async loadUserData() {
-            const userId = getCookie('currentUser') || 'User1'; // Default to User1 if no cookie
+            const userId = getCookie('currentUser') || 'User1';
             try {
                 const response = await fetch(`/debug/debugLogins/${userId}/userInfo.json`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch user info');
                 }
                 const data = await response.json();
-                
+
                 this.userInfo = {
                     name: data.name,
                     email: data.email,
@@ -58,7 +77,7 @@ createApp({
                 };
                 this.friendCode = data.friendCode;
                 this.friends = data.friends.map(fName => ({ id: fName, name: fName }));
-                
+
             } catch (error) {
                 console.error('Error loading user data:', error);
                 this.userInfo = {
@@ -66,6 +85,69 @@ createApp({
                     email: '',
                     dateJoined: ''
                 };
+            }
+        },
+        async loadHuddleData() {
+            const userId = getCookie('currentUser') || 'User1';
+            const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
+            const invitations = JSON.parse(localStorage.getItem(`invitations_${userId}`)) || [];
+
+            // Huddles where user is a participant
+            this.myHuddles = huddles.filter(h =>
+                h.owner === userId ||
+                (h.participants && h.participants.includes(userId))
+            );
+
+            // Pending invitations for this user
+            this.pendingInvitations = invitations.filter(inv => inv.to === userId);
+        },
+        acceptInvitation(invitation) {
+            const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
+            const huddle = huddles.find(h => h.id === invitation.huddleId);
+            if (huddle) {
+                if (!huddle.participants) {
+                    huddle.participants = [huddle.owner];
+                }
+                const userId = getCookie('currentUser') || 'User1';
+                if (!huddle.participants.includes(userId)) {
+                    huddle.participants.push(userId);
+                }
+                localStorage.setItem('huddles', JSON.stringify(huddles));
+
+                // Remove invitation
+                this.removeInvitation(invitation);
+                this.loadHuddleData();
+            }
+        },
+        declineInvitation(invitation) {
+            this.removeInvitation(invitation);
+            this.loadHuddleData();
+        },
+        removeInvitation(invitation) {
+            const userId = getCookie('currentUser') || 'User1';
+            let invitations = JSON.parse(localStorage.getItem(`invitations_${userId}`)) || [];
+            invitations = invitations.filter(inv => inv.id !== invitation.id);
+            localStorage.setItem(`invitations_${userId}`, JSON.stringify(invitations));
+        },
+        joinHuddleFromProfile() {
+            if (!this.joinHuddleCode.trim()) return;
+
+            const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
+            const huddle = huddles.find(h => h.code === this.joinHuddleCode.trim());
+            if (huddle) {
+                const userId = getCookie('currentUser') || 'User1';
+                if (!huddle.participants) {
+                    huddle.participants = [huddle.owner];
+                }
+                if (!huddle.participants.includes(userId)) {
+                    huddle.participants.push(userId);
+                }
+                localStorage.setItem('huddles', JSON.stringify(huddles));
+                this.joinHuddleCode = '';
+                this.loadHuddleData();
+                alert(`Joined "${huddle.name}"!`);
+            } else {
+                alert('Invalid huddle code!');
             }
         },
         removeFriend(id) {

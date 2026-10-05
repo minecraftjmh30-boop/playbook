@@ -7,54 +7,123 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.8/dist/lumen/bootstrap.min.css">
     <!-- Vue 3 CDN -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        .profile-nav {
+            position: sticky;
+            top: 1rem;
+        }
+        .profile-nav .nav-link {
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .profile-section {
+            scroll-margin-top: 2rem;
+        }
+    </style>
 </head>
 <body id="app" class="d-flex flex-column min-vh-100">
     <app-header></app-header>
 
     <main class="container my-5 flex-grow-1">
-        <!-- Profile Tabs Navigation -->
-        <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="main-tab" data-bs-toggle="tab" data-bs-target="#main-pane" type="button" role="tab">Main</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="friends-tab" data-bs-toggle="tab" data-bs-target="#friends-pane" type="button" role="tab">Friends</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings-pane" type="button" role="tab">Settings</button>
-            </li>
-        </ul>
-
-        <!-- Tab Content -->
-        <div class="tab-content" id="profileTabsContent">
-            <!-- Main Section: Basic Info -->
-            <div class="tab-pane fade show active" id="main-pane" role="tabpanel">
-                <profile-info :user-info="userInfo"></profile-info>
+        <div class="row">
+            <!-- Navigation Sidebar -->
+            <div class="col-md-3">
+                <nav class="profile-nav">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#profile-main">Profile Info</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#profile-huddles">Huddle Invitations</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#profile-friends">Friends</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#profile-settings">Settings</a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
 
-            <!-- Friends Section -->
-            <div class="tab-pane fade" id="friends-pane" role="tabpanel">
-                <profile-friends 
-                    :friends="friends" 
-                    :pending-requests="pendingRequests" 
-                    :friend-code="friendCode" 
-                    @remove-friend="removeFriend" 
-                    @handle-request="handlePendingRequest" 
-                    @add-friend="addFriend">
-                </profile-friends>
-            </div>
+            <!-- Scrollable Content -->
+            <div class="col-md-9">
+                <!-- Profile Info Section -->
+                <section id="profile-main" class="profile-section mb-5">
+                    <h4>Profile Information</h4>
+                    <profile-info :user-info="userInfo"></profile-info>
+                </section>
 
-            <!-- Settings Section -->
-            <div class="tab-pane fade" id="settings-pane" role="tabpanel">
-                <profile-settings></profile-settings>
+                <!-- Huddle Invitations Section -->
+                <section id="profile-huddles" class="profile-section mb-5">
+                    <h4>Huddle Invitations</h4>
+                    <div class="card mb-4">
+                        <div class="card-header">Huddles I'm In</div>
+                        <ul class="list-group list-group-flush">
+                            <li v-for="huddle in myHuddles" :key="huddle.id" class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ huddle.name }}</strong>
+                                    <p class="mb-0 small text-muted">{{ huddle.description }}</p>
+                                </div>
+                                <a :href="'huddle.html?id=' + huddle.id" class="btn btn-primary btn-sm">Go to Huddle</a>
+                            </li>
+                        </ul>
+                        <div v-if="myHuddles.length === 0" class="card-body text-muted text-center">
+                            You're not in any huddles yet.
+                        </div>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-header">Pending Invitations</div>
+                        <ul class="list-group list-group-flush">
+                            <li v-for="invitation in pendingInvitations" :key="invitation.id" class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ invitation.huddleName }}</strong>
+                                    <p class="mb-0 small text-muted">Invited by {{ invitation.invitedBy }}</p>
+                                </div>
+                                <div>
+                                    <button class="btn btn-success btn-sm me-1" @click="acceptInvitation(invitation)">Accept</button>
+                                    <button class="btn btn-secondary btn-sm" @click="declineInvitation(invitation)">Decline</button>
+                                </div>
+                            </li>
+                        </ul>
+                        <div v-if="pendingInvitations.length === 0" class="card-body text-muted text-center">
+                            No pending invitations.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">Join a Huddle</div>
+                        <div class="card-body">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Enter huddle code" v-model="joinHuddleCode" @keyup.enter="joinHuddleFromProfile">
+                                <button class="btn btn-primary" type="button" @click="joinHuddleFromProfile">Join</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Friends Section -->
+                <section id="profile-friends" class="profile-section mb-5">
+                    <h4>Friends</h4>
+                    <profile-friends 
+                        :friends="friends" 
+                        :pending-requests="pendingRequests" 
+                        :friend-code="friendCode" 
+                        @remove-friend="removeFriend" 
+                        @handle-request="handlePendingRequest" 
+                        @add-friend="addFriend">
+                    </profile-friends>
+                </section>
+
+                <!-- Settings Section -->
+                <section id="profile-settings" class="profile-section mb-5">
+                    <h4>Settings</h4>
+                    <profile-settings></profile-settings>
+                </section>
             </div>
         </div>
     </main>
 
-    <!-- Modals -->
-    <change-username-modal></change-username-modal>
-    <change-password-modal></change-password-modal>
-    <forgot-password-modal></forgot-password-modal>
+    <!-- Modals are now handled by profileSettings component using unified-modal -->
 
     <app-footer></app-footer>
 
@@ -65,9 +134,7 @@
     <script src="js/components/profile/profileInfo.js"></script>
     <script src="js/components/profile/profileFriends.js"></script>
     <script src="js/components/profile/profileSettings.js"></script>
-    <script src="js/components/modals/changeUsernameModal.js"></script>
-    <script src="js/components/modals/changePasswordModal.js"></script>
-    <script src="js/components/modals/forgotPasswordModal.js"></script>
+    <script src="js/components/modals/unifiedModal.js"></script>
     <script src="js/core/darkmode.js"></script>
     <script src="js/features/profile/profile.js"></script>
 </body>
