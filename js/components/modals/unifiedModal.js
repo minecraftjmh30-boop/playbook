@@ -42,7 +42,7 @@ const UnifiedModal = {
             // Validate required fields
             for (const field of this.fields) {
                 if (field.required && !this.values[field.id].trim()) {
-                    alert(`Please fill in ${field.label}.`);
+                    window.toast.error(`Please fill in ${field.label}.`);
                     return;
                 }
             }

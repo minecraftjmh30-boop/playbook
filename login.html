@@ -14,14 +14,28 @@
         <header>
             <h1>Welcome!</h1>
         </header>
-        <form @submit.prevent="handleSubmit">
+        <form @submit.prevent="handleSubmit" novalidate>
             <div class="mb-3">
                 <label class="form-label">Email</label>
-                <input type="email" class="form-control" v-model="email" required>
+                <input 
+                    type="email" 
+                    class="form-control" 
+                    :class="{'is-invalid': submitted && formErrors.email, 'is-valid': submitted && !formErrors.email && email}"
+                    v-model="email" 
+                    required
+                    placeholder="Enter your email">
+                <div class="invalid-feedback">{{ formErrors.email }}</div>
             </div>
             <div class="mb-3">
                 <label class="form-label">Password</label>
-                <input type="password" class="form-control" v-model="password" required>
+                <input 
+                    type="password" 
+                    class="form-control" 
+                    :class="{'is-invalid': submitted && formErrors.password, 'is-valid': submitted && !formErrors.password && password}"
+                    v-model="password" 
+                    required
+                    placeholder="Enter your password">
+                <div class="invalid-feedback">{{ formErrors.password }}</div>
             </div>
             <button type="submit" class="btn btn-primary w-100 mb-2" id="login">Login</button>
             <div class="text-center my-2">OR</div>
@@ -34,6 +48,9 @@
     <!-- components -->
     <script src="js/components/main/footer.js"></script>
     <script src="js/core/darkmode.js"></script>
+    <!-- Utilities and Toast -->
+    <script src="js/core/utils.js"></script>
+    <script src="js/components/ui/toast.js"></script>
     <!-- Login App -->
     <script src="js/features/auth/login.js"></script>
 </body>

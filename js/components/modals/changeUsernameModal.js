@@ -9,11 +9,11 @@ const ChangeUsernameModal = {
     methods: {
         handleUpdate() {
             if (!this.newUsername || !this.currentPassword) {
-                alert("Please fill in all fields.");
+                window.toast.error("Please fill in all fields.");
                 return;
             }
             console.log("Attempting to change username to:", this.newUsername);
-            alert("Username change requested (simulated).");
+            window.toast.success("Username change requested (simulated).");
             const modalEl = document.getElementById('changeUsernameModal');
             if (modalEl && typeof bootstrap !== 'undefined') {
                 const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
@@ -63,3 +63,5 @@ if (typeof Vue !== 'undefined' && Vue.createApp) {
         return app;
     };
 }
+
+// Note: This modal has been replaced by unifiedModal.js. Keeping for backward compatibility.

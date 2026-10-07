@@ -1,38 +1,28 @@
 const { createApp } = Vue;
 
-function getCookie(name) {
-    const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i].trim();
-        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
-}
-
 createApp({
     data() {
         return {
-            allHuddles: JSON.parse(localStorage.getItem('huddles')) || [
-                { id: 1, name: 'Virtual Huddle #123', description: 'This is a huddle where users can collaborate and chat. The schedule shows upcoming events for this huddle.', status: 'Planning', location: 'Virtual', friends: '', code: '123', owner: 'User1', participants: ['User1'], messages: [], selectedDates: [] },
-                { id: 2, name: 'Design Workshop', description: 'Collaborative design session for the upcoming project.', status: 'Completed', location: 'Workshop', friends: '', code: '456', owner: 'User2', participants: ['User2'], messages: [], selectedDates: [] }
-            ],
+            // Remove static huddles - only load from localStorage
+            allHuddles: JSON.parse(localStorage.getItem('huddles')) || [],
             showChoiceModal: false,
             showJoinModal: false,
             joinCode: '',
-            currentUser: getCookie('currentUser') || null,
+            currentUser: window.utils.getCookie('currentUser') || null,
             showMyHuddlesOnly: false
         };
     },
     computed: {
         huddles() {
-            if (this.showMyHuddlesOnly && this.currentUser) {
-                return this.allHuddles.filter(h =>
-                    h.owner === this.currentUser ||
-                    (h.participants && h.participants.includes(this.currentUser))
-                );
+            // Filter to only show huddles the user is a part of (owner or participant)
+            if (!this.currentUser) {
+                return [];
             }
-            return this.allHuddles;
+            
+            return this.allHuddles.filter(h =>
+                h.owner === this.currentUser ||
+                (h.participants && h.participants.includes(this.currentUser))
+            );
         }
     },
     methods: {
@@ -40,7 +30,14 @@ createApp({
             this.showJoinModal = true;
         },
         joinHuddle() {
-            const huddle = this.allHuddles.find(r => r.code === this.joinCode);
+            // Sanitize and trim the join code
+            const code = window.utils.sanitizeInput(this.joinCode.trim());
+            if (!code) {
+                window.toast.error('Please enter a huddle code.');
+                return;
+            }
+            
+            const huddle = this.allHuddles.find(r => r.code === code);
             if (huddle) {
                 // Add current user as participant if not already
                 if (!huddle.participants) {
@@ -56,13 +53,16 @@ createApp({
                         time: new Date().toLocaleTimeString(),
                         system: true
                     });
+                    window.toast.success(`Successfully joined "${huddle.name}"!`);
+                } else {
+                    window.toast.info('You are already a member of this huddle.');
                 }
                 localStorage.setItem('huddles', JSON.stringify(this.allHuddles));
                 this.showJoinModal = false;
                 this.joinCode = '';
                 window.location.href = `huddle.html?id=${huddle.id}`;
             } else {
-                alert('Invalid huddle code!');
+                window.toast.error('Invalid huddle code!');
             }
         },
         editHuddle(huddle) {
@@ -70,11 +70,13 @@ createApp({
             if (this.currentUser && huddle.owner === this.currentUser) {
                 const newName = prompt('Edit huddle name:', huddle.name);
                 if (newName !== null && newName.trim() !== '') {
-                    huddle.name = newName.trim();
+                    // Sanitize the new name
+                    huddle.name = window.utils.sanitizeInput(newName.trim());
                     localStorage.setItem('huddles', JSON.stringify(this.allHuddles));
+                    window.toast.success('Huddle name updated successfully!');
                 }
             } else {
-                alert('You must be the owner to edit this huddle.');
+                window.toast.error('You must be the owner to edit this huddle.');
             }
         },
         deleteHuddle(id) {
@@ -86,9 +88,10 @@ createApp({
                 if (confirm('Are you sure you want to delete this huddle?')) {
                     this.allHuddles = this.allHuddles.filter(huddle => huddle.id !== id);
                     localStorage.setItem('huddles', JSON.stringify(this.allHuddles));
+                    window.toast.success('Huddle deleted successfully!');
                 }
             } else {
-                alert('You must be the owner to delete this huddle.');
+                window.toast.error('You must be the owner to delete this huddle.');
             }
         },
         leaveHuddle(huddle) {
@@ -103,6 +106,7 @@ createApp({
                         time: new Date().toLocaleTimeString(),
                         system: true
                     });
+                    window.toast.info(`You have left "${huddle.name}".`);
                 }
                 localStorage.setItem('huddles', JSON.stringify(this.allHuddles));
             }

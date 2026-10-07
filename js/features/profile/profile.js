@@ -1,17 +1,5 @@
 const { createApp } = Vue;
 
-// Helper to get cookie
-function getCookie(name) {
-    const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
-}
-
 createApp({
     data() {
         return {
@@ -62,7 +50,7 @@ createApp({
     },
     methods: {
         async loadUserData() {
-            const userId = getCookie('currentUser') || 'User1';
+            const userId = window.utils.getCookie('currentUser') || 'User1';
             try {
                 const response = await fetch(`/debug/debugLogins/${userId}/userInfo.json`);
                 if (!response.ok) {
@@ -88,7 +76,7 @@ createApp({
             }
         },
         async loadHuddleData() {
-            const userId = getCookie('currentUser') || 'User1';
+            const userId = window.utils.getCookie('currentUser') || 'User1';
             const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
             const invitations = JSON.parse(localStorage.getItem(`invitations_${userId}`)) || [];
 
@@ -108,7 +96,7 @@ createApp({
                 if (!huddle.participants) {
                     huddle.participants = [huddle.owner];
                 }
-                const userId = getCookie('currentUser') || 'User1';
+                const userId = window.utils.getCookie('currentUser') || 'User1';
                 if (!huddle.participants.includes(userId)) {
                     huddle.participants.push(userId);
                 }
@@ -117,25 +105,31 @@ createApp({
                 // Remove invitation
                 this.removeInvitation(invitation);
                 this.loadHuddleData();
+                window.toast.success(`You accepted the invitation to "${huddle.name}".`);
             }
         },
         declineInvitation(invitation) {
             this.removeInvitation(invitation);
             this.loadHuddleData();
+            window.toast.info('Invitation declined.');
         },
         removeInvitation(invitation) {
-            const userId = getCookie('currentUser') || 'User1';
+            const userId = window.utils.getCookie('currentUser') || 'User1';
             let invitations = JSON.parse(localStorage.getItem(`invitations_${userId}`)) || [];
             invitations = invitations.filter(inv => inv.id !== invitation.id);
             localStorage.setItem(`invitations_${userId}`, JSON.stringify(invitations));
         },
         joinHuddleFromProfile() {
-            if (!this.joinHuddleCode.trim()) return;
+            const code = window.utils.sanitizeInput(this.joinHuddleCode.trim());
+            if (!code) {
+                window.toast.error('Please enter a huddle code.');
+                return;
+            }
 
             const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
-            const huddle = huddles.find(h => h.code === this.joinHuddleCode.trim());
+            const huddle = huddles.find(h => h.code === code);
             if (huddle) {
-                const userId = getCookie('currentUser') || 'User1';
+                const userId = window.utils.getCookie('currentUser') || 'User1';
                 if (!huddle.participants) {
                     huddle.participants = [huddle.owner];
                 }
@@ -145,14 +139,15 @@ createApp({
                 localStorage.setItem('huddles', JSON.stringify(huddles));
                 this.joinHuddleCode = '';
                 this.loadHuddleData();
-                alert(`Joined "${huddle.name}"!`);
+                window.toast.success(`Joined "${huddle.name}"!`);
             } else {
-                alert('Invalid huddle code!');
+                window.toast.error('Invalid huddle code!');
             }
         },
         removeFriend(id) {
             if (confirm('Are you sure you want to remove this friend?')) {
                 this.friends = this.friends.filter(f => f.id !== id);
+                window.toast.info('Friend removed.');
             }
         },
         handlePendingRequest(id, action) {
@@ -161,14 +156,17 @@ createApp({
                 if (friend) {
                     this.friends.push({ id: friend.name, name: friend.name });
                     this.pendingRequests = this.pendingRequests.filter(p => p.id !== id);
+                    window.toast.success(`Friend request from ${friend.name} accepted.`);
                 }
             } else {
                 this.pendingRequests = this.pendingRequests.filter(p => p.id !== id);
+                window.toast.info('Friend request declined.');
             }
         },
         addFriend(code) {
             if (code && code.trim()) {
-                alert(`Friend request sent to: ${code.trim()}`);
+                const sanitizedCode = window.utils.sanitizeInput(code.trim());
+                window.toast.success(`Friend request sent to: ${sanitizedCode}`);
             }
         }
     }

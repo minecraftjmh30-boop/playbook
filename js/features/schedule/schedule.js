@@ -1,17 +1,5 @@
 const { createApp } = Vue;
 
-// Helper to get cookie
-function getCookie(name) {
-    const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
-}
-
 createApp({
     data() {
         return {
@@ -99,7 +87,7 @@ createApp({
                    d1.getDate() === d2.getDate();
         },
         async loadSchedule() {
-            const userId = getCookie('currentUser') || 'User1';
+            const userId = window.utils.getCookie('currentUser') || 'User1';
             const storageKey = `schedule_${userId}`;
             
             try {
@@ -136,16 +124,16 @@ createApp({
             }
         },
         async saveSchedule() {
-            const userId = getCookie('currentUser') || 'User1';
+            const userId = window.utils.getCookie('currentUser') || 'User1';
             const storageKey = `schedule_${userId}`;
             
             try {
                 localStorage.setItem(storageKey, JSON.stringify(this.schedules));
-                alert('Schedule saved successfully to local storage!');
+                window.toast.success('Schedule saved successfully!');
                 console.log('Simulated upload to schedule.csv:', this.schedules);
             } catch (error) {
                 console.error('Error saving schedule:', error);
-                alert('Error saving schedule.');
+                window.toast.error('Error saving schedule.');
             }
         },
         changeMonth(offset) {
@@ -192,7 +180,7 @@ createApp({
         },
         saveTime() {
             if (!this.modalData.startTime || !this.modalData.endTime) {
-                alert("Please select both start and end times.");
+                window.toast.error("Please select both start and end times.");
                 return;
             }
             const key = this.getDateKey(this.modalData.date);

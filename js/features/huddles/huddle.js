@@ -1,16 +1,5 @@
 const { createApp } = Vue;
 
-
-function getCookie(name) {
-    const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i].trim();
-        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
-}
-
 createApp({
     data() {
         const urlParams = typeof window !== 'undefined' && window.location ? new URLSearchParams(window.location.search) : null;
@@ -31,7 +20,7 @@ createApp({
             selectedDates: []
         };
 
-        const currentUser = getCookie('currentUser');
+        const currentUser = window.utils.getCookie('currentUser');
 
         // Check if user is authorized to access this huddle
         const participantIds = huddleData.participants || [huddleData.owner];
@@ -41,8 +30,10 @@ createApp({
 
         if (!isAuthorized && huddleData.name !== 'Huddle Not Found') {
             // Redirect unauthorized users to index page
-            alert('You are not a participant of this huddle and cannot access it.');
-            window.location.href = 'index.html';
+            window.toast.error('You are not a participant of this huddle and cannot access it.');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1500);
         }
 
         // Build participants list from huddle data
@@ -203,16 +194,8 @@ createApp({
                    d1.getDate() === d2.getDate();
         },
         formatDate(dateStr) {
-            if (!dateStr) return '';
-            const parts = dateStr.split(/[-/]/);
-            if (parts.length >= 3) {
-                const year = parseInt(parts[0]);
-                const month = parseInt(parts[1]) - 1;
-                const day = parseInt(parts[2]);
-                const date = new Date(year, month, day);
-                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-            }
-            return dateStr;
+            // Use shared utility
+            return window.utils.formatDate(dateStr);
         },
         changeMonth(offset) {
             const newDate = new Date(this.currentMonthView.getFullYear(), this.currentMonthView.getMonth() + offset, 1);
@@ -278,9 +261,10 @@ createApp({
                     
                     // Persist to localStorage
                     this.saveHuddleData();
+                    window.toast.success(`${participantId} has been removed from the huddle.`);
                 }
             } else {
-                alert('Only the owner can remove participants.');
+                window.toast.error('Only the owner can remove participants.');
             }
         },
         // Select dates for huddle from schedule (owners only)
@@ -374,17 +358,27 @@ createApp({
         closeOverlayModal() {
             this.showOverlayModal = false;
         },
-        // Handle day click on schedule calendar
+        // Handle day click on schedule calendar - only show overlay, don't select date
         handleDayClick(day) {
             if (!day || day.type !== 'actual') return;
             
-            // If owner, allow selecting dates
-            if (this.currentUser && this.huddle.owner === this.currentUser) {
-                this.selectHuddleDate(day.dateKey);
-            }
-            
             // Show overlay with participant schedule details
             this.showScheduleOverlay(day);
+        },
+        // Owner selects a date as planned date via button
+        selectDateAsPlanned(dateKey) {
+            if (!this.currentUser || this.huddle.owner !== this.currentUser) {
+                window.toast.error('Only the owner can select planned dates.');
+                return;
+            }
+            
+            this.selectHuddleDate(dateKey);
+            const index = this.huddle.selectedDates.indexOf(dateKey);
+            if (index !== -1) {
+                window.toast.info(`${this.formatDate(dateKey)} removed from planned dates.`);
+            } else {
+                window.toast.success(`${this.formatDate(dateKey)} added to planned dates.`);
+            }
         }
     }
 }).mount('#app');

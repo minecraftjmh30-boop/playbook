@@ -22,18 +22,43 @@
             <div class="col-md-6">
                 <div class="card shadow">
                     <div class="card-body">
-                        <form @submit.prevent="handleSubmit">
+                        <form @submit.prevent="handleSubmit" novalidate>
                             <div class="mb-3">
                                 <label for="name" class="form-label">Huddle Name</label>
-                                <input type="text" class="form-control" id="name" v-model="huddle.name" required>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    :class="{'is-invalid': submitted && formErrors.name, 'is-valid': submitted && !formErrors.name && huddle.name}"
+                                    id="name" 
+                                    v-model="huddle.name" 
+                                    required
+                                    minlength="3"
+                                    placeholder="Enter huddle name">
+                                <div class="invalid-feedback">{{ formErrors.name }}</div>
                             </div>
                             <div class="mb-3">
                                 <label for="description" class="form-label">Description</label>
-                                <textarea class="form-control" id="description" rows="3" v-model="huddle.description" required></textarea>
+                                <textarea 
+                                    class="form-control" 
+                                    :class="{'is-invalid': submitted && formErrors.description, 'is-valid': submitted && !formErrors.description && huddle.description}"
+                                    id="description" 
+                                    rows="3" 
+                                    v-model="huddle.description" 
+                                    required
+                                    placeholder="Enter huddle description"></textarea>
+                                <div class="invalid-feedback">{{ formErrors.description }}</div>
                             </div>
                             <div class="mb-3">
                                 <label for="location" class="form-label">Location</label>
-                                <input type="text" class="form-control" id="location" v-model="huddle.location" required>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    :class="{'is-invalid': submitted && formErrors.location, 'is-valid': submitted && !formErrors.location && huddle.location}"
+                                    id="location" 
+                                    v-model="huddle.location" 
+                                    required
+                                    placeholder="Enter location">
+                                <div class="invalid-feedback">{{ formErrors.location }}</div>
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
@@ -64,6 +89,9 @@
     <script src="js/components/main/header.js"></script>
     <script src="js/components/main/footer.js"></script>
     <script src="js/core/darkmode.js"></script>
+    <!-- Utilities and Toast -->
+    <script src="js/core/utils.js"></script>
+    <script src="js/components/ui/toast.js"></script>
     <!-- App Logic -->
     <script src="js/features/huddles/create-huddle.js"></script>
 </body>

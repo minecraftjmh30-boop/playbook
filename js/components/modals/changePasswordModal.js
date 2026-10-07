@@ -10,15 +10,15 @@ const ChangePasswordModal = {
     methods: {
         handleUpdate() {
             if (!this.currentPassword || !this.newPassword || !this.confirmNewPassword) {
-                alert("Please fill in all fields.");
+                window.toast.error("Please fill in all fields.");
                 return;
             }
             if (this.newPassword !== this.confirmNewPassword) {
-                alert("New passwords do not match.");
+                window.toast.error("New passwords do not match.");
                 return;
             }
             console.log("Attempting to change password...");
-            alert("Password change requested (simulated).");
+            window.toast.success("Password change requested (simulated).");
             const modalEl = document.getElementById('changePasswordModal');
             if (modalEl && typeof bootstrap !== 'undefined') {
                 const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
@@ -73,3 +73,5 @@ if (typeof Vue !== 'undefined' && Vue.createApp) {
         return app;
     };
 }
+
+// Note: This modal has been replaced by unifiedModal.js. Keeping for backward compatibility.

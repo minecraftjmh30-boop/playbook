@@ -71,16 +71,8 @@ const HuddleDetails = {
     `,
     methods: {
         formatDate(dateStr) {
-            if (!dateStr) return '';
-            const parts = dateStr.split(/[-/]/);
-            if (parts.length >= 3) {
-                const year = parseInt(parts[0]);
-                const month = parseInt(parts[1]) - 1;
-                const day = parseInt(parts[2]);
-                const date = new Date(year, month, day);
-                return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-            }
-            return dateStr;
+            // Use shared utility
+            return window.utils.formatDate(dateStr);
         },
         startEdit() {
             if (this.currentUser && this.huddle.owner === this.currentUser) {
@@ -89,19 +81,21 @@ const HuddleDetails = {
                 this.editLocation = this.huddle.location;
                 this.editing = true;
             } else {
-                alert('You must be the owner to edit this huddle.');
+                window.toast.error('You must be the owner to edit this huddle.');
             }
         },
         saveEdit() {
             if (!this.editName.trim()) {
-                alert('Name cannot be empty.');
+                window.toast.error('Name cannot be empty.');
                 return;
             }
-            this.huddle.name = this.editName.trim();
-            this.huddle.description = this.editDescription.trim();
-            this.huddle.location = this.editLocation.trim() || 'Virtual';
+            // Sanitize inputs
+            this.huddle.name = window.utils.sanitizeInput(this.editName.trim());
+            this.huddle.description = window.utils.sanitizeInput(this.editDescription.trim());
+            this.huddle.location = window.utils.sanitizeInput(this.editLocation.trim()) || 'Virtual';
             this.editing = false;
             this.$emit('save');
+            window.toast.success('Huddle details updated successfully!');
         },
         cancelEdit() {
             this.editing = false;

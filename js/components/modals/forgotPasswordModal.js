@@ -10,15 +10,15 @@ const ForgotPasswordModal = {
     methods: {
         handleReset() {
             if (!this.resetCode || !this.resetNewPassword || !this.confirmResetNewPassword) {
-                alert("Please fill in all fields.");
+                window.toast.error("Please fill in all fields.");
                 return;
             }
             if (this.resetNewPassword !== this.confirmResetNewPassword) {
-                alert("New passwords do not match.");
+                window.toast.error("New passwords do not match.");
                 return;
             }
             console.log("Attempting to reset password with code:", this.resetCode);
-            alert("Password reset requested (simulated).");
+            window.toast.success("Password reset requested (simulated).");
             const modalEl = document.getElementById('forgotPasswordModal');
             if (modalEl && typeof bootstrap !== 'undefined') {
                 const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
@@ -73,3 +73,5 @@ if (typeof Vue !== 'undefined' && Vue.createApp) {
         return app;
     };
 }
+
+// Note: This modal has been replaced by unifiedModal.js. Keeping for backward compatibility.

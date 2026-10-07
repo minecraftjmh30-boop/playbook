@@ -31,28 +31,24 @@ const ProfileSettings = {
     },
     methods: {
         handleUsernameSubmit(values) {
-            if (values.newUsername !== values.currentPassword) {
-                console.log('Username change requested:', values.newUsername);
-                alert('Username change requested (simulated).');
-            } else {
-                alert('Username change requested (simulated).');
-            }
+            console.log('Username change requested:', values.newUsername);
+            window.toast.success('Username change requested (simulated).');
         },
         handlePasswordSubmit(values) {
             if (values.newPassword !== values.confirmNewPassword) {
-                alert('New passwords do not match.');
+                window.toast.error('New passwords do not match.');
                 return;
             }
             console.log('Password change requested');
-            alert('Password change requested (simulated).');
+            window.toast.success('Password change requested (simulated).');
         },
         handleForgotSubmit(values) {
             if (values.resetNewPassword !== values.confirmResetNewPassword) {
-                alert('New passwords do not match.');
+                window.toast.error('New passwords do not match.');
                 return;
             }
             console.log('Password reset requested with code:', values.resetCode);
-            alert('Password reset requested (simulated).');
+            window.toast.success('Password reset requested (simulated).');
         }
     },
     template: `
