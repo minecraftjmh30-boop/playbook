@@ -26,19 +26,10 @@ function formatDate(dateStr) {
 function sanitizeInput(input) {
     if (typeof input !== 'string') return '';
     
-    // Remove HTML tags
-    let sanitized = input.replace(/<[^>]*>/g, '');
-    
-    // Escape special characters
-    sanitized = sanitized
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#x27;')
-        .replace(/\//g, '&#x2F;');
-    
-    return sanitized;
+    // Remove HTML tags to prevent XSS
+    // Note: Vue's {{ }} interpolation automatically escapes special characters,
+    // so we only need to strip HTML tags here.
+    return input.replace(/<[^>]*>/g, '');
 }
 
 /**

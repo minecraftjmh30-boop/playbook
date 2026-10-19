@@ -437,7 +437,7 @@ createApp({
             });
             this.saveHuddleData();
             window.toast.success(`${friendId} has been invited to the huddle!`);
-        }
+        },
         // Handle day click on schedule calendar - only show overlay, don't select date
         handleDayClick(day) {
             if (!day || day.type !== 'actual') return;
