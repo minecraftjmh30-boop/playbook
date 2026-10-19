@@ -31,16 +31,3 @@ const AppHero = {
         return { day, month, year, weekday, week, season };
     }
 };
-
-if (typeof window !== 'undefined') {
-    window.AppHero = AppHero;
-}
-
-if (typeof Vue !== 'undefined' && Vue.createApp) {
-    const originalCreateApp = Vue.createApp;
-    Vue.createApp = function(...args) {
-        const app = originalCreateApp.apply(this, args);
-        app.component('app-hero', AppHero);
-        return app;
-    };
-}

@@ -198,4 +198,9 @@ createApp({
             this.schedules = {};
         }
     }
-}).mount('#app');
+}).component('app-header', AppHeader)
+  .component('app-footer', AppFooter)
+  .component('schedule-tools', ScheduleTools)
+  .component('schedule-calendar', ScheduleCalendar)
+  .component('time-range-modal', TimeRangeModal)
+  .mount('#app');

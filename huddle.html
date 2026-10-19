@@ -43,6 +43,20 @@
                     </ul>
                 </div>
 
+                <!-- Invite Friends Button for owner -->
+                <div v-if="currentUser && huddle.owner === currentUser" class="mb-3">
+                    <button class="btn btn-outline-primary w-100" @click="openInviteModal">
+                        Invite Friends
+                    </button>
+                </div>
+
+                <!-- Leave Huddle Button for non-owners -->
+                <div v-if="currentUser && huddle.owner !== currentUser" class="mb-3">
+                    <button class="btn btn-outline-danger w-100" @click="leaveHuddle">
+                        Leave Huddle
+                    </button>
+                </div>
+
                 <!-- Section 3: Participants -->
                 <huddle-participants 
                     :participants="participants" 
@@ -86,6 +100,7 @@
                                 {{ detail.mode || 'undetermined' }}
                             </span>
                             <span v-if="detail.startTime" class="ms-2">{{ detail.startTime }} - {{ detail.endTime }}</span>
+                            <span v-else class="ms-2 text-muted">All Day</span>
                         </div>
                     </div>
                 </div>
@@ -103,6 +118,47 @@
         </div>
     </div>
 
+    <!-- Invite Friends Modal -->
+    <div v-if="showInviteModal" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Invite Friends</h5>
+                    <button type="button" class="btn-close" @click="closeInviteModal"></button>
+                </div>
+                <div class="modal-body">
+                    <input 
+                        type="text" 
+                        class="form-control form-control-sm mb-3" 
+                        placeholder="Search friends..." 
+                        :value="inviteSearch"
+                        @input="inviteSearch = $event.target.value">
+                    <div v-if="friends.length === 0" class="text-muted text-center">
+                        No friends found. Add friends from your profile first.
+                    </div>
+                    <ul class="list-group">
+                        <li 
+                            v-for="friend in friends" 
+                            :key="friend.id" 
+                            class="list-group-item d-flex justify-content-between align-items-center"
+                            v-if="!inviteSearch || friend.name.toLowerCase().includes(inviteSearch.toLowerCase())">
+                            <span>{{ friend.name }}</span>
+                            <button 
+                                class="btn btn-sm btn-primary" 
+                                @click="inviteFriend(friend.id)"
+                                :disabled="huddle.participants && huddle.participants.includes(friend.id)">
+                                {{ huddle.participants && huddle.participants.includes(friend.id) ? 'Invited' : 'Invite' }}
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @click="closeInviteModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <app-footer></app-footer>
 
     <!-- Dependencies -->
@@ -111,6 +167,7 @@
     <script src="js/components/main/header.js"></script>
     <script src="js/components/main/footer.js"></script>
     <script src="js/components/huddle/huddleDetails.js"></script>
+    <script src="js/components/huddle/participantItem.js"></script>
     <script src="js/components/huddle/huddleParticipants.js"></script>
     <script src="js/components/huddle/huddleChat.js"></script>
     <script src="js/components/schedule/scheduleCalendar.js"></script>

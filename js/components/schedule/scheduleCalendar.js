@@ -58,6 +58,17 @@ const ScheduleCalendar = {
     },
     template: `
     <div>
+        <!-- Color legend for huddle overlay mode -->
+        <div v-if="overlayStatus" class="mb-3 p-2 bg-light rounded">
+            <small class="text-muted d-block mb-1"><strong>Schedule Legend</strong></small>
+            <div class="d-flex flex-wrap gap-2 small">
+                <span class="d-flex align-items-center"><span class="badge bg-success me-1">●</span> All Free</span>
+                <span class="d-flex align-items-center"><span class="badge bg-warning text-dark me-1">●</span> Mixed</span>
+                <span class="d-flex align-items-center"><span class="badge bg-danger me-1">●</span> Majority Busy</span>
+                <span class="d-flex align-items-center"><span class="badge bg-primary me-1">●</span> Planned Date</span>
+            </div>
+        </div>
+
         <div class="row justify-content-center align-items-center mb-3">
             <button class="btn btn-sm btn-outline-secondary col-auto px-2 rounded-pill" :class="{ invisible: isCurrentMonth }" @click="$emit('change-month', -1)"> &#8592; </button>
             <h6 v-if="!interactive" class="col-auto text-center mx-2 my-0">{{ monthInfo.monthName }} {{ monthInfo.year }}</h6>
@@ -95,16 +106,3 @@ const ScheduleCalendar = {
     </div>
     `
 };
-
-if (typeof window !== 'undefined') {
-    window.ScheduleCalendar = ScheduleCalendar;
-}
-
-if (typeof Vue !== 'undefined' && Vue.createApp) {
-    const originalCreateApp = Vue.createApp;
-    Vue.createApp = function(...args) {
-        const app = originalCreateApp.apply(this, args);
-        app.component('schedule-calendar', ScheduleCalendar);
-        return app;
-    };
-}

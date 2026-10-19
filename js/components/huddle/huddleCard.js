@@ -75,7 +75,8 @@ const HuddleCard = {
                             <button class="btn btn-warning btn-sm me-1" @click="$emit('edit', huddle)">Edit</button>
                             <button class="btn btn-danger btn-sm" @click="$emit('delete', huddle.id)">Delete</button>
                         </template>
-                        <button v-else-if="huddle.status === 'Completed'" class="btn btn-danger btn-sm" @click="$emit('leave', huddle)">Leave</button>
+                        <!-- Leave button for non-owners who are participants -->
+                        <button v-else-if="currentUser && huddle.participants && huddle.participants.includes(currentUser)" class="btn btn-outline-danger btn-sm" @click="$emit('leave', huddle)">Leave</button>
                     </div>
                 </div>
             </div>
@@ -83,16 +84,3 @@ const HuddleCard = {
     </div>
     `
 };
-
-if (typeof window !== 'undefined') {
-    window.HuddleCard = HuddleCard;
-}
-
-if (typeof Vue !== 'undefined' && Vue.createApp) {
-    const originalCreateApp = Vue.createApp;
-    Vue.createApp = function(...args) {
-        const app = originalCreateApp.apply(this, args);
-        app.component('huddle-card', HuddleCard);
-        return app;
-    };
-}

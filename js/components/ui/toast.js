@@ -96,11 +96,3 @@ if (typeof window !== 'undefined') {
     };
 }
 
-if (typeof Vue !== 'undefined' && Vue.createApp) {
-    const originalCreateApp = Vue.createApp;
-    Vue.createApp = function(...args) {
-        const app = originalCreateApp.apply(this, args);
-        app.component('toast-component', ToastComponent);
-        return app;
-    };
-}

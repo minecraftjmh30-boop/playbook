@@ -98,16 +98,3 @@ const ProfileSettings = {
     </div>
     `
 };
-
-if (typeof window !== 'undefined') {
-    window.ProfileSettings = ProfileSettings;
-}
-
-if (typeof Vue !== 'undefined' && Vue.createApp) {
-    const originalCreateApp = Vue.createApp;
-    Vue.createApp = function(...args) {
-        const app = originalCreateApp.apply(this, args);
-        app.component('profile-settings', ProfileSettings);
-        return app;
-    };
-}

@@ -17,16 +17,3 @@ const ProfileInfo = {
     </div>
     `
 };
-
-if (typeof window !== 'undefined') {
-    window.ProfileInfo = ProfileInfo;
-}
-
-if (typeof Vue !== 'undefined' && Vue.createApp) {
-    const originalCreateApp = Vue.createApp;
-    Vue.createApp = function(...args) {
-        const app = originalCreateApp.apply(this, args);
-        app.component('profile-info', ProfileInfo);
-        return app;
-    };
-}

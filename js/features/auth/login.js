@@ -51,4 +51,5 @@ createApp({
             window.toast.info('Signup feature coming soon!');
         }
     }
-}).mount('#app');
+}).component('app-footer', AppFooter)
+  .mount('#app');

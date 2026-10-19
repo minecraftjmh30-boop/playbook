@@ -9,7 +9,8 @@ createApp({
             showJoinModal: false,
             joinCode: '',
             currentUser: window.utils.getCookie('currentUser') || null,
-            showMyHuddlesOnly: false
+            showMyHuddlesOnly: false,
+            searchQuery: ''
         };
     },
     computed: {
@@ -19,10 +20,21 @@ createApp({
                 return [];
             }
             
-            return this.allHuddles.filter(h =>
+            let filtered = this.allHuddles.filter(h =>
                 h.owner === this.currentUser ||
                 (h.participants && h.participants.includes(this.currentUser))
             );
+            
+            // Filter by search query
+            if (this.searchQuery.trim()) {
+                const query = this.searchQuery.toLowerCase();
+                filtered = filtered.filter(h => 
+                    h.name.toLowerCase().includes(query) ||
+                    (h.description && h.description.toLowerCase().includes(query))
+                );
+            }
+            
+            return filtered;
         }
     },
     methods: {
@@ -68,13 +80,7 @@ createApp({
         editHuddle(huddle) {
             // Only the owner should be able to edit
             if (this.currentUser && huddle.owner === this.currentUser) {
-                const newName = prompt('Edit huddle name:', huddle.name);
-                if (newName !== null && newName.trim() !== '') {
-                    // Sanitize the new name
-                    huddle.name = window.utils.sanitizeInput(newName.trim());
-                    localStorage.setItem('huddles', JSON.stringify(this.allHuddles));
-                    window.toast.success('Huddle name updated successfully!');
-                }
+                window.location.href = `createHuddle.html?id=${huddle.id}`;
             } else {
                 window.toast.error('You must be the owner to edit this huddle.');
             }
@@ -114,6 +120,9 @@ createApp({
         toggleMyHuddles() {
             this.showMyHuddlesOnly = !this.showMyHuddlesOnly;
         },
+        updateSearch(event) {
+            this.searchQuery = event.target.value;
+        },
         createHuddle(name, description, location) {
             // Create a new huddle with owner as the only participant
             const newHuddle = {
@@ -136,4 +145,10 @@ createApp({
             window.location.href = `huddle.html?id=${newHuddle.id}`;
         }
     }
-}).mount('#app');
+}).component('app-header', AppHeader)
+  .component('app-footer', AppFooter)
+  .component('app-hero', AppHero)
+  .component('huddle-card', HuddleCard)
+  .component('choice-modal', ChoiceModal)
+  .component('join-huddle-modal', JoinHuddleModal)
+  .mount('#app');

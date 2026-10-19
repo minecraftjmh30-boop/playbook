@@ -15,16 +15,3 @@ const ScheduleTools = {
     </section>
     `
 };
-
-if (typeof window !== 'undefined') {
-    window.ScheduleTools = ScheduleTools;
-}
-
-if (typeof Vue !== 'undefined' && Vue.createApp) {
-    const originalCreateApp = Vue.createApp;
-    Vue.createApp = function(...args) {
-        const app = originalCreateApp.apply(this, args);
-        app.component('schedule-tools', ScheduleTools);
-        return app;
-    };
-}

@@ -17,8 +17,18 @@ const ProfileFriends = {
     emits: ['remove-friend', 'handle-request', 'add-friend'],
     data() {
         return {
-            newFriendCode: ''
+            newFriendCode: '',
+            friendSearch: ''
         };
+    },
+    computed: {
+        filteredFriends() {
+            if (!this.friendSearch.trim()) {
+                return this.friends;
+            }
+            const query = this.friendSearch.toLowerCase();
+            return this.friends.filter(f => f.name.toLowerCase().includes(query));
+        }
     },
     methods: {
         handleAdd() {
@@ -33,12 +43,23 @@ const ProfileFriends = {
         <!-- Friends List -->
         <div class="card mb-4">
             <div class="card-header">Your Friends</div>
+            <div class="card-body pb-0">
+                <input 
+                    type="text" 
+                    class="form-control form-control-sm mb-2" 
+                    placeholder="Search friends by name..." 
+                    :value="friendSearch"
+                    @input="friendSearch = $event.target.value">
+            </div>
             <ul class="list-group list-group-flush">
-                <li class="list-group-item d-flex justify-content-between align-items-center" v-for="friend in friends" :key="friend.id">
+                <li class="list-group-item d-flex justify-content-between align-items-center" v-for="friend in filteredFriends" :key="friend.id">
                     {{ friend.name }}
                     <button class="btn btn-sm btn-outline-danger" @click="$emit('remove-friend', friend.id)">Remove</button>
                 </li>
             </ul>
+            <div v-if="filteredFriends.length === 0 && friendSearch.trim()" class="card-body text-muted text-center">
+                No friends match your search.
+            </div>
         </div>
 
         <!-- Pending Requests -->
@@ -73,16 +94,3 @@ const ProfileFriends = {
     </div>
     `
 };
-
-if (typeof window !== 'undefined') {
-    window.ProfileFriends = ProfileFriends;
-}
-
-if (typeof Vue !== 'undefined' && Vue.createApp) {
-    const originalCreateApp = Vue.createApp;
-    Vue.createApp = function(...args) {
-        const app = originalCreateApp.apply(this, args);
-        app.component('profile-friends', ProfileFriends);
-        return app;
-    };
-}

@@ -47,16 +47,3 @@ const TimeRangeModal = {
     </div>
     `
 };
-
-if (typeof window !== 'undefined') {
-    window.TimeRangeModal = TimeRangeModal;
-}
-
-if (typeof Vue !== 'undefined' && Vue.createApp) {
-    const originalCreateApp = Vue.createApp;
-    Vue.createApp = function(...args) {
-        const app = originalCreateApp.apply(this, args);
-        app.component('time-range-modal', TimeRangeModal);
-        return app;
-    };
-}

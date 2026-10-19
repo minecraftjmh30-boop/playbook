@@ -170,4 +170,9 @@ createApp({
             }
         }
     }
-}).mount('#app');
+}).component('app-header', AppHeader)
+  .component('app-footer', AppFooter)
+  .component('profile-info', ProfileInfo)
+  .component('profile-friends', ProfileFriends)
+  .component('profile-settings', ProfileSettings)
+  .mount('#app');

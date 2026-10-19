@@ -92,16 +92,3 @@ const UnifiedModal = {
     </div>
     `
 };
-
-if (typeof window !== 'undefined') {
-    window.UnifiedModal = UnifiedModal;
-}
-
-if (typeof Vue !== 'undefined' && Vue.createApp) {
-    const originalCreateApp = Vue.createApp;
-    Vue.createApp = function(...args) {
-        const app = originalCreateApp.apply(this, args);
-        app.component('unified-modal', UnifiedModal);
-        return app;
-    };
-}

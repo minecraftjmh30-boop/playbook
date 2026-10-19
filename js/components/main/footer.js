@@ -11,16 +11,3 @@ const AppFooter = {
         };
     }
 };
-
-if (typeof window !== 'undefined') {
-    window.AppFooter = AppFooter;
-}
-
-if (typeof Vue !== 'undefined' && Vue.createApp) {
-    const originalCreateApp = Vue.createApp;
-    Vue.createApp = function(...args) {
-        const app = originalCreateApp.apply(this, args);
-        app.component('app-footer', AppFooter);
-        return app;
-    };
-}

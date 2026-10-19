@@ -68,7 +68,12 @@ createApp({
             // Huddle schedule overlay modal
             showOverlayModal: false,
             overlayDate: null,
-            overlayData: []
+            overlayData: [],
+
+            // Invite friends modal
+            showInviteModal: false,
+            friends: [],
+            inviteSearch: ''
         };
     },
     computed: {
@@ -235,6 +240,35 @@ createApp({
             
             this.currentMonthView = newDate;
         },
+        // Leave huddle (non-owners only)
+        leaveHuddle() {
+            if (this.currentUser && this.huddle.owner !== this.currentUser) {
+                if (confirm('Are you sure you want to leave this huddle?')) {
+                    // Remove self from participants
+                    if (this.huddle.participants) {
+                        this.huddle.participants = this.huddle.participants.filter(id => id !== this.currentUser);
+                    }
+                    // Update participants display list
+                    this.participants = this.huddle.participants.map(id => ({
+                        name: id,
+                        id: id
+                    }));
+                    // Add leave system message
+                    this.messages.push({
+                        user: 'System',
+                        text: `${this.currentUser} has left the huddle.`,
+                        time: new Date().toLocaleTimeString(),
+                        system: true
+                    });
+                    // Persist to localStorage
+                    this.saveHuddleData();
+                    window.toast.info('You have left the huddle.');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                }
+            }
+        },
         // Remove participant from huddle (owners only)
         removeParticipant(participantId) {
             if (this.currentUser && this.huddle.owner === this.currentUser) {
@@ -358,6 +392,52 @@ createApp({
         closeOverlayModal() {
             this.showOverlayModal = false;
         },
+        // Load friends for current user
+        loadFriends() {
+            try {
+                const userInfo = localStorage.getItem(`userInfo_${this.currentUser}`);
+                if (userInfo) {
+                    const data = JSON.parse(userInfo);
+                    this.friends = (data.friends || []).map(fId => ({ id: fId, name: fId }));
+                }
+            } catch (e) {
+                console.warn('Failed to load friends:', e);
+            }
+        },
+        // Open invite friends modal
+        openInviteModal() {
+            this.loadFriends();
+            this.showInviteModal = true;
+        },
+        closeInviteModal() {
+            this.showInviteModal = false;
+            this.inviteSearch = '';
+        },
+        // Invite a friend to the huddle
+        inviteFriend(friendId) {
+            if (!this.huddle.participants) {
+                this.huddle.participants = [this.huddle.owner];
+            }
+            if (this.huddle.participants.includes(friendId)) {
+                window.toast.info(`${friendId} is already a participant.`);
+                return;
+            }
+            this.huddle.participants.push(friendId);
+            // Update participants display list
+            this.participants = this.huddle.participants.map(id => ({
+                name: id,
+                id: id
+            }));
+            // Add invite system message
+            this.messages.push({
+                user: 'System',
+                text: `${this.currentUser} invited ${friendId} to the huddle.`,
+                time: new Date().toLocaleTimeString(),
+                system: true
+            });
+            this.saveHuddleData();
+            window.toast.success(`${friendId} has been invited to the huddle!`);
+        }
         // Handle day click on schedule calendar - only show overlay, don't select date
         handleDayClick(day) {
             if (!day || day.type !== 'actual') return;
@@ -381,4 +461,10 @@ createApp({
             }
         }
     }
-}).mount('#app');
+}).component('app-header', AppHeader)
+  .component('app-footer', AppFooter)
+  .component('schedule-calendar', ScheduleCalendar)
+  .component('huddle-participants', HuddleParticipants)
+  .component('huddle-details', HuddleDetails)
+  .component('huddle-chat', HuddleChat)
+  .mount('#app');

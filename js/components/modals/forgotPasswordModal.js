@@ -61,17 +61,4 @@ const ForgotPasswordModal = {
     `
 };
 
-if (typeof window !== 'undefined') {
-    window.ForgotPasswordModal = ForgotPasswordModal;
-}
-
-if (typeof Vue !== 'undefined' && Vue.createApp) {
-    const originalCreateApp = Vue.createApp;
-    Vue.createApp = function(...args) {
-        const app = originalCreateApp.apply(this, args);
-        app.component('forgot-password-modal', ForgotPasswordModal);
-        return app;
-    };
-}
-
 // Note: This modal has been replaced by unifiedModal.js. Keeping for backward compatibility.

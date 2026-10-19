@@ -102,16 +102,3 @@ const HuddleDetails = {
         }
     }
 };
-
-if (typeof window !== 'undefined') {
-    window.HuddleDetails = HuddleDetails;
-}
-
-if (typeof Vue !== 'undefined' && Vue.createApp) {
-    const originalCreateApp = Vue.createApp;
-    Vue.createApp = function(...args) {
-        const app = originalCreateApp.apply(this, args);
-        app.component('huddle-details', HuddleDetails);
-        return app;
-    };
-}
