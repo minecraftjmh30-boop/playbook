@@ -60,12 +60,12 @@ const ScheduleCalendar = {
     <div>
         <!-- Color legend for huddle overlay mode -->
         <div v-if="overlayStatus" class="mb-3 p-2 bg-light rounded">
-            <small class="text-muted d-block mb-1"><strong>Schedule Legend</strong></small>
-            <div class="d-flex flex-wrap gap-2 small">
-                <span class="d-flex align-items-center"><span class="badge legend-badge-green me-1">●</span> All Free</span>
-                <span class="d-flex align-items-center"><span class="badge legend-badge-yellow me-1">●</span> Mixed</span>
-                <span class="d-flex align-items-center"><span class="badge legend-badge-red me-1">●</span> Majority Busy</span>
-                <span class="d-flex align-items-center"><span class="badge legend-badge-blue me-1">●</span> Planned Date</span>
+            <small class="text-dark d-block mb-1"><strong>Schedule Legend</strong></small>
+            <div class="d-flex flex-wrap gap-2 small text-dark">
+                <span class="d-flex align-items-center"><span class="badge bg-success me-1">●</span> All Free</span>
+                <span class="d-flex align-items-center"><span class="badge bg-warning text-dark me-1">●</span> Mixed</span>
+                <span class="d-flex align-items-center"><span class="badge bg-danger me-1">●</span> Majority Busy</span>
+                <span class="d-flex align-items-center"><span class="badge bg-primary me-1">●</span> Planned Date</span>
             </div>
         </div>
 
