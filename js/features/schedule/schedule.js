@@ -1,10 +1,10 @@
-import { getCookie } from '../core/utils.js';
-import { AppHeader } from '../components/main/header.js';
-import { AppFooter } from '../components/main/footer.js';
-import { ScheduleTools } from '../components/schedule/scheduleTools.js';
-import { ScheduleCalendar } from '../components/schedule/scheduleCalendar.js';
-import { TimeRangeModal } from '../components/modals/timeRangeModal.js';
-import { ToastComponent } from '../components/ui/toast.js';
+import { getCookie } from '../../core/utils.js';
+import { AppHeader } from '../../components/main/header.js';
+import { AppFooter } from '../../components/main/footer.js';
+import { ScheduleTools } from '../../components/schedule/scheduleTools.js';
+import { ScheduleCalendar } from '../../components/schedule/scheduleCalendar.js';
+import { TimeRangeModal } from '../../components/modals/timeRangeModal.js';
+import { ToastComponent } from '../../components/ui/toast.js';
 
 const { createApp } = Vue;
 

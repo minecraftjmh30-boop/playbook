@@ -1,10 +1,10 @@
-import { getCookie, sanitizeInput } from '../core/utils.js';
-import { AppHeader } from '../components/main/header.js';
-import { AppFooter } from '../components/main/footer.js';
-import { ProfileInfo } from '../components/profile/profileInfo.js';
-import { ProfileFriends } from '../components/profile/profileFriends.js';
-import { ProfileSettings } from '../components/profile/profileSettings.js';
-import { ToastComponent } from '../components/ui/toast.js';
+import { getCookie, sanitizeInput } from '../../core/utils.js';
+import { AppHeader } from '../../components/main/header.js';
+import { AppFooter } from '../../components/main/footer.js';
+import { ProfileInfo } from '../../components/profile/profileInfo.js';
+import { ProfileFriends } from '../../components/profile/profileFriends.js';
+import { ProfileSettings } from '../../components/profile/profileSettings.js';
+import { ToastComponent } from '../../components/ui/toast.js';
 
 const { createApp } = Vue;
 

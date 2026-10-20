@@ -1,6 +1,6 @@
-import { sanitizeInput, setCookie } from '../core/utils.js';
-import { AppFooter } from '../components/main/footer.js';
-import { ToastComponent } from '../components/ui/toast.js';
+import { sanitizeInput, setCookie } from '../../core/utils.js';
+import { AppFooter } from '../../components/main/footer.js';
+import { ToastComponent } from '../../components/ui/toast.js';
 
 const { createApp } = Vue;
 

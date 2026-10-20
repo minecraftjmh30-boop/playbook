@@ -1,4 +1,4 @@
-import { getCookie, buildParticipantsDisplay, getDateKey, isSameDay, formatDate, createSystemMessage } from '../core/utils.js';
+import { getCookie, buildParticipantsDisplay, getDateKey, isSameDay, formatDate, createSystemMessage } from '../../core/utils.js';
 import { AppHeader } from '../../components/main/header.js';
 import { AppFooter } from '../../components/main/footer.js';
 import { ScheduleCalendar } from '../../components/schedule/scheduleCalendar.js';
