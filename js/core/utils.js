@@ -33,6 +33,67 @@ function sanitizeInput(input) {
 }
 
 /**
+ * Set a cookie with a given name and value
+ * @param {string} name - Cookie name
+ * @param {string} value - Cookie value
+ * @param {number} days - Number of days until expiration (default: 30)
+ */
+function setCookie(name, value, days = 30) {
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
+}
+
+/**
+ * Format a Date object to a date key string "YYYY-M-D"
+ * @param {Date} date - Date object
+ * @returns {string} Date key string
+ */
+function getDateKey(date) {
+    const y = date.getFullYear();
+    const m = date.getMonth() + 1;
+    const d = date.getDate();
+    return `${y}-${m}-${d}`;
+}
+
+/**
+ * Check if two Date objects represent the same calendar day
+ * @param {Date} d1 - First date
+ * @param {Date} d2 - Second date
+ * @returns {boolean} True if same day
+ */
+function isSameDay(d1, d2) {
+    return d1.getFullYear() === d2.getFullYear() &&
+           d1.getMonth() === d2.getMonth() &&
+           d1.getDate() === d2.getDate();
+}
+
+/**
+ * Create a system message object for chat
+ * @param {string} text - Message text
+ * @returns {object} System message object
+ */
+function createSystemMessage(text) {
+    return {
+        user: 'System',
+        text: text,
+        time: new Date().toLocaleTimeString(),
+        system: true
+    };
+}
+
+/**
+ * Rebuild participants display array from participant IDs
+ * @param {Array<string>} participantIds - Array of participant IDs
+ * @returns {Array<object>} Array of {name, id} objects
+ */
+function buildParticipantsDisplay(participantIds) {
+    return (participantIds || []).map(id => ({
+        name: id,
+        id: id
+    }));
+}
+
+/**
  * Get cookie value by name
  * @param {string} name - Cookie name
  * @returns {string|null} Cookie value or null if not found
@@ -52,6 +113,11 @@ if (typeof window !== 'undefined') {
     window.utils = {
         formatDate,
         sanitizeInput,
-        getCookie
+        setCookie,
+        getCookie,
+        getDateKey,
+        isSameDay,
+        createSystemMessage,
+        buildParticipantsDisplay
     };
 }

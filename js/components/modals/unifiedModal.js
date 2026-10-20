@@ -20,15 +20,14 @@ const UnifiedModal = {
     },
     emits: ['close', 'submit', 'update:show'],
     data() {
-        const values = {};
-        this.fields.forEach(f => { values[f.id] = ''; });
         return {
-            values
+            values: {}
         };
     },
     watch: {
         show(newVal) {
             if (newVal) {
+                // Initialize field values when modal opens
                 this.fields.forEach(f => { this.values[f.id] = f.default || ''; });
             }
         }

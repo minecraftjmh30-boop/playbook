@@ -45,6 +45,10 @@ createApp({
             // Sanitize email
             const sanitizedEmail = window.utils.sanitizeInput(this.email.trim());
             console.log('Logging in with:', sanitizedEmail);
+            
+            // Set the currentUser cookie so other pages can read the logged-in user
+            window.utils.setCookie('currentUser', sanitizedEmail);
+            
             window.toast.success(`Logged in as ${sanitizedEmail}`);
         },
         handleSignup() {
