@@ -15,3 +15,5 @@ const ScheduleTools = {
     </section>
     `
 };
+
+export { ScheduleTools };

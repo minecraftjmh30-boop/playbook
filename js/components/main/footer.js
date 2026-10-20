@@ -11,3 +11,4 @@ const AppFooter = {
         };
     }
 };
+export { AppFooter };

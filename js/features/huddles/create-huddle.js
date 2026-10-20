@@ -1,3 +1,8 @@
+import { getCookie, sanitizeInput } from '../core/utils.js';
+import { AppHeader } from '../components/main/header.js';
+import { AppFooter } from '../components/main/footer.js';
+import { ToastComponent } from '../components/ui/toast.js';
+
 const { createApp } = Vue;
 
 createApp({
@@ -66,13 +71,13 @@ createApp({
                 return;
             }
             
-            const currentUser = window.utils.getCookie('currentUser') || 'Anonymous';
+            const currentUser = getCookie('currentUser') || 'Anonymous';
             const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
             
             // Sanitize inputs
-            const sanitizedName = window.utils.sanitizeInput(this.huddle.name.trim());
-            const sanitizedDescription = window.utils.sanitizeInput(this.huddle.description.trim());
-            const sanitizedLocation = window.utils.sanitizeInput(this.huddle.location.trim());
+            const sanitizedName = sanitizeInput(this.huddle.name.trim());
+            const sanitizedDescription = sanitizeInput(this.huddle.description.trim());
+            const sanitizedLocation = sanitizeInput(this.huddle.location.trim());
             
             if (this.isEditMode) {
                 // Update existing huddle

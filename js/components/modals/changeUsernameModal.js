@@ -52,3 +52,5 @@ const ChangeUsernameModal = {
 };
 
 // Note: This modal has been replaced by unifiedModal.js. Keeping for backward compatibility.
+
+export { ChangeUsernameModal };

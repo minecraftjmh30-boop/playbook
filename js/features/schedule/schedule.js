@@ -1,3 +1,11 @@
+import { getCookie } from '../core/utils.js';
+import { AppHeader } from '../components/main/header.js';
+import { AppFooter } from '../components/main/footer.js';
+import { ScheduleTools } from '../components/schedule/scheduleTools.js';
+import { ScheduleCalendar } from '../components/schedule/scheduleCalendar.js';
+import { TimeRangeModal } from '../components/modals/timeRangeModal.js';
+import { ToastComponent } from '../components/ui/toast.js';
+
 const { createApp } = Vue;
 
 createApp({
@@ -87,7 +95,7 @@ createApp({
                    d1.getDate() === d2.getDate();
         },
         async loadSchedule() {
-            const userId = window.utils.getCookie('currentUser') || 'User1';
+            const userId = getCookie('currentUser') || 'User1';
             const storageKey = `schedule_${userId}`;
             
             try {
@@ -124,7 +132,7 @@ createApp({
             }
         },
         async saveSchedule() {
-            const userId = window.utils.getCookie('currentUser') || 'User1';
+            const userId = getCookie('currentUser') || 'User1';
             const storageKey = `schedule_${userId}`;
             
             try {

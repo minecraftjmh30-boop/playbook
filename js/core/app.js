@@ -1,3 +1,12 @@
+import { getCookie, sanitizeInput } from './utils.js';
+import { AppHeader } from '../components/main/header.js';
+import { AppFooter } from '../components/main/footer.js';
+import { AppHero } from '../components/main/hero.js';
+import { HuddleCard } from '../components/huddle/huddleCard.js';
+import { ChoiceModal } from '../components/modals/choiceModal.js';
+import { JoinHuddleModal } from '../components/modals/joinHuddleModal.js';
+import { ToastComponent } from '../components/ui/toast.js';
+
 const { createApp } = Vue;
 
 createApp({
@@ -8,7 +17,7 @@ createApp({
             showChoiceModal: false,
             showJoinModal: false,
             joinCode: '',
-            currentUser: window.utils.getCookie('currentUser') || null,
+            currentUser: getCookie('currentUser') || null,
             showMyHuddlesOnly: false,
             searchQuery: ''
         };
@@ -43,7 +52,7 @@ createApp({
         },
         joinHuddle() {
             // Sanitize and trim the join code
-            const code = window.utils.sanitizeInput(this.joinCode.trim());
+            const code = sanitizeInput(this.joinCode.trim());
             if (!code) {
                 window.toast.error('Please enter a huddle code.');
                 return;

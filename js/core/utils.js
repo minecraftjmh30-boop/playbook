@@ -49,22 +49,22 @@ function setCookie(name, value, days = 30) {
  * @returns {string} Date key string
  */
 function getDateKey(date) {
-    const y = date.getFullYear();
-    const m = date.getMonth() + 1;
-    const d = date.getDate();
-    return `${y}-${m}-${d}`;
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}-${month}-${day}`;
 }
 
 /**
  * Check if two Date objects represent the same calendar day
- * @param {Date} d1 - First date
- * @param {Date} d2 - Second date
+ * @param {Date} dateOne - First date
+ * @param {Date} dateTwo - Second date
  * @returns {boolean} True if same day
  */
-function isSameDay(d1, d2) {
-    return d1.getFullYear() === d2.getFullYear() &&
-           d1.getMonth() === d2.getMonth() &&
-           d1.getDate() === d2.getDate();
+function isSameDay(dateOne, dateTwo) {
+    return dateOne.getFullYear() === dateTwo.getFullYear() &&
+           dateOne.getMonth() === dateTwo.getMonth() &&
+           dateOne.getDate() === dateTwo.getDate();
 }
 
 /**
@@ -108,16 +108,13 @@ function getCookie(name) {
     return null;
 }
 
-// Make utilities available globally
-if (typeof window !== 'undefined') {
-    window.utils = {
-        formatDate,
-        sanitizeInput,
-        setCookie,
-        getCookie,
-        getDateKey,
-        isSameDay,
-        createSystemMessage,
-        buildParticipantsDisplay
-    };
-}
+export {
+    formatDate,
+    sanitizeInput,
+    setCookie,
+    getCookie,
+    getDateKey,
+    isSameDay,
+    createSystemMessage,
+    buildParticipantsDisplay
+};

@@ -54,6 +54,8 @@ const ToastComponent = {
     `
 };
 
+export { ToastComponent };
+
 // Global toast instance
 let toastInstance = null;
 

@@ -1,3 +1,7 @@
+import { sanitizeInput, setCookie } from '../core/utils.js';
+import { AppFooter } from '../components/main/footer.js';
+import { ToastComponent } from '../components/ui/toast.js';
+
 const { createApp } = Vue;
 
 createApp({
@@ -43,11 +47,11 @@ createApp({
             }
             
             // Sanitize email
-            const sanitizedEmail = window.utils.sanitizeInput(this.email.trim());
+            const sanitizedEmail = sanitizeInput(this.email.trim());
             console.log('Logging in with:', sanitizedEmail);
             
             // Set the currentUser cookie so other pages can read the logged-in user
-            window.utils.setCookie('currentUser', sanitizedEmail);
+            setCookie('currentUser', sanitizedEmail);
             
             window.toast.success(`Logged in as ${sanitizedEmail}`);
         },

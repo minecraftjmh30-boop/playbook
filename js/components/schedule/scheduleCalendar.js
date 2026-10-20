@@ -110,3 +110,5 @@ const ScheduleCalendar = {
     </div>
     `
 };
+
+export { ScheduleCalendar };

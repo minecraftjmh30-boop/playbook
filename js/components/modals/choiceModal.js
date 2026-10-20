@@ -27,3 +27,5 @@ const ChoiceModal = {
     </div>
     `
 };
+
+export { ChoiceModal };

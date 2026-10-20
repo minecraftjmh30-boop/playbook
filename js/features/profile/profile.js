@@ -1,3 +1,11 @@
+import { getCookie, sanitizeInput } from '../core/utils.js';
+import { AppHeader } from '../components/main/header.js';
+import { AppFooter } from '../components/main/footer.js';
+import { ProfileInfo } from '../components/profile/profileInfo.js';
+import { ProfileFriends } from '../components/profile/profileFriends.js';
+import { ProfileSettings } from '../components/profile/profileSettings.js';
+import { ToastComponent } from '../components/ui/toast.js';
+
 const { createApp } = Vue;
 
 createApp({
@@ -50,7 +58,7 @@ createApp({
     },
     methods: {
         async loadUserData() {
-            const userId = window.utils.getCookie('currentUser') || 'User1';
+            const userId = getCookie('currentUser') || 'User1';
             try {
                 const response = await fetch(`/debug/debugLogins/${userId}/userInfo.json`);
                 if (!response.ok) {
@@ -76,7 +84,7 @@ createApp({
             }
         },
         async loadHuddleData() {
-            const userId = window.utils.getCookie('currentUser') || 'User1';
+            const userId = getCookie('currentUser') || 'User1';
             const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
             const invitations = JSON.parse(localStorage.getItem(`invitations_${userId}`)) || [];
 
@@ -96,7 +104,7 @@ createApp({
                 if (!huddle.participants) {
                     huddle.participants = [huddle.owner];
                 }
-                const userId = window.utils.getCookie('currentUser') || 'User1';
+                const userId = getCookie('currentUser') || 'User1';
                 if (!huddle.participants.includes(userId)) {
                     huddle.participants.push(userId);
                 }
@@ -114,13 +122,13 @@ createApp({
             window.toast.info('Invitation declined.');
         },
         removeInvitation(invitation) {
-            const userId = window.utils.getCookie('currentUser') || 'User1';
+            const userId = getCookie('currentUser') || 'User1';
             let invitations = JSON.parse(localStorage.getItem(`invitations_${userId}`)) || [];
             invitations = invitations.filter(inv => inv.id !== invitation.id);
             localStorage.setItem(`invitations_${userId}`, JSON.stringify(invitations));
         },
         joinHuddleFromProfile() {
-            const code = window.utils.sanitizeInput(this.joinHuddleCode.trim());
+            const code = sanitizeInput(this.joinHuddleCode.trim());
             if (!code) {
                 window.toast.error('Please enter a huddle code.');
                 return;
@@ -129,7 +137,7 @@ createApp({
             const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
             const huddle = huddles.find(h => h.code === code);
             if (huddle) {
-                const userId = window.utils.getCookie('currentUser') || 'User1';
+                const userId = getCookie('currentUser') || 'User1';
                 if (!huddle.participants) {
                     huddle.participants = [huddle.owner];
                 }
@@ -165,7 +173,7 @@ createApp({
         },
         addFriend(code) {
             if (code && code.trim()) {
-                const sanitizedCode = window.utils.sanitizeInput(code.trim());
+                const sanitizedCode = sanitizeInput(code.trim());
                 window.toast.success(`Friend request sent to: ${sanitizedCode}`);
             }
         }

@@ -1,3 +1,12 @@
+import { getCookie, buildParticipantsDisplay, getDateKey, isSameDay, formatDate, createSystemMessage } from '../core/utils.js';
+import { AppHeader } from '../../components/main/header.js';
+import { AppFooter } from '../../components/main/footer.js';
+import { ScheduleCalendar } from '../../components/schedule/scheduleCalendar.js';
+import { HuddleParticipants } from '../../components/huddle/huddleParticipants.js';
+import { HuddleDetails } from '../../components/huddle/huddleDetails.js';
+import { HuddleChat } from '../../components/huddle/huddleChat.js';
+import { ToastComponent } from '../../components/ui/toast.js';
+
 const { createApp } = Vue;
 
 createApp({
@@ -20,7 +29,7 @@ createApp({
             selectedDates: []
         };
 
-        const currentUser = window.utils.getCookie('currentUser');
+        const currentUser = getCookie('currentUser');
 
         // Check if user is authorized to access this huddle
         const participantIds = huddleData.participants || [huddleData.owner];
@@ -37,7 +46,7 @@ createApp({
         }
 
         // Build participants list from huddle data
-        const participants = window.utils.buildParticipantsDisplay(huddleData.participants || [huddleData.owner]);
+        const participants = buildParticipantsDisplay(huddleData.participants || [huddleData.owner]);
 
         // Load messages from huddle data, default to empty array
         const messages = huddleData.messages || [];
@@ -113,8 +122,8 @@ createApp({
             // Add actual days of the current month
             for (let d = 1; d <= lastDay; d++) {
                 const dateObj = new Date(year, monthIndex, d);
-                const dateKey = window.utils.getDateKey(dateObj);
-                const isToday = window.utils.isSameDay(dateObj, this.today);
+                const dateKey = getDateKey(dateObj);
+                const isToday = isSameDay(dateObj, this.today);
                 const isPast = dateObj.getTime() < todayStart;
                 
                 // Check if the date is within the huddle's time frame if provided
@@ -185,7 +194,7 @@ createApp({
 
         // Schedule methods
         formatDate(dateStr) {
-            return window.utils.formatDate(dateStr);
+            return formatDate(dateStr);
         },
         changeMonth(offset) {
             const newDate = new Date(this.currentMonthView.getFullYear(), this.currentMonthView.getMonth() + offset, 1);
@@ -234,9 +243,9 @@ createApp({
                         this.huddle.participants = this.huddle.participants.filter(id => id !== this.currentUser);
                     }
                     // Update participants display list
-                    this.participants = window.utils.buildParticipantsDisplay(this.huddle.participants);
+                    this.participants = buildParticipantsDisplay(this.huddle.participants);
                     // Add leave system message
-                    this.messages.push(window.utils.createSystemMessage(`${this.currentUser} has left the huddle.`));
+                    this.messages.push(createSystemMessage(`${this.currentUser} has left the huddle.`));
                     // Persist to localStorage
                     this.saveHuddleData();
                     window.toast.info('You have left the huddle.');
@@ -257,10 +266,10 @@ createApp({
                     this.huddle.participants = this.huddle.participants.filter(id => id !== participantId);
                     
                     // Update participants display list
-                    this.participants = window.utils.buildParticipantsDisplay(this.huddle.participants);
+                    this.participants = buildParticipantsDisplay(this.huddle.participants);
                     
                     // Add kick system message to chat
-                    this.messages.push(window.utils.createSystemMessage(`${participantId} was removed from the huddle by ${this.currentUser}.`));
+                    this.messages.push(createSystemMessage(`${participantId} was removed from the huddle by ${this.currentUser}.`));
                     
                     // Persist to localStorage
                     this.saveHuddleData();
@@ -280,11 +289,11 @@ createApp({
             if (index !== -1) {
                 this.huddle.selectedDates.splice(index, 1);
                 // Add date removed system message
-                this.messages.push(window.utils.createSystemMessage(`${this.currentUser} removed ${this.formatDate(dateKey)} from the planned dates.`));
+                this.messages.push(createSystemMessage(`${this.currentUser} removed ${this.formatDate(dateKey)} from the planned dates.`));
             } else {
                 this.huddle.selectedDates.push(dateKey);
                 // Add date picked system message
-                this.messages.push(window.utils.createSystemMessage(`${this.currentUser} selected ${this.formatDate(dateKey)} as a planned date.`));
+                this.messages.push(createSystemMessage(`${this.currentUser} selected ${this.formatDate(dateKey)} as a planned date.`));
             }
             
             this.saveHuddleData();
@@ -383,9 +392,9 @@ createApp({
             }
             this.huddle.participants.push(friendId);
             // Update participant display list
-            this.participants = window.utils.buildParticipantsDisplay(this.huddle.participants);
+            this.participants = buildParticipantsDisplay(this.huddle.participants);
             // Add invite system message
-            this.messages.push(window.utils.createSystemMessage(`${this.currentUser} invited ${friendId} to the huddle.`));
+            this.messages.push(createSystemMessage(`${this.currentUser} invited ${friendId} to the huddle.`));
             this.saveHuddleData();
             window.toast.success(`${friendId} has been invited to the huddle!`);
         },

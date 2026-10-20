@@ -94,3 +94,5 @@ const ProfileFriends = {
     </div>
     `
 };
+
+export { ProfileFriends };

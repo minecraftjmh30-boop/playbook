@@ -34,3 +34,5 @@ const JoinHuddleModal = {
     </div>
     `
 };
+
+export { JoinHuddleModal };

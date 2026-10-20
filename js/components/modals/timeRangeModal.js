@@ -47,3 +47,5 @@ const TimeRangeModal = {
     </div>
     `
 };
+
+export { TimeRangeModal };

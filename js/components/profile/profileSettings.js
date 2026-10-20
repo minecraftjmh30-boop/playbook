@@ -98,3 +98,5 @@ const ProfileSettings = {
     </div>
     `
 };
+
+export { ProfileSettings };

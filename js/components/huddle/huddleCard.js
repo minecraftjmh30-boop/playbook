@@ -84,3 +84,5 @@ const HuddleCard = {
     </div>
     `
 };
+
+export { HuddleCard };

@@ -28,3 +28,5 @@ const ParticipantItem = {
     </li>
     `
 };
+
+export { ParticipantItem };

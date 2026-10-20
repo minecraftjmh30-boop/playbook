@@ -91,3 +91,5 @@ const UnifiedModal = {
     </div>
     `
 };
+
+export { UnifiedModal };

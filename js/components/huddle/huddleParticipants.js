@@ -1,3 +1,5 @@
+import { ParticipantItem } from './participantItem.js';
+
 const HuddleParticipants = {
     name: 'HuddleParticipants',
     components: {
@@ -37,3 +39,5 @@ const HuddleParticipants = {
     </div>
     `
 };
+
+export { HuddleParticipants };

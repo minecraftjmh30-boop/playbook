@@ -62,3 +62,5 @@ const ForgotPasswordModal = {
 };
 
 // Note: This modal has been replaced by unifiedModal.js. Keeping for backward compatibility.
+
+export { ForgotPasswordModal };

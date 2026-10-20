@@ -1,3 +1,5 @@
+import { formatDate, sanitizeInput } from '../../core/utils.js';
+
 const HuddleDetails = {
     name: 'HuddleDetails',
     props: {
@@ -72,7 +74,7 @@ const HuddleDetails = {
     methods: {
         formatDate(dateStr) {
             // Use shared utility
-            return window.utils.formatDate(dateStr);
+            return formatDate(dateStr);
         },
         startEdit() {
             if (this.currentUser && this.huddle.owner === this.currentUser) {
@@ -90,9 +92,9 @@ const HuddleDetails = {
                 return;
             }
             // Sanitize inputs
-            this.huddle.name = window.utils.sanitizeInput(this.editName.trim());
-            this.huddle.description = window.utils.sanitizeInput(this.editDescription.trim());
-            this.huddle.location = window.utils.sanitizeInput(this.editLocation.trim()) || 'Virtual';
+            this.huddle.name = sanitizeInput(this.editName.trim());
+            this.huddle.description = sanitizeInput(this.editDescription.trim());
+            this.huddle.location = sanitizeInput(this.editLocation.trim()) || 'Virtual';
             this.editing = false;
             this.$emit('save');
             window.toast.success('Huddle details updated successfully!');
@@ -102,3 +104,5 @@ const HuddleDetails = {
         }
     }
 };
+
+export { HuddleDetails };

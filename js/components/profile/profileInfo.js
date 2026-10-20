@@ -17,3 +17,5 @@ const ProfileInfo = {
     </div>
     `
 };
+
+export { ProfileInfo };

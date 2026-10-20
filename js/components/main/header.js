@@ -79,3 +79,4 @@ const AppHeader = {
         }
     }
 };
+export { AppHeader };

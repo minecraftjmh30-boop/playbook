@@ -31,3 +31,5 @@ const AppHero = {
         return { day, month, year, weekday, week, season };
     }
 };
+
+export { AppHero };

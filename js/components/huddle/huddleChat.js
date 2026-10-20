@@ -85,3 +85,5 @@ const HuddleChat = {
     </div>
     `
 };
+
+export { HuddleChat };
