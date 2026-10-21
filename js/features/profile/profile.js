@@ -4,7 +4,6 @@ import { AppFooter } from '../../components/main/footer.js';
 import { ProfileInfo } from '../../components/profile/profileInfo.js';
 import { ProfileFriends } from '../../components/profile/profileFriends.js';
 import { ProfileSettings } from '../../components/profile/profileSettings.js';
-import { ToastComponent } from '../../components/ui/toast.js';
 
 const { createApp } = Vue;
 
@@ -112,13 +111,13 @@ createApp({
 
                 // Remove invitation
                 this.removeInvitation(invitation);
-                this.loadHuddleData();
+                await this.loadHuddleData();
                 window.toast.success(`You accepted the invitation to "${huddle.name}".`);
             }
         },
-        declineInvitation(invitation) {
+        async declineInvitation(invitation) {
             this.removeInvitation(invitation);
-            this.loadHuddleData();
+            await this.loadHuddleData();
             window.toast.info('Invitation declined.');
         },
         removeInvitation(invitation) {
@@ -127,7 +126,7 @@ createApp({
             invitations = invitations.filter(inv => inv.id !== invitation.id);
             localStorage.setItem(`invitations_${userId}`, JSON.stringify(invitations));
         },
-        joinHuddleFromProfile() {
+        async joinHuddleFromProfile() {
             const code = sanitizeInput(this.joinHuddleCode.trim());
             if (!code) {
                 window.toast.error('Please enter a huddle code.');
@@ -146,7 +145,7 @@ createApp({
                 }
                 localStorage.setItem('huddles', JSON.stringify(huddles));
                 this.joinHuddleCode = '';
-                this.loadHuddleData();
+                await this.loadHuddleData();
                 window.toast.success(`Joined "${huddle.name}"!`);
             } else {
                 window.toast.error('Invalid huddle code!');

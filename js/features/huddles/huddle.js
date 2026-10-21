@@ -5,7 +5,6 @@ import { ScheduleCalendar } from '../../components/schedule/scheduleCalendar.js'
 import { HuddleParticipants } from '../../components/huddle/huddleParticipants.js';
 import { HuddleDetails } from '../../components/huddle/huddleDetails.js';
 import { HuddleChat } from '../../components/huddle/huddleChat.js';
-import { ToastComponent } from '../../components/ui/toast.js';
 
 const { createApp } = Vue;
 
@@ -15,7 +14,7 @@ createApp({
         const idParam = urlParams ? (urlParams.get('id') || urlParams.get('code')) : null;
         
         const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
-        const huddleData = huddles.find(h => h.id == idParam || h.code == idParam) || {
+        const huddleData = huddles.find(h => h.id === idParam || h.code === idParam) || {
             name: 'Huddle Not Found',
             description: 'The requested huddle could not be found.',
             location: 'Unknown',

@@ -4,7 +4,6 @@ import { AppFooter } from '../../components/main/footer.js';
 import { ScheduleTools } from '../../components/schedule/scheduleTools.js';
 import { ScheduleCalendar } from '../../components/schedule/scheduleCalendar.js';
 import { TimeRangeModal } from '../../components/modals/timeRangeModal.js';
-import { ToastComponent } from '../../components/ui/toast.js';
 
 const { createApp } = Vue;
 

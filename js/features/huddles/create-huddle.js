@@ -1,7 +1,6 @@
 import { getCookie, sanitizeInput } from '../../core/utils.js';
 import { AppHeader } from '../../components/main/header.js';
 import { AppFooter } from '../../components/main/footer.js';
-import { ToastComponent } from '../../components/ui/toast.js';
 
 const { createApp } = Vue;
 
@@ -11,7 +10,7 @@ createApp({
         const editId = urlParams ? urlParams.get('id') : null;
         
         const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
-        const existingHuddle = editId ? huddles.find(h => h.id == editId) : null;
+        const existingHuddle = editId ? huddles.find(h => h.id === editId) : null;
         
         return {
             editId: editId,
@@ -81,7 +80,7 @@ createApp({
             
             if (this.isEditMode) {
                 // Update existing huddle
-                const index = huddles.findIndex(h => h.id == this.editId);
+                const index = huddles.findIndex(h => h.id === this.editId);
                 if (index !== -1 && huddles[index].owner === currentUser) {
                     huddles[index].name = sanitizedName;
                     huddles[index].description = sanitizedDescription;

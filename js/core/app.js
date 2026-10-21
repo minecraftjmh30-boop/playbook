@@ -5,7 +5,6 @@ import { AppHero } from '../components/main/hero.js';
 import { HuddleCard } from '../components/huddle/huddleCard.js';
 import { ChoiceModal } from '../components/modals/choiceModal.js';
 import { JoinHuddleModal } from '../components/modals/joinHuddleModal.js';
-import { ToastComponent } from '../components/ui/toast.js';
 
 const { createApp } = Vue;
 
