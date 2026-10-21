@@ -1,3 +1,5 @@
+import { toast } from '../ui/toast.js';
+
 const ChangeUsernameModal = {
     name: 'ChangeUsernameModal',
     data() {
@@ -9,11 +11,11 @@ const ChangeUsernameModal = {
     methods: {
         handleUpdate() {
             if (!this.newUsername || !this.currentPassword) {
-                window.toast.error("Please fill in all fields.");
+                toast.error("Please fill in all fields.");
                 return;
             }
             console.log("Attempting to change username to:", this.newUsername);
-            window.toast.success("Username change requested (simulated).");
+            toast.success("Username change requested (simulated).");
             const modalEl = document.getElementById('changeUsernameModal');
             if (modalEl && typeof bootstrap !== 'undefined') {
                 const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);

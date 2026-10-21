@@ -1,4 +1,5 @@
 import { formatDate, sanitizeInput } from '../../core/utils.js';
+import { toast } from '../ui/toast.js';
 
 const HuddleDetails = {
     name: 'HuddleDetails',
@@ -83,12 +84,12 @@ const HuddleDetails = {
                 this.editLocation = this.huddle.location;
                 this.editing = true;
             } else {
-                window.toast.error('You must be the owner to edit this huddle.');
+                toast.error('You must be the owner to edit this huddle.');
             }
         },
         saveEdit() {
             if (!this.editName.trim()) {
-                window.toast.error('Name cannot be empty.');
+                toast.error('Name cannot be empty.');
                 return;
             }
             // Sanitize inputs
@@ -97,7 +98,7 @@ const HuddleDetails = {
             this.huddle.location = sanitizeInput(this.editLocation.trim()) || 'Virtual';
             this.editing = false;
             this.$emit('save');
-            window.toast.success('Huddle details updated successfully!');
+            toast.success('Huddle details updated successfully!');
         },
         cancelEdit() {
             this.editing = false;

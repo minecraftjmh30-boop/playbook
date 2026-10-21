@@ -99,11 +99,14 @@ function buildParticipantsDisplay(participantIds) {
  * @returns {string|null} Cookie value or null if not found
  */
 function getCookie(name) {
-    const nameEQ = name + "=";
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-        let c = ca[i].trim();
-        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    const cookies = document.cookie.split(';');
+    const cookieName = `${name}=`;
+
+    for (const cookie of cookies) {
+        const trimmedCookie = cookie.trim();
+        if (trimmedCookie.startsWith(cookieName)) {
+            return decodeURIComponent(trimmedCookie.slice(cookieName.length));
+        }
     }
     return null;
 }

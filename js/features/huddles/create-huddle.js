@@ -1,4 +1,5 @@
 import { getCookie, sanitizeInput } from '../../core/utils.js';
+import { toast } from '../../components/ui/toast.js';
 import { AppHeader } from '../../components/main/header.js';
 import { AppFooter } from '../../components/main/footer.js';
 
@@ -10,7 +11,7 @@ createApp({
         const editId = urlParams ? urlParams.get('id') : null;
         
         const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
-        const existingHuddle = editId ? huddles.find(h => h.id === editId) : null;
+        const existingHuddle = editId ? huddles.find(currentHuddle => currentHuddle.id === editId) : null;
         
         return {
             editId: editId,
@@ -66,7 +67,7 @@ createApp({
             this.submitted = true;
             
             if (!this.validateForm()) {
-                window.toast.error('Please fill in all required fields correctly.');
+                toast.error('Please fill in all required fields correctly.');
                 return;
             }
             
@@ -80,7 +81,7 @@ createApp({
             
             if (this.isEditMode) {
                 // Update existing huddle
-                const index = huddles.findIndex(h => h.id === this.editId);
+                const index = huddles.findIndex(huddle => huddle.id === this.editId);
                 if (index !== -1 && huddles[index].owner === currentUser) {
                     huddles[index].name = sanitizedName;
                     huddles[index].description = sanitizedDescription;
@@ -88,16 +89,16 @@ createApp({
                     huddles[index].startDate = this.huddle.startDate || null;
                     huddles[index].endDate = this.huddle.endDate || null;
                     localStorage.setItem('huddles', JSON.stringify(huddles));
-                    window.toast.success(`Huddle "${sanitizedName}" updated successfully!`);
+                    toast.success(`Huddle "${sanitizedName}" updated successfully!`);
                     setTimeout(() => {
                         window.location.href = `huddle.html?id=${this.editId}`;
                     }, 1000);
                 } else {
-                    window.toast.error('You can only edit huddles you own.');
+                    toast.error('You can only edit huddles you own.');
                 }
             } else {
                 // Create a new huddle
-                const newId = huddles.length > 0 ? Math.max(...huddles.map(h => h.id)) + 1 : 1;
+                const newId = huddles.length > 0 ? Math.max(...huddles.map(huddle => huddle.id)) + 1 : 1;
                 const newCode = Math.random().toString(36).substring(2, 7).toUpperCase();
                 
                 const newHuddle = {
@@ -118,7 +119,7 @@ createApp({
                 huddles.push(newHuddle);
                 localStorage.setItem('huddles', JSON.stringify(huddles));
                 
-                window.toast.success(`Huddle "${sanitizedName}" created successfully!`);
+                toast.success(`Huddle "${sanitizedName}" created successfully!`);
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 1000);

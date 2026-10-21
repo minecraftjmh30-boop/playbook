@@ -1,3 +1,5 @@
+import { toast } from '../ui/toast.js';
+
 const ProfileSettings = {
     name: 'ProfileSettings',
     data() {
@@ -32,23 +34,23 @@ const ProfileSettings = {
     methods: {
         handleUsernameSubmit(values) {
             console.log('Username change requested:', values.newUsername);
-            window.toast.success('Username change requested (simulated).');
+            toast.success('Username change requested (simulated).');
         },
         handlePasswordSubmit(values) {
             if (values.newPassword !== values.confirmNewPassword) {
-                window.toast.error('New passwords do not match.');
+                toast.error('New passwords do not match.');
                 return;
             }
             console.log('Password change requested');
-            window.toast.success('Password change requested (simulated).');
+            toast.success('Password change requested (simulated).');
         },
         handleForgotSubmit(values) {
             if (values.resetNewPassword !== values.confirmResetNewPassword) {
-                window.toast.error('New passwords do not match.');
+                toast.error('New passwords do not match.');
                 return;
             }
             console.log('Password reset requested with code:', values.resetCode);
-            window.toast.success('Password reset requested (simulated).');
+            toast.success('Password reset requested (simulated).');
         }
     },
     template: `

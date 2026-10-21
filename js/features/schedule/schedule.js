@@ -1,4 +1,5 @@
 import { getCookie } from '../../core/utils.js';
+import { toast } from '../../components/ui/toast.js';
 import { AppHeader } from '../../components/main/header.js';
 import { AppFooter } from '../../components/main/footer.js';
 import { ScheduleTools } from '../../components/schedule/scheduleTools.js';
@@ -61,15 +62,15 @@ createApp({
             const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate()).getTime();
 
             // Add actual days of the current month
-            for (let d = 1; d <= lastDay; d++) {
-                const dateObj = new Date(year, monthIndex, d);
+            for (let day = 1; day <= lastDay; day++) {
+                const dateObj = new Date(year, monthIndex, day);
                 const dateKey = this.getDateKey(dateObj);
                 const isToday = this.isSameDay(dateObj, this.today);
                 const isPast = dateObj.getTime() < todayStart;
 
                 days.push({
                     type: 'actual',
-                    day: d,
+                    day: day,
                     date: dateObj,
                     dateKey: dateKey,
                     isToday,
@@ -83,15 +84,15 @@ createApp({
     },
     methods: {
         getDateKey(date) {
-            const y = date.getFullYear();
-            const m = date.getMonth() + 1;
-            const d = date.getDate();
-            return `${y}-${m}-${d}`;
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            return `${year}-${month}-${day}`;
         },
-        isSameDay(d1, d2) {
-            return d1.getFullYear() === d2.getFullYear() &&
-                   d1.getMonth() === d2.getMonth() &&
-                   d1.getDate() === d2.getDate();
+        isSameDay(date, otherDate) {
+            return date.getFullYear() === otherDate.getFullYear() &&
+                   date.getMonth() === otherDate.getMonth() &&
+                   date.getDate() === otherDate.getDate();
         },
         async loadSchedule() {
             const userId = getCookie('currentUser') || 'User1';
@@ -113,8 +114,8 @@ createApp({
                             for (const line of lines) {
                                 if (!line.trim()) continue;
                                 const [dateStr, mode, startTime, endTime] = line.split(',');
-                                const [y, m, d] = dateStr.split('-').map(Number);
-                                const dateObj = new Date(y, m - 1, d);
+                                const [year, month, day] = dateStr.split('-').map(Number);
+                                const dateObj = new Date(year, month - 1, day);
                                 if (dateObj.getTime() >= todayStart) {
                                     newSchedules[dateStr] = { mode, startTime, endTime };
                                 }
@@ -136,11 +137,11 @@ createApp({
             
             try {
                 localStorage.setItem(storageKey, JSON.stringify(this.schedules));
-                window.toast.success('Schedule saved successfully!');
+                toast.success('Schedule saved successfully!');
                 console.log('Simulated upload to schedule.csv:', this.schedules);
             } catch (error) {
                 console.error('Error saving schedule:', error);
-                window.toast.error('Error saving schedule.');
+                toast.error('Error saving schedule.');
             }
         },
         changeMonth(offset) {
@@ -187,7 +188,7 @@ createApp({
         },
         saveTime() {
             if (!this.modalData.startTime || !this.modalData.endTime) {
-                window.toast.error("Please select both start and end times.");
+                toast.error("Please select both start and end times.");
                 return;
             }
             const key = this.getDateKey(this.modalData.date);

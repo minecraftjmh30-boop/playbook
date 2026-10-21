@@ -27,7 +27,7 @@ const ProfileFriends = {
                 return this.friends;
             }
             const query = this.friendSearch.toLowerCase();
-            return this.friends.filter(f => f.name.toLowerCase().includes(query));
+            return this.friends.filter(friend => friend.name.toLowerCase().includes(query));
         }
     },
     methods: {

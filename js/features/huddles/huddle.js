@@ -1,4 +1,5 @@
 import { getCookie, buildParticipantsDisplay, getDateKey, isSameDay, formatDate, createSystemMessage } from '../../core/utils.js';
+import { toast } from '../../components/ui/toast.js';
 import { AppHeader } from '../../components/main/header.js';
 import { AppFooter } from '../../components/main/footer.js';
 import { ScheduleCalendar } from '../../components/schedule/scheduleCalendar.js';
@@ -14,7 +15,8 @@ createApp({
         const idParam = urlParams ? (urlParams.get('id') || urlParams.get('code')) : null;
         
         const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
-        const huddleData = huddles.find(h => h.id === idParam || h.code === idParam) || {
+        const idParamNumber = idParam ? Number(idParam) : null;
+        const huddleData = huddles.find(h => h.id === idParamNumber || h.code === idParam) || {
             name: 'Huddle Not Found',
             description: 'The requested huddle could not be found.',
             location: 'Unknown',
@@ -57,7 +59,7 @@ createApp({
 
         if (!isAuthorized && updatedHuddleData.name !== 'Huddle Not Found') {
             // Redirect unauthorized users to index page
-            window.toast.error('You are not a participant of this huddle and cannot access it.');
+            toast.error('You are not a participant of this huddle and cannot access it.');
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, 1500);
@@ -138,8 +140,8 @@ createApp({
             const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate()).getTime();
 
             // Add actual days of the current month
-            for (let d = 1; d <= lastDay; d++) {
-                const dateObj = new Date(year, monthIndex, d);
+            for (let day = 1; day <= lastDay; day++) {
+                const dateObj = new Date(year, monthIndex, day);
                 const dateKey = getDateKey(dateObj);
                 const isToday = isSameDay(dateObj, this.today);
                 const isPast = dateObj.getTime() < todayStart;
@@ -157,7 +159,7 @@ createApp({
                 if (isWithinFrame) {
                     days.push({
                         type: 'actual',
-                        day: d,
+                        day: day,
                         date: dateObj,
                         dateKey: dateKey,
                         isToday,
@@ -260,13 +262,13 @@ createApp({
                     if (this.huddle.participants) {
                         this.huddle.participants = this.huddle.participants.filter(id => id !== this.currentUser);
                     }
-                    // Update participants display list
+                    // Update participant display list
                     this.participants = buildParticipantsDisplay(this.huddle.participants);
                     // Add leave system message
                     this.messages.push(createSystemMessage(`${this.currentUser} has left the huddle.`));
                     // Persist to localStorage
                     this.saveHuddleData();
-                    window.toast.info('You have left the huddle.');
+                    toast.info('You have left the huddle.');
                     setTimeout(() => {
                         window.location.href = 'index.html';
                     }, 1000);
@@ -283,7 +285,7 @@ createApp({
                     }
                     this.huddle.participants = this.huddle.participants.filter(id => id !== participantId);
                     
-                    // Update participants display list
+                    // Update participant display list
                     this.participants = buildParticipantsDisplay(this.huddle.participants);
                     
                     // Add kick system message to chat
@@ -291,10 +293,10 @@ createApp({
                     
                     // Persist to localStorage
                     this.saveHuddleData();
-                    window.toast.success(`${participantId} has been removed from the huddle.`);
+                    toast.success(`${participantId} has been removed from the huddle.`);
                 }
             } else {
-                window.toast.error('Only the owner can remove participants.');
+                toast.error('Only the owner can remove participants.');
             }
         },
         // Select dates for huddle from schedule (owners only)
@@ -405,7 +407,7 @@ createApp({
                 this.huddle.participants = [this.huddle.owner];
             }
             if (this.huddle.participants.includes(friendId)) {
-                window.toast.info(`${friendId} is already a participant.`);
+                toast.info(`${friendId} is already a participant.`);
                 return;
             }
             this.huddle.participants.push(friendId);
@@ -414,7 +416,7 @@ createApp({
             // Add invite system message
             this.messages.push(createSystemMessage(`${this.currentUser} invited ${friendId} to the huddle.`));
             this.saveHuddleData();
-            window.toast.success(`${friendId} has been invited to the huddle!`);
+            toast.success(`${friendId} has been invited to the huddle!`);
         },
         // Handle day click on schedule calendar - only show overlay, don't select date
         handleDayClick(day) {
@@ -426,16 +428,16 @@ createApp({
         // Owner selects a date as planned date via button
         selectDateAsPlanned(dateKey) {
             if (!this.currentUser || this.huddle.owner !== this.currentUser) {
-                window.toast.error('Only the owner can select planned dates.');
+                toast.error('Only the owner can select planned dates.');
                 return;
             }
             
             this.selectHuddleDate(dateKey);
             const index = this.huddle.selectedDates.indexOf(dateKey);
             if (index !== -1) {
-                window.toast.info(`${this.formatDate(dateKey)} removed from planned dates.`);
+                toast.info(`${this.formatDate(dateKey)} removed from planned dates.`);
             } else {
-                window.toast.success(`${this.formatDate(dateKey)} added to planned dates.`);
+                toast.success(`${this.formatDate(dateKey)} added to planned dates.`);
             }
         }
     }

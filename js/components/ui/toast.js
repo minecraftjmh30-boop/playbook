@@ -54,8 +54,6 @@ const ToastComponent = {
     `
 };
 
-export { ToastComponent };
-
 // Global toast instance
 let toastInstance = null;
 
@@ -72,29 +70,28 @@ function initToast() {
     return toastInstance;
 }
 
-// Make toast available globally
-if (typeof window !== 'undefined') {
-    window.toast = {
-        show: function(message, type = 'info', duration = 3000) {
-            if (!toastInstance) initToast();
-            toastInstance.show(message, type, duration);
-        },
-        success: function(message, duration = 3000) {
-            if (!toastInstance) initToast();
-            toastInstance.success(message, duration);
-        },
-        error: function(message, duration = 3000) {
-            if (!toastInstance) initToast();
-            toastInstance.error(message, duration);
-        },
-        warning: function(message, duration = 3000) {
-            if (!toastInstance) initToast();
-            toastInstance.warning(message, duration);
-        },
-        info: function(message, duration = 3000) {
-            if (!toastInstance) initToast();
-            toastInstance.info(message, duration);
-        }
-    };
-}
+const toast = {
+    show: function(message, type = 'info', duration = 3000) {
+        if (!toastInstance) initToast();
+        toastInstance.show(message, type, duration);
+    },
+    success: function(message, duration = 3000) {
+        if (!toastInstance) initToast();
+        toastInstance.success(message, duration);
+    },
+    error: function(message, duration = 3000) {
+        if (!toastInstance) initToast();
+        toastInstance.error(message, duration);
+    },
+    warning: function(message, duration = 3000) {
+        if (!toastInstance) initToast();
+        toastInstance.warning(message, duration);
+    },
+    info: function(message, duration = 3000) {
+        if (!toastInstance) initToast();
+        toastInstance.info(message, duration);
+    }
+};
+
+export { ToastComponent, toast };
 

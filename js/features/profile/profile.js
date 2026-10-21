@@ -1,4 +1,5 @@
 import { getCookie, sanitizeInput } from '../../core/utils.js';
+import { toast } from '../../components/ui/toast.js';
 import { AppHeader } from '../../components/main/header.js';
 import { AppFooter } from '../../components/main/footer.js';
 import { ProfileInfo } from '../../components/profile/profileInfo.js';
@@ -88,9 +89,9 @@ createApp({
             const invitations = JSON.parse(localStorage.getItem(`invitations_${userId}`)) || [];
 
             // Huddles where user is a participant
-            this.myHuddles = huddles.filter(h =>
-                h.owner === userId ||
-                (h.participants && h.participants.includes(userId))
+            this.myHuddles = huddles.filter(huddle =>
+                huddle.owner === userId ||
+                (huddle.participants && huddle.participants.includes(userId))
             );
 
             // Pending invitations for this user
@@ -98,7 +99,7 @@ createApp({
         },
         async acceptInvitation(invitation) {
             const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
-            const huddle = huddles.find(h => h.id === invitation.huddleId);
+            const huddle = huddles.find(huddle => huddle.id === invitation.huddleId);
             if (huddle) {
                 if (!huddle.participants) {
                     huddle.participants = [huddle.owner];
@@ -112,13 +113,13 @@ createApp({
                 // Remove invitation
                 this.removeInvitation(invitation);
                 await this.loadHuddleData();
-                window.toast.success(`You accepted the invitation to "${huddle.name}".`);
+                toast.success(`You accepted the invitation to "${huddle.name}".`);
             }
         },
         async declineInvitation(invitation) {
             this.removeInvitation(invitation);
             await this.loadHuddleData();
-            window.toast.info('Invitation declined.');
+            toast.info('Invitation declined.');
         },
         removeInvitation(invitation) {
             const userId = getCookie('currentUser') || 'User1';
@@ -129,12 +130,12 @@ createApp({
         async joinHuddleFromProfile() {
             const code = sanitizeInput(this.joinHuddleCode.trim());
             if (!code) {
-                window.toast.error('Please enter a huddle code.');
+                toast.error('Please enter a huddle code.');
                 return;
             }
 
             const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
-            const huddle = huddles.find(h => h.code === code);
+            const huddle = huddles.find(huddle => huddle.code === code);
             if (huddle) {
                 const userId = getCookie('currentUser') || 'User1';
                 if (!huddle.participants) {
@@ -146,34 +147,34 @@ createApp({
                 localStorage.setItem('huddles', JSON.stringify(huddles));
                 this.joinHuddleCode = '';
                 await this.loadHuddleData();
-                window.toast.success(`Joined "${huddle.name}"!`);
+                toast.success(`Joined "${huddle.name}"!`);
             } else {
-                window.toast.error('Invalid huddle code!');
+                toast.error('Invalid huddle code!');
             }
         },
         removeFriend(id) {
             if (confirm('Are you sure you want to remove this friend?')) {
-                this.friends = this.friends.filter(f => f.id !== id);
-                window.toast.info('Friend removed.');
+                this.friends = this.friends.filter(friend => friend.id !== id);
+                toast.info('Friend removed.');
             }
         },
         handlePendingRequest(id, action) {
             if (action === 'add') {
-                const friend = this.pendingRequests.find(p => p.id === id);
+                const friend = this.pendingRequests.find(pendingRequest => pendingRequest.id === id);
                 if (friend) {
                     this.friends.push({ id: friend.name, name: friend.name });
-                    this.pendingRequests = this.pendingRequests.filter(p => p.id !== id);
-                    window.toast.success(`Friend request from ${friend.name} accepted.`);
+                    this.pendingRequests = this.pendingRequests.filter(pendingRequest => pendingRequest.id !== id);
+                    toast.success(`Friend request from ${friend.name} accepted.`);
                 }
             } else {
-                this.pendingRequests = this.pendingRequests.filter(p => p.id !== id);
-                window.toast.info('Friend request declined.');
+                this.pendingRequests = this.pendingRequests.filter(pendingRequest => pendingRequest.id !== id);
+                toast.info('Friend request declined.');
             }
         },
         addFriend(code) {
             if (code && code.trim()) {
                 const sanitizedCode = sanitizeInput(code.trim());
-                window.toast.success(`Friend request sent to: ${sanitizedCode}`);
+                toast.success(`Friend request sent to: ${sanitizedCode}`);
             }
         }
     }

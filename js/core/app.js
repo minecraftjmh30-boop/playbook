@@ -1,4 +1,5 @@
 import { getCookie, sanitizeInput } from './utils.js';
+import { toast } from '../components/ui/toast.js';
 import { AppHeader } from '../components/main/header.js';
 import { AppFooter } from '../components/main/footer.js';
 import { AppHero } from '../components/main/hero.js';
@@ -30,21 +31,21 @@ createApp({
             let filtered;
             if (this.showMyHuddlesOnly) {
                 // Only show huddles the user owns
-                filtered = this.allHuddles.filter(h => h.owner === this.currentUser);
+                filtered = this.allHuddles.filter(huddle => huddle.owner === this.currentUser);
             } else {
                 // Show all huddles the user is a part of (owner or participant)
-                filtered = this.allHuddles.filter(h =>
-                    h.owner === this.currentUser ||
-                    (h.participants && h.participants.includes(this.currentUser))
+                filtered = this.allHuddles.filter(huddle =>
+                    huddle.owner === this.currentUser ||
+                    (huddle.participants && huddle.participants.includes(this.currentUser))
                 );
             }
             
             // Filter by search query
             if (this.searchQuery.trim()) {
                 const query = this.searchQuery.toLowerCase();
-                filtered = filtered.filter(h => 
-                    h.name.toLowerCase().includes(query) ||
-                    (h.description && h.description.toLowerCase().includes(query))
+                filtered = filtered.filter(huddle =>
+                    huddle.name.toLowerCase().includes(query) ||
+                    (huddle.description && huddle.description.toLowerCase().includes(query))
                 );
             }
             
@@ -59,7 +60,7 @@ createApp({
             // Sanitize and trim the join code
             const code = sanitizeInput(this.joinCode.trim());
             if (!code) {
-                window.toast.error('Please enter a huddle code.');
+                toast.error('Please enter a huddle code.');
                 return;
             }
             
@@ -79,16 +80,16 @@ createApp({
                         time: new Date().toLocaleTimeString(),
                         system: true
                     });
-                    window.toast.success(`Successfully joined "${huddle.name}"!`);
+                    toast.success(`Successfully joined "${huddle.name}"!`);
                 } else {
-                    window.toast.info('You are already a member of this huddle.');
+                    toast.info('You are already a member of this huddle.');
                 }
                 localStorage.setItem('huddles', JSON.stringify(this.allHuddles));
                 this.showJoinModal = false;
                 this.joinCode = '';
                 window.location.href = `huddle.html?id=${huddle.id}`;
             } else {
-                window.toast.error('Invalid huddle code!');
+                toast.error('Invalid huddle code!');
             }
         },
         editHuddle(huddle) {
@@ -96,11 +97,11 @@ createApp({
             if (this.currentUser && huddle.owner === this.currentUser) {
                 window.location.href = `createHuddle.html?id=${huddle.id}`;
             } else {
-                window.toast.error('You must be the owner to edit this huddle.');
+                toast.error('You must be the owner to edit this huddle.');
             }
         },
         deleteHuddle(id) {
-            const huddleToDelete = this.allHuddles.find(h => h.id === id);
+            const huddleToDelete = this.allHuddles.find(huddle => huddle.id === id);
             if (!huddleToDelete) return;
 
             // Only the owner should be able to delete
@@ -108,10 +109,10 @@ createApp({
                 if (confirm('Are you sure you want to delete this huddle?')) {
                     this.allHuddles = this.allHuddles.filter(huddle => huddle.id !== id);
                     localStorage.setItem('huddles', JSON.stringify(this.allHuddles));
-                    window.toast.success('Huddle deleted successfully!');
+                    toast.success('Huddle deleted successfully!');
                 }
             } else {
-                window.toast.error('You must be the owner to delete this huddle.');
+                toast.error('You must be the owner to delete this huddle.');
             }
         },
         leaveHuddle(huddle) {
@@ -126,7 +127,7 @@ createApp({
                         time: new Date().toLocaleTimeString(),
                         system: true
                     });
-                    window.toast.info(`You have left "${huddle.name}".`);
+                    toast.info(`You have left "${huddle.name}".`);
                 }
                 localStorage.setItem('huddles', JSON.stringify(this.allHuddles));
             }

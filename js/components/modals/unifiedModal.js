@@ -1,3 +1,5 @@
+import { toast } from '../ui/toast.js';
+
 const UnifiedModal = {
     name: 'UnifiedModal',
     props: {
@@ -28,7 +30,7 @@ const UnifiedModal = {
         show(newVal) {
             if (newVal) {
                 // Initialize field values when modal opens
-                this.fields.forEach(f => { this.values[f.id] = f.default || ''; });
+                this.fields.forEach(field => { this.values[field.id] = field.default || ''; });
             }
         }
     },
@@ -41,7 +43,7 @@ const UnifiedModal = {
             // Validate required fields
             for (const field of this.fields) {
                 if (field.required && !this.values[field.id].trim()) {
-                    window.toast.error(`Please fill in ${field.label}.`);
+                    toast.error(`Please fill in ${field.label}.`);
                     return;
                 }
             }

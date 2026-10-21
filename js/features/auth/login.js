@@ -1,4 +1,5 @@
 import { sanitizeInput, setCookie } from '../../core/utils.js';
+import { toast } from '../../components/ui/toast.js';
 import { AppFooter } from '../../components/main/footer.js';
 
 const { createApp } = Vue;
@@ -41,7 +42,7 @@ createApp({
             this.submitted = true;
             
             if (!this.validateForm()) {
-                window.toast.error('Please fill in all fields correctly.');
+                toast.error('Please fill in all fields correctly.');
                 return;
             }
             
@@ -52,10 +53,10 @@ createApp({
             // Set the currentUser cookie so other pages can read the logged-in user
             setCookie('currentUser', sanitizedEmail);
             
-            window.toast.success(`Logged in as ${sanitizedEmail}`);
+            toast.success(`Logged in as ${sanitizedEmail}`);
         },
         handleSignup() {
-            window.toast.info('Signup feature coming soon!');
+            toast.info('Signup feature coming soon!');
         }
     }
 }).component('app-footer', AppFooter)

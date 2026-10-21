@@ -1,3 +1,5 @@
+import { toast } from '../ui/toast.js';
+
 const ForgotPasswordModal = {
     name: 'ForgotPasswordModal',
     data() {
@@ -10,15 +12,15 @@ const ForgotPasswordModal = {
     methods: {
         handleReset() {
             if (!this.resetCode || !this.resetNewPassword || !this.confirmResetNewPassword) {
-                window.toast.error("Please fill in all fields.");
+                toast.error("Please fill in all fields.");
                 return;
             }
             if (this.resetNewPassword !== this.confirmResetNewPassword) {
-                window.toast.error("New passwords do not match.");
+                toast.error("New passwords do not match.");
                 return;
             }
             console.log("Attempting to reset password with code:", this.resetCode);
-            window.toast.success("Password reset requested (simulated).");
+            toast.success("Password reset requested (simulated).");
             const modalEl = document.getElementById('forgotPasswordModal');
             if (modalEl && typeof bootstrap !== 'undefined') {
                 const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);

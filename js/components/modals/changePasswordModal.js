@@ -1,3 +1,5 @@
+import { toast } from '../ui/toast.js';
+
 const ChangePasswordModal = {
     name: 'ChangePasswordModal',
     data() {
@@ -10,15 +12,15 @@ const ChangePasswordModal = {
     methods: {
         handleUpdate() {
             if (!this.currentPassword || !this.newPassword || !this.confirmNewPassword) {
-                window.toast.error("Please fill in all fields.");
+                toast.error("Please fill in all fields.");
                 return;
             }
             if (this.newPassword !== this.confirmNewPassword) {
-                window.toast.error("New passwords do not match.");
+                toast.error("New passwords do not match.");
                 return;
             }
             console.log("Attempting to change password...");
-            window.toast.success("Password change requested (simulated).");
+            toast.success("Password change requested (simulated).");
             const modalEl = document.getElementById('changePasswordModal');
             if (modalEl && typeof bootstrap !== 'undefined') {
                 const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
