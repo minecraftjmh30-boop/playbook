@@ -96,7 +96,7 @@ createApp({
             // Pending invitations for this user
             this.pendingInvitations = invitations.filter(inv => inv.to === userId);
         },
-        acceptInvitation(invitation) {
+        async acceptInvitation(invitation) {
             const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
             const huddle = huddles.find(h => h.id === invitation.huddleId);
             if (huddle) {
