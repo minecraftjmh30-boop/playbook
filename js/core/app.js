@@ -24,15 +24,21 @@ createApp({
     },
     computed: {
         huddles() {
-            // Filter to only show huddles the user is a part of (owner or participant)
             if (!this.currentUser) {
                 return [];
             }
             
-            let filtered = this.allHuddles.filter(h =>
-                h.owner === this.currentUser ||
-                (h.participants && h.participants.includes(this.currentUser))
-            );
+            let filtered;
+            if (this.showMyHuddlesOnly) {
+                // Only show huddles the user owns
+                filtered = this.allHuddles.filter(h => h.owner === this.currentUser);
+            } else {
+                // Show all huddles the user is a part of (owner or participant)
+                filtered = this.allHuddles.filter(h =>
+                    h.owner === this.currentUser ||
+                    (h.participants && h.participants.includes(this.currentUser))
+                );
+            }
             
             // Filter by search query
             if (this.searchQuery.trim()) {

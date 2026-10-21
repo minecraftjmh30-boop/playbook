@@ -31,13 +31,32 @@ createApp({
 
         const currentUser = getCookie('currentUser');
 
-        // Check if user is authorized to access this huddle
-        const participantIds = huddleData.participants || [huddleData.owner];
-        const isOwner = currentUser && huddleData.owner === currentUser;
-        const isParticipant = currentUser && participantIds.includes(currentUser);
-        const isAuthorized = isOwner || isParticipant || huddleData.name === 'Huddle Not Found';
+        // If accessing via code and user is not already a participant, add them
+        let updatedHuddleData = huddleData;
+        if (idParam && huddleData.code === idParam && currentUser && huddleData.name !== 'Huddle Not Found') {
+            if (!huddleData.participants) {
+                huddleData.participants = [huddleData.owner];
+            }
+            if (!huddleData.participants.includes(currentUser)) {
+                huddleData.participants.push(currentUser);
+                // Save the updated participants to localStorage
+                const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
+                const index = huddles.find(h => h.id === huddleData.id);
+                if (index) {
+                    index.participants = huddleData.participants;
+                    localStorage.setItem('huddles', JSON.stringify(huddles));
+                }
+                updatedHuddleData = huddleData;
+            }
+        }
 
-        if (!isAuthorized && huddleData.name !== 'Huddle Not Found') {
+        // Check if user is authorized to access this huddle
+        const participantIds = updatedHuddleData.participants || [updatedHuddleData.owner];
+        const isOwner = currentUser && updatedHuddleData.owner === currentUser;
+        const isParticipant = currentUser && participantIds.includes(currentUser);
+        const isAuthorized = isOwner || isParticipant || updatedHuddleData.name === 'Huddle Not Found';
+
+        if (!isAuthorized && updatedHuddleData.name !== 'Huddle Not Found') {
             // Redirect unauthorized users to index page
             window.toast.error('You are not a participant of this huddle and cannot access it.');
             setTimeout(() => {
@@ -46,21 +65,21 @@ createApp({
         }
 
         // Build participants list from huddle data
-        const participants = buildParticipantsDisplay(huddleData.participants || [huddleData.owner]);
+        const participants = buildParticipantsDisplay(updatedHuddleData.participants || [updatedHuddleData.owner]);
 
         // Load messages from huddle data, default to empty array
-        const messages = huddleData.messages || [];
+        const messages = updatedHuddleData.messages || [];
 
         // Initialize currentMonthView to the huddle's start month if available, otherwise current month
         let initialMonthView = new Date();
-        if (huddleData.startDate) {
-            const startDate = new Date(huddleData.startDate);
+        if (updatedHuddleData.startDate) {
+            const startDate = new Date(updatedHuddleData.startDate);
             initialMonthView = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
         }
 
         return {
             // Huddle data
-            huddle: huddleData,
+            huddle: updatedHuddleData,
             participants,
             messages,
             currentUser,
