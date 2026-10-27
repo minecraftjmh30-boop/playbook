@@ -266,4 +266,9 @@ export default {
 .profile-nav { position: sticky; top: 1rem; }
 .profile-nav .nav-link { cursor: pointer; white-space: nowrap; }
 .profile-section { scroll-margin-top: 2rem; }
+
+@media (max-width: 700px) {
+    .profile-nav { display: none; }
+    .col-md-9 { flex: 0 0 100%; max-width: 100%; }
+}
 </style>
