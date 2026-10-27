@@ -63,6 +63,16 @@
         </main>
         <AppFooter></AppFooter>
         <ToastComponent ref="toast" />
+        <div v-if="showConfirmModal" class="modal fade show d-block modal-overlay" tabindex="-1">
+            <div class="modal-dialog"><div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">{{ confirmTitle }}</h5><button type="button" class="btn-close" @click="closeConfirmModal"></button></div>
+                <div class="modal-body"><p>{{ confirmMessage }}</p></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @click="closeConfirmModal">Cancel</button>
+                    <button type="button" class="btn btn-danger" @click="executeConfirmAction">Confirm</button>
+                </div>
+            </div></div>
+        </div>
     </div>
 </template>
 
@@ -100,7 +110,12 @@ export default {
             // Huddle invitations
             myHuddles: [],
             pendingInvitations: [],
-            joinHuddleCode: ''
+            joinHuddleCode: '',
+            // Confirmation modal
+            showConfirmModal: false,
+            confirmTitle: '',
+            confirmMessage: '',
+            confirmCallback: null
         };
     },
     async mounted() {
@@ -227,10 +242,23 @@ export default {
             }
         },
         removeFriend(id) {
-            if (confirm('Are you sure you want to remove this friend?')) {
+            this.confirmTitle = 'Remove Friend';
+            this.confirmMessage = 'Are you sure you want to remove this friend?';
+            this.confirmCallback = () => {
                 this.friends = this.friends.filter(friend => friend.id !== id);
                 this.toast.info('Friend removed.');
+            };
+            this.showConfirmModal = true;
+        },
+        closeConfirmModal() {
+            this.showConfirmModal = false;
+            this.confirmCallback = null;
+        },
+        executeConfirmAction() {
+            if (this.confirmCallback) {
+                this.confirmCallback();
             }
+            this.closeConfirmModal();
         },
         handlePendingRequest(id, action) {
             if (action === 'add') {

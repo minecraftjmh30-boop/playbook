@@ -31,6 +31,20 @@
             </section>
             <ChoiceModal :show="showChoiceModal" @close="showChoiceModal = false" @open-join="showChoiceModal = false; openJoinModal()"></ChoiceModal>
             <JoinHuddleModal :show="showJoinModal" v-model="joinCode" @close="showJoinModal = false" @join="joinHuddle"></JoinHuddleModal>
+            <div v-if="showDeleteModal" class="modal fade show d-block modal-overlay" tabindex="-1">
+                <div class="modal-dialog"><div class="modal-content">
+                    <div class="modal-header"><h5 class="modal-title">{{ confirmAction === 'delete' ? 'Delete Huddle' : 'Leave Huddle' }}</h5><button type="button" class="btn-close" @click="showDeleteModal = false"></button></div>
+                    <div class="modal-body">
+                        <p v-if="confirmAction === 'delete'">Are you sure you want to delete "{{ confirmHuddle?.name }}"? This action cannot be undone.</p>
+                        <p v-else>Are you sure you want to leave "{{ confirmHuddle?.name }}"?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="showDeleteModal = false">Cancel</button>
+                        <button v-if="confirmAction === 'delete'" type="button" class="btn btn-danger" @click="executeConfirmAction">Delete</button>
+                        <button v-else type="button" class="btn btn-primary" @click="executeConfirmAction">Leave</button>
+                    </div>
+                </div></div>
+            </div>
         </main>
         <AppFooter></AppFooter>
         <ToastComponent ref="toast" />
@@ -68,7 +82,10 @@ export default {
             joinCode: '',
             currentUser: getCookie('currentUser') || null,
             showMyHuddlesOnly: false,
-            searchQuery: ''
+            searchQuery: '',
+            showDeleteModal: false,
+            confirmAction: null,
+            confirmHuddle: null
         };
     },
     computed: {
@@ -155,20 +172,27 @@ export default {
 
             // Only the owner should be able to delete
             if (this.currentUser && huddleToDelete.owner === this.currentUser) {
-                if (confirm('Are you sure you want to delete this huddle?')) {
-                    this.allHuddles = this.allHuddles.filter(huddle => huddle.id !== id);
-                    localStorage.setItem('huddles', JSON.stringify(this.allHuddles));
-                    this.toast.success('Huddle deleted successfully!');
-                }
+                this.confirmAction = 'delete';
+                this.confirmHuddle = huddleToDelete;
+                this.showDeleteModal = true;
             } else {
                 this.toast.error('You must be the owner to delete this huddle.');
             }
         },
         leaveHuddle(huddle) {
-            if (confirm(`Leave "${huddle.name}"?`)) {
+            this.confirmAction = 'leave';
+            this.confirmHuddle = huddle;
+            this.showDeleteModal = true;
+        },
+        executeConfirmAction() {
+            if (this.confirmAction === 'delete') {
+                this.allHuddles = this.allHuddles.filter(huddle => huddle.id !== this.confirmHuddle.id);
+                localStorage.setItem('huddles', JSON.stringify(this.allHuddles));
+                this.toast.success('Huddle deleted successfully!');
+            } else if (this.confirmAction === 'leave') {
+                const huddle = this.confirmHuddle;
                 if (huddle.participants) {
                     huddle.participants = huddle.participants.filter(id => id !== this.currentUser);
-                    // Add leave system message to chat
                     if (!huddle.messages) huddle.messages = [];
                     huddle.messages.push({
                         user: 'System',
@@ -180,6 +204,9 @@ export default {
                 }
                 localStorage.setItem('huddles', JSON.stringify(this.allHuddles));
             }
+            this.showDeleteModal = false;
+            this.confirmAction = null;
+            this.confirmHuddle = null;
         },
         toggleMyHuddles() {
             this.showMyHuddlesOnly = !this.showMyHuddlesOnly;
