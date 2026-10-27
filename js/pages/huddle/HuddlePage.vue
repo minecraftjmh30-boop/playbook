@@ -16,7 +16,7 @@
                     </div>
                     <div v-if="currentUser && huddle.owner === currentUser" class="mb-3"><button class="btn btn-outline-primary w-100" @click="openInviteModal">Invite Friends</button></div>
                     <div v-if="currentUser && huddle.owner !== currentUser" class="mb-3"><button class="btn btn-outline-danger w-100" @click="leaveHuddle">Leave Huddle</button></div>
-                    <HuddleParticipants :participants="participants" :owner-id="huddle.owner" :current-user="currentUser" @remove-participant="removeParticipant"></HuddleParticipants>
+                    <HuddleParticipants :participants="allParticipants" :owner-id="huddle.owner" :current-user="currentUser" :pending-ids="pendingInviteIds" @remove-participant="removeParticipant"></HuddleParticipants>
                 </div>
                 <div class="col-md-8">
                     <HuddleDetails :huddle="huddle" :current-user="currentUser" @save="saveHuddleData"></HuddleDetails>
@@ -53,7 +53,9 @@
                     <ul class="list-group">
                         <li v-for="friend in filteredInviteFriends" :key="friend.id" class="list-group-item d-flex justify-content-between align-items-center">
                             <span>{{ friend.name }}</span>
-                            <button class="btn btn-sm btn-primary" @click="inviteFriend(friend.id)" :disabled="huddle.participants && huddle.participants.includes(friend.id)">{{ huddle.participants && huddle.participants.includes(friend.id) ? 'Invited' : 'Invite' }}</button>
+                            <span v-if="huddle.participants && huddle.participants.includes(friend.id)" class="badge bg-success">Participant</span>
+                            <span v-else-if="huddle.pendingInvites && huddle.pendingInvites.includes(friend.id)" class="badge bg-info">Pending</span>
+                            <button v-else class="btn btn-sm btn-primary" @click="inviteFriend(friend.id)">Invite</button>
                         </li>
                     </ul>
                 </div>
@@ -159,6 +161,7 @@ export default {
             messages,
             currentUser,
             huddles, // reference to all huddles for localStorage updates
+            pendingInviteIds: updatedHuddleData.pendingInvites || [],
 
             // Schedule preview data
             today: new Date(),
@@ -177,6 +180,17 @@ export default {
         };
     },
     computed: {
+        // Combine regular participants with pending invitees for display
+        allParticipants() {
+            const allIds = [...(this.huddle.participants || [this.huddle.owner])];
+            const pending = this.huddle.pendingInvites || [];
+            pending.forEach(id => {
+                if (!allIds.includes(id)) {
+                    allIds.push(id);
+                }
+            });
+            return buildParticipantsDisplay(allIds);
+        },
         // Schedule computed properties
         isCurrentMonth() {
             return this.currentMonthView.getFullYear() === this.today.getFullYear() &&
@@ -259,7 +273,6 @@ export default {
         }
     },
     methods: {
-        // Huddle methods
         sendMessage(text) {
             if (text && text.trim()) {
                 const msg = {
@@ -281,6 +294,7 @@ export default {
                 this.huddles[index].name = this.huddle.name;
                 this.huddles[index].description = this.huddle.description;
                 this.huddles[index].location = this.huddle.location;
+                this.huddles[index].pendingInvites = this.huddle.pendingInvites || [];
                 localStorage.setItem('huddles', JSON.stringify(this.huddles));
             }
         },
@@ -456,28 +470,30 @@ export default {
         closeOverlayModal() {
             this.showOverlayModal = false;
         },
-        // Load friends for current user
-        loadFriends() {
+        // Load friends for current user from the same API source as ProfilePage
+        async loadFriends() {
             try {
-                const userInfo = localStorage.getItem(`userInfo_${this.currentUser}`);
-                if (userInfo) {
-                    const data = JSON.parse(userInfo);
-                    this.friends = (data.friends || []).map(fId => ({ id: fId, name: fId }));
+                const response = await fetch(`/debug/debugLogins/${this.currentUser}/userInfo.json`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user info');
                 }
+                const data = await response.json();
+                this.friends = (data.friends || []).map(fName => ({ id: fName, name: fName }));
             } catch (e) {
                 console.warn('Failed to load friends:', e);
+                this.friends = [];
             }
         },
         // Open invite friends modal
-        openInviteModal() {
-            this.loadFriends();
+        async openInviteModal() {
+            await this.loadFriends();
             this.showInviteModal = true;
         },
         closeInviteModal() {
             this.showInviteModal = false;
             this.inviteSearch = '';
         },
-        // Invite a friend to the huddle
+        // Invite a friend to the huddle — creates a pending invitation
         inviteFriend(friendId) {
             if (!this.huddle.participants) {
                 this.huddle.participants = [this.huddle.owner];
@@ -486,13 +502,34 @@ export default {
                 this.toast.info(`${friendId} is already a participant.`);
                 return;
             }
-            this.huddle.participants.push(friendId);
-            // Update participant display list
-            this.participants = buildParticipantsDisplay(this.huddle.participants);
+            // Check if already pending
+            if (!this.huddle.pendingInvites) {
+                this.huddle.pendingInvites = [];
+            }
+            if (this.huddle.pendingInvites.includes(friendId)) {
+                this.toast.info(`${friendId} already has a pending invitation.`);
+                return;
+            }
+            // Create pending invitation record in the invitee's localStorage
+            const invitation = {
+                id: `inv_${Date.now()}_${friendId}`,
+                huddleId: this.huddle.id,
+                huddleName: this.huddle.name,
+                invitedBy: this.currentUser,
+                to: friendId,
+                timestamp: new Date().toISOString()
+            };
+            let invitations = JSON.parse(localStorage.getItem(`invitations_${friendId}`)) || [];
+            invitations.push(invitation);
+            localStorage.setItem(`invitations_${friendId}`, JSON.stringify(invitations));
+
+            // Track pending invite on the huddle data
+            this.huddle.pendingInvites.push(friendId);
+            this.saveHuddleData();
+
             // Add invite system message
             this.messages.push(createSystemMessage(`${this.currentUser} invited ${friendId} to the huddle.`));
-            this.saveHuddleData();
-            this.toast.success(`${friendId} has been invited to the huddle!`);
+            this.toast.success(`Invitation sent to ${friendId}!`);
         },
         // Handle day click on schedule calendar - only show overlay, don't select date
         handleDayClick(day) {

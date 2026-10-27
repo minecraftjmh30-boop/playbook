@@ -162,12 +162,16 @@ export default {
             const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
             const huddle = huddles.find(huddle => huddle.id === invitation.huddleId);
             if (huddle) {
+                const userId = getCookie('currentUser') || 'User1';
                 if (!huddle.participants) {
                     huddle.participants = [huddle.owner];
                 }
-                const userId = getCookie('currentUser') || 'User1';
                 if (!huddle.participants.includes(userId)) {
                     huddle.participants.push(userId);
+                }
+                // Remove from pending invites list
+                if (huddle.pendingInvites) {
+                    huddle.pendingInvites = huddle.pendingInvites.filter(id => id !== userId);
                 }
                 localStorage.setItem('huddles', JSON.stringify(huddles));
 
@@ -178,6 +182,15 @@ export default {
             }
         },
         async declineInvitation(invitation) {
+            const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
+            const huddle = huddles.find(huddle => huddle.id === invitation.huddleId);
+            if (huddle) {
+                const userId = getCookie('currentUser') || 'User1';
+                if (huddle.pendingInvites) {
+                    huddle.pendingInvites = huddle.pendingInvites.filter(id => id !== userId);
+                }
+                localStorage.setItem('huddles', JSON.stringify(huddles));
+            }
             this.removeInvitation(invitation);
             await this.loadHuddleData();
             this.toast.info('Invitation declined.');

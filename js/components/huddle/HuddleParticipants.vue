@@ -2,7 +2,7 @@
     <div class="card mb-4">
         <div class="card-header">Participants</div>
         <ul class="list-group list-group-flush">
-            <ParticipantItem v-for="p in participants" :key="p.id" :participant="p" :owner-id="ownerId" :current-user="currentUser" @remove-participant="$emit('remove-participant', $event)"></ParticipantItem>
+            <ParticipantItem v-for="p in participants" :key="p.id" :participant="p" :owner-id="ownerId" :current-user="currentUser" :is-pending="pendingIds.includes(p.id)" @remove-participant="$emit('remove-participant', $event)"></ParticipantItem>
         </ul>
         <div v-if="participants.length === 0" class="card-body text-muted text-center">No participants yet.</div>
     </div>
@@ -28,6 +28,10 @@ export default {
         currentUser: {
             type: String,
             default: null
+        },
+        pendingIds: {
+            type: Array,
+            default: () => []
         }
     },
     emits: ['remove-participant'],
