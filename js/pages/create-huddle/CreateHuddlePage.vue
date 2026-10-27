@@ -65,10 +65,11 @@ export default {
         return { toast, route, router };
     },
     data() {
-        const editId = this.route.query.id;
+        const rawId = this.route.query.id;
+        const editId = rawId ? Number(rawId) : null;
         
         const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
-        const existingHuddle = editId ? huddles.find(currentHuddle => currentHuddle.id === editId) : null;
+        const existingHuddle = (editId !== null && !isNaN(editId)) ? huddles.find(currentHuddle => currentHuddle.id === editId) : null;
         
         return {
             editId: editId,

@@ -27,6 +27,7 @@
 <script>
 import { sanitizeInput, setCookie } from '../../core/utils.js';
 import { provide, ref } from 'vue';
+import { useRouter } from 'vue-router';
 const ToastKey = Symbol('toast');
 import AppFooter from '../../components/main/AppFooter.vue';
 import ToastComponent from '../../components/ui/Toast.vue';
@@ -36,8 +37,9 @@ export default {
     components: { AppFooter, ToastComponent },
     setup() {
         const toast = ref(null);
+        const router = useRouter();
         provide(ToastKey, toast);
-        return { toast };
+        return { toast, router };
     },
     data() {
         return {
@@ -88,6 +90,7 @@ export default {
             setCookie('currentUser', sanitizedEmail);
             
             this.toast.success(`Logged in as ${sanitizedEmail}`);
+            this.router.push('/');
         },
         handleSignup() {
             this.toast.info('Signup feature coming soon!');
