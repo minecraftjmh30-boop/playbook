@@ -5,82 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PlayBook</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.8/dist/lumen/bootstrap.min.css">
-    <!-- Vue 3 CDN -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
-<body id="app" class="d-flex flex-column min-vh-100">
-<app-header></app-header>
-<app-hero></app-hero>
-<main class="flex-grow-1">
-<header class="mt-4">
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h1 class="mb-0">My Huddles</h1>
-            <div>
-                <button class="btn btn-success me-2" @click="showChoiceModal = true">Add Huddle</button>
-                <button 
-                    class="btn" 
-                    :class="showMyHuddlesOnly ? 'btn-primary' : 'btn-secondary'"
-                    @click="toggleMyHuddles()">
-                    {{ showMyHuddlesOnly ? 'All Huddles' : 'My Huddles Only' }}
-                </button>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <input 
-                    type="text" 
-                    class="form-control" 
-                    placeholder="Search huddles by name..." 
-                    :value="searchQuery"
-                    @input="updateSearch">
-            </div>
-        </div>
-    </div>
-</header>
-<section id="huddles">
-    <div class="container my-4">
-        <div class="row">
-            <!-- Huddle Card -->
-            <huddle-card 
-                v-for="huddle in huddles" 
-                :key="huddle.id" 
-                :huddle="huddle" 
-                :current-user="currentUser"
-                @edit="editHuddle" 
-                @delete="deleteHuddle" 
-                @leave="leaveHuddle">
-            </huddle-card>
-        </div>
-        <div v-if="huddles.length === 0" class="text-center text-muted">
-            No huddles available. Add one!
-        </div>
-    </div>
-</section>
-
-<!-- Modal for Choice (Create or Join) -->
-<choice-modal :show="showChoiceModal" @close="showChoiceModal = false" @open-join="showChoiceModal = false; openJoinModal()"></choice-modal>
-
-<!-- Modal for Joining a Huddle -->
-<join-huddle-modal :show="showJoinModal" v-model="joinCode" @close="showJoinModal = false" @join="joinHuddle"></join-huddle-modal>
-</main>
-<app-footer></app-footer>
-<!--dependencies-->
+<body>
+<div id="app"></div>
 <script src="https://unpkg.com/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-<!--components-->
-<script type="module" src="js/components/main/header.js"></script>
-<script type="module" src="js/components/main/hero.js"></script>
-<script type="module" src="js/components/main/footer.js"></script>
-<script type="module" src="js/components/huddle/huddleCard.js"></script>
-<script type="module" src="js/components/modals/choiceModal.js"></script>
-<script type="module" src="js/components/modals/joinHuddleModal.js"></script>
-<script src="js/core/darkmode.js"></script>
-<!-- Utilities and Toast -->
-<script type="module" src="js/core/utils.js"></script>
-<script type="module" src="js/components/ui/toast.js"></script>
-<!--Huddles-->
-<script type="module" src="js/core/app.js"></script>
-<!-- Debugger / Tyler doesn't want me to add a database yet so I have to make my own using JavaScript instead because he wants to wait on it but my app does not work properly without one :( -->
-<script src="debug/addDebugger.js"></script>
+<script src="/debug/addDebugger.js"></script>
+<script type="module" src="/js/main.js"></script>
 </body>
 </html>

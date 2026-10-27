@@ -111,6 +111,14 @@ function getCookie(name) {
     return null;
 }
 
+/**
+ * Detect the user's color scheme preference and return the Bootstrap theme value.
+ * @returns {'dark'|'light'}
+ */
+function getTheme() {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
 export {
     formatDate,
     sanitizeInput,
@@ -119,5 +127,6 @@ export {
     getDateKey,
     isSameDay,
     createSystemMessage,
-    buildParticipantsDisplay
+    buildParticipantsDisplay,
+    getTheme
 };
