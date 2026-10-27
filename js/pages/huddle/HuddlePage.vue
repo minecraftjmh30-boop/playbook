@@ -88,7 +88,7 @@ export default {
         const route = useRoute();
         const router = useRouter();
         provide(ToastKey, toast);
-        return { toast, route, router };
+        return { toast, route, router, formatDate };
     },
     data() {
         const idParam = this.route.query.id || this.route.query.code;

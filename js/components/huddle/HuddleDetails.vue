@@ -52,7 +52,7 @@ export default {
     emits: ['save'],
     setup() {
         const toast = inject(ToastKey);
-        return { toast };
+        return { toast, formatDate };
     },
     data() {
         return {

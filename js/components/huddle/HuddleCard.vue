@@ -42,6 +42,9 @@ export default {
         }
     },
     emits: ['edit', 'delete', 'leave'],
+    setup() {
+        return { formatDate };
+    },
     computed: {
         huddleStatus() {
             // Show selected dates if available
@@ -65,11 +68,6 @@ export default {
             if (this.huddle.status === 'Planning') return 'bg-warning';
             if (this.huddle.status === 'Completed') return 'bg-secondary';
             return 'bg-info';
-        }
-    },
-    methods: {
-        formatDate(dateStr) {
-            return formatDate(dateStr);
         }
     },
 };
