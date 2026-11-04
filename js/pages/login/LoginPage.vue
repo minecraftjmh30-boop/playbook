@@ -28,7 +28,7 @@
 import { sanitizeInput, setCookie } from '../../core/utils.js';
 import { provide, ref } from 'vue';
 import { useRouter } from 'vue-router';
-const ToastKey = Symbol('toast');
+import { ToastKey } from '../../core/keys.js';
 import AppFooter from '../../components/main/AppFooter.vue';
 import ToastComponent from '../../components/ui/Toast.vue';
 

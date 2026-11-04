@@ -18,7 +18,8 @@
 <script>
 import { getCookie, getDateKey, isSameDay } from '../../core/utils.js';
 import { provide, ref } from 'vue';
-const ToastKey = Symbol('toast');
+import { ToastKey } from '../../core/keys.js';
+import { store } from '../../core/store.js';
 import AppHeader from '../../components/main/AppHeader.vue';
 import AppFooter from '../../components/main/AppFooter.vue';
 import ScheduleTools from '../../components/schedule/ScheduleTools.vue';
@@ -112,51 +113,46 @@ export default {
             const userId = getCookie('currentUser') || 'User1';
             const storageKey = `schedule_${userId}`;
             
+            // Check store first
+            if (store.schedules[storageKey]) {
+                this.schedules = store.schedules[storageKey];
+                return;
+            }
+            
+            // Load from CSV if not in store
+            const url = `/debug/debugLogins/${userId}/schedule.csv`;
             try {
-                const savedData = localStorage.getItem(storageKey);
-                if (savedData) {
-                    this.schedules = JSON.parse(savedData);
-                } else {
-                    const url = `/debug/debugLogins/${userId}/schedule.csv`;
-                    try {
-                        const response = await fetch(url);
-                        if (response.ok) {
-                            const text = await response.text();
-                            const lines = text.trim().split('\n');
-                            const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate()).getTime();
-                            const newSchedules = {};
-                            for (const line of lines) {
-                                if (!line.trim()) continue;
-                                const [dateStr, mode, startTime, endTime] = line.split(',');
-                                const [year, month, day] = dateStr.split('-').map(Number);
-                                const dateObj = new Date(year, month - 1, day);
-                                if (dateObj.getTime() >= todayStart) {
-                                    newSchedules[dateStr] = { mode, startTime, endTime };
-                                }
-                            }
-                            this.schedules = newSchedules;
-                            localStorage.setItem(storageKey, JSON.stringify(this.schedules));
+                const response = await fetch(url);
+                if (response.ok) {
+                    const text = await response.text();
+                    const lines = text.trim().split('\n');
+                    const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate()).getTime();
+                    const newSchedules = {};
+                    for (const line of lines) {
+                        if (!line.trim()) continue;
+                        const [dateStr, mode, startTime, endTime] = line.split(',');
+                        const [year, month, day] = dateStr.split('-').map(Number);
+                        const dateObj = new Date(year, month - 1, day);
+                        if (dateObj.getTime() >= todayStart) {
+                            newSchedules[dateStr] = { mode, startTime, endTime };
                         }
-                    } catch (e) {
-                        console.warn('CSV fetch failed, starting with empty schedule.');
                     }
+                    this.schedules = newSchedules;
+                    store.schedules[storageKey] = newSchedules;
+// localStorage disabled - store.schedules is reactive
                 }
-            } catch (error) {
-                console.error('Error loading schedule:', error);
+            } catch (e) {
+                console.warn('CSV fetch failed, starting with empty schedule.');
             }
         },
         async saveSchedule() {
             const userId = getCookie('currentUser') || 'User1';
             const storageKey = `schedule_${userId}`;
             
-            try {
-                localStorage.setItem(storageKey, JSON.stringify(this.schedules));
-                this.toast.success('Schedule saved successfully!');
-                console.log('Simulated upload to schedule.csv:', this.schedules);
-            } catch (error) {
-                console.error('Error saving schedule:', error);
-                this.toast.error('Error saving schedule.');
-            }
+            store.schedules[storageKey] = this.schedules;
+// localStorage disabled - store.schedules is reactive
+            this.toast.success('Schedule saved successfully!');
+            console.log('Simulated upload to schedule.csv:', this.schedules);
         },
         changeMonth(offset) {
             const newDate = new Date(this.currentMonthView.getFullYear(), this.currentMonthView.getMonth() + offset, 1);

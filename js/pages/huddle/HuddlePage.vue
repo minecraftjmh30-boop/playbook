@@ -78,10 +78,12 @@
 </template>
 
 <script>
-import { getCookie, buildParticipantsDisplay, getDateKey, isSameDay, formatDate, createSystemMessage } from '../../core/utils.js';
+import { getCookie, buildParticipantsDisplay, getDateKey, isSameDay, formatDate } from '../../core/utils.js';
 import { provide, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-const ToastKey = Symbol('toast');
+import { ToastKey } from '../../core/keys.js';
+import { store } from '../../core/store.js';
+import { Huddle } from '../../models/Huddle.js';
 import AppHeader from '../../components/main/AppHeader.vue';
 import AppFooter from '../../components/main/AppFooter.vue';
 import ScheduleCalendar from '../../components/schedule/ScheduleCalendar.vue';
@@ -102,76 +104,42 @@ export default {
     },
     data() {
         const idParam = this.route.query.id || this.route.query.code;
-        
-        const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
+
+        // Look up by id first, then by code
         const idParamNumber = idParam ? Number(idParam) : null;
-        const huddleData = huddles.find(h => h.id === idParamNumber || h.code === idParam) || {
-            name: 'Huddle Not Found',
-            description: 'The requested huddle could not be found.',
-            location: 'Unknown',
-            code: idParam || '',
-            status: 'Offline',
-            owner: null,
-            startDate: null,
-            endDate: null,
-            participants: [],
-            messages: [],
-            selectedDates: []
-        };
+        let huddleData = store.huddles.findById(idParamNumber)
+            || store.huddles.findByCode(idParam)
+            || new Huddle({
+                name: 'Huddle Not Found',
+                description: 'The requested huddle could not be found.',
+                location: 'Unknown',
+                code: idParam || '',
+                status: 'Offline'
+            });
 
         const currentUser = getCookie('currentUser');
 
         // If accessing via code and user is not already a participant, add them
-        let updatedHuddleData = huddleData;
         if (idParam && huddleData.code === idParam && currentUser && huddleData.name !== 'Huddle Not Found') {
-            if (!huddleData.participants) {
-                huddleData.participants = [huddleData.owner];
-            }
-            if (!huddleData.participants.includes(currentUser)) {
-                huddleData.participants.push(currentUser);
-                // Save the updated participants to localStorage
-                const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
-                const index = huddles.find(h => h.id === huddleData.id);
-                if (index) {
-                    index.participants = huddleData.participants;
-                    localStorage.setItem('huddles', JSON.stringify(huddles));
-                }
-                updatedHuddleData = huddleData;
-            }
-        }
-
-        // Check if user is authorized to access this huddle
-        const participantIds = updatedHuddleData.participants || [updatedHuddleData.owner];
-        const isOwner = currentUser && updatedHuddleData.owner === currentUser;
-        const isParticipant = currentUser && participantIds.includes(currentUser);
-        const isAuthorized = isOwner || isParticipant || updatedHuddleData.name === 'Huddle Not Found';
-
-        if (!isAuthorized && updatedHuddleData.name !== 'Huddle Not Found') {
-            // Redirect unauthorized users to index page
-            // Note: toast cannot be used in data() — handled in mounted()
+            huddleData.addParticipant(currentUser);
         }
 
         // Build participants list from huddle data
-        const participants = buildParticipantsDisplay(updatedHuddleData.participants || [updatedHuddleData.owner]);
-
-        // Load messages from huddle data, default to empty array
-        const messages = updatedHuddleData.messages || [];
+        const participants = buildParticipantsDisplay(huddleData.participants);
 
         // Initialize currentMonthView to the huddle's start month if available, otherwise current month
         let initialMonthView = new Date();
-        if (updatedHuddleData.startDate) {
-            const startDate = new Date(updatedHuddleData.startDate);
+        if (huddleData.startDate) {
+            const startDate = new Date(huddleData.startDate);
             initialMonthView = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
         }
 
         return {
             // Huddle data
-            huddle: updatedHuddleData,
+            huddle: huddleData,
             participants,
-            messages,
             currentUser,
-            huddles, // reference to all huddles for localStorage updates
-            pendingInviteIds: updatedHuddleData.pendingInvites || [],
+            pendingInviteIds: huddleData.pendingInvites || [],
 
             // Schedule preview data
             today: new Date(),
@@ -198,14 +166,7 @@ export default {
     computed: {
         // Combine regular participants with pending invitees for display
         allParticipants() {
-            const allIds = [...(this.huddle.participants || [this.huddle.owner])];
-            const pending = this.huddle.pendingInvites || [];
-            pending.forEach(id => {
-                if (!allIds.includes(id)) {
-                    allIds.push(id);
-                }
-            });
-            return buildParticipantsDisplay(allIds);
+            return buildParticipantsDisplay(this.huddle.allParticipantIds);
         },
         // Schedule computed properties
         isCurrentMonth() {
@@ -291,34 +252,17 @@ export default {
     methods: {
         sendMessage(text) {
             if (text && text.trim()) {
-                const msg = {
-                    user: this.currentUser || 'Anonymous',
-                    text: text.trim(),
-                    time: new Date().toLocaleTimeString()
-                };
-                this.messages.push(msg);
-                // Persist messages to localStorage
+                this.huddle.messages.addChat(this.currentUser || 'Anonymous', text.trim());
                 this.saveHuddleData();
             }
         },
         saveHuddleData() {
-            const index = this.huddles.findIndex(h => h.id === this.huddle.id);
-            if (index !== -1) {
-                this.huddles[index].participants = this.huddle.participants;
-                this.huddles[index].messages = this.messages;
-                this.huddles[index].selectedDates = this.huddle.selectedDates || [];
-                this.huddles[index].name = this.huddle.name;
-                this.huddles[index].description = this.huddle.description;
-                this.huddles[index].location = this.huddle.location;
-                this.huddles[index].pendingInvites = this.huddle.pendingInvites || [];
-                localStorage.setItem('huddles', JSON.stringify(this.huddles));
-            }
+            // The huddle is the same instance in store.huddles, so no copy needed
+// localStorage disabled - store.huddles is reactive
         },
         deleteMessage(index) {
-            if (index >= 0 && index < this.messages.length) {
-                this.messages.splice(index, 1);
-                this.saveHuddleData();
-            }
+            this.huddle.messages.removeAt(index);
+            this.saveHuddleData();
         },
 
         // Schedule methods
@@ -362,15 +306,11 @@ export default {
         },
         // Leave huddle (non-owners only)
         leaveHuddle() {
-            if (this.currentUser && this.huddle.owner !== this.currentUser) {
+            if (this.currentUser && !this.huddle.isOwner(this.currentUser)) {
                 this.confirmTitle = 'Leave Huddle';
                 this.confirmMessage = 'Are you sure you want to leave this huddle?';
                 this.confirmCallback = () => {
-                    if (this.huddle.participants) {
-                        this.huddle.participants = this.huddle.participants.filter(id => id !== this.currentUser);
-                    }
-                    this.participants = buildParticipantsDisplay(this.huddle.participants);
-                    this.messages.push(createSystemMessage(`${this.currentUser} has left the huddle.`));
+                    this.huddle.removeParticipant(this.currentUser);
                     this.saveHuddleData();
                     this.toast.info('You have left the huddle.');
                     setTimeout(() => {
@@ -382,41 +322,22 @@ export default {
         },
         // Remove participant from huddle (owners only)
         removeParticipant(participantId) {
-            if (this.currentUser && this.huddle.owner === this.currentUser) {
-                this.confirmTitle = 'Remove Participant';
-                this.confirmMessage = 'Are you sure you want to remove this participant?';
-                this.confirmCallback = () => {
-                    if (!this.huddle.participants) {
-                        this.huddle.participants = [this.huddle.owner];
-                    }
-                    this.huddle.participants = this.huddle.participants.filter(id => id !== participantId);
-                    this.participants = buildParticipantsDisplay(this.huddle.participants);
-                    this.messages.push(createSystemMessage(`${participantId} was removed from the huddle by ${this.currentUser}.`));
-                    this.saveHuddleData();
-                    this.toast.success(`${participantId} has been removed from the huddle.`);
-                };
-                this.showConfirmModal = true;
-            } else {
+            if (!this.huddle.isOwner(this.currentUser)) {
                 this.toast.error('Only the owner can remove participants.');
+                return;
             }
+            this.confirmTitle = 'Remove Participant';
+            this.confirmMessage = 'Are you sure you want to remove this participant?';
+            this.confirmCallback = () => {
+                this.huddle.removeParticipant(participantId, this.currentUser);
+                this.saveHuddleData();
+                this.toast.success(`${participantId} has been removed from the huddle.`);
+            };
+            this.showConfirmModal = true;
         },
         // Select dates for huddle from schedule (owners only)
         selectHuddleDate(dateKey) {
-            if (!this.huddle.selectedDates) {
-                this.huddle.selectedDates = [];
-            }
-            
-            const index = this.huddle.selectedDates.indexOf(dateKey);
-            if (index !== -1) {
-                this.huddle.selectedDates.splice(index, 1);
-                // Add date removed system message
-                this.messages.push(createSystemMessage(`${this.currentUser} removed ${formatDate(dateKey)} from the planned dates.`));
-            } else {
-                this.huddle.selectedDates.push(dateKey);
-                // Add date picked system message
-                this.messages.push(createSystemMessage(`${this.currentUser} selected ${formatDate(dateKey)} as a planned date.`));
-            }
-            
+            this.huddle.togglePlannedDate(dateKey, this.currentUser);
             this.saveHuddleData();
         },
         // Build huddle schedule overlay from all participants' schedules
@@ -426,28 +347,22 @@ export default {
             
             participantIds.forEach(pid => {
                 const scheduleKey = `schedule_${pid}`;
-                const scheduleData = localStorage.getItem(scheduleKey);
-                if (scheduleData) {
-                    try {
-                        const schedules = JSON.parse(scheduleData);
-                        Object.keys(schedules).forEach(dateKey => {
-                            if (!overlay[dateKey]) {
-                                overlay[dateKey] = { free: 0, busy: 0, undetermined: 0, details: [] };
-                            }
-                            overlay[dateKey].details.push({ participant: pid, ...schedules[dateKey] });
-                            if (schedules[dateKey].mode === 'free') {
-                                overlay[dateKey].free++;
-                            } else if (schedules[dateKey].mode === 'busy') {
-                                overlay[dateKey].busy++;
-                            } else {
-                                overlay[dateKey].undetermined++;
-                            }
-                        });
-                    } catch (e) {
-                        console.warn('Failed to parse schedule for', pid);
-                    }
-                } else {
-                    // Participant has no schedule data
+                // localStorage disabled - use store.schedules instead
+                const schedules = store.schedules[scheduleKey];
+                if (schedules) {
+                    Object.keys(schedules).forEach(dateKey => {
+                        if (!overlay[dateKey]) {
+                            overlay[dateKey] = { free: 0, busy: 0, undetermined: 0, details: [] };
+                        }
+                        overlay[dateKey].details.push({ participant: pid, ...schedules[dateKey] });
+                        if (schedules[dateKey].mode === 'free') {
+                            overlay[dateKey].free++;
+                        } else if (schedules[dateKey].mode === 'busy') {
+                            overlay[dateKey].busy++;
+                        } else {
+                            overlay[dateKey].undetermined++;
+                        }
+                    });
                 }
             });
             
@@ -516,22 +431,16 @@ export default {
         },
         // Invite a friend to the huddle — creates a pending invitation
         inviteFriend(friendId) {
-            if (!this.huddle.participants) {
-                this.huddle.participants = [this.huddle.owner];
-            }
-            if (this.huddle.participants.includes(friendId)) {
+            const result = this.huddle.invite(friendId, this.currentUser);
+            if (result === 'participant') {
                 this.toast.info(`${friendId} is already a participant.`);
                 return;
             }
-            // Check if already pending
-            if (!this.huddle.pendingInvites) {
-                this.huddle.pendingInvites = [];
-            }
-            if (this.huddle.pendingInvites.includes(friendId)) {
+            if (result === 'pending') {
                 this.toast.info(`${friendId} already has a pending invitation.`);
                 return;
             }
-            // Create pending invitation record in the invitee's localStorage
+            // Create pending invitation record in store
             const invitation = {
                 id: `inv_${Date.now()}_${friendId}`,
                 huddleId: this.huddle.id,
@@ -540,16 +449,10 @@ export default {
                 to: friendId,
                 timestamp: new Date().toISOString()
             };
-            let invitations = JSON.parse(localStorage.getItem(`invitations_${friendId}`)) || [];
-            invitations.push(invitation);
-            localStorage.setItem(`invitations_${friendId}`, JSON.stringify(invitations));
-
-            // Track pending invite on the huddle data
-            this.huddle.pendingInvites.push(friendId);
+            if (!store.invitations[friendId]) store.invitations[friendId] = [];
+            store.invitations[friendId].push(invitation);
+// localStorage disabled - store.invitations is reactive
             this.saveHuddleData();
-
-            // Add invite system message
-            this.messages.push(createSystemMessage(`${this.currentUser} invited ${friendId} to the huddle.`));
             this.toast.success(`Invitation sent to ${friendId}!`);
         },
         // Handle day click on schedule calendar - only show overlay, don't select date
@@ -561,17 +464,16 @@ export default {
         },
         // Owner selects a date as planned date via button
         selectDateAsPlanned(dateKey) {
-            if (!this.currentUser || this.huddle.owner !== this.currentUser) {
+            if (!this.currentUser || !this.huddle.isOwner(this.currentUser)) {
                 this.toast.error('Only the owner can select planned dates.');
                 return;
             }
-            
-            this.selectHuddleDate(dateKey);
-            const index = this.huddle.selectedDates.indexOf(dateKey);
-            if (index !== -1) {
-                this.toast.info(`${formatDate(dateKey)} removed from planned dates.`);
-            } else {
+            const isNowPlanned = this.huddle.togglePlannedDate(dateKey, this.currentUser);
+            this.saveHuddleData();
+            if (isNowPlanned) {
                 this.toast.success(`${formatDate(dateKey)} added to planned dates.`);
+            } else {
+                this.toast.info(`${formatDate(dateKey)} removed from planned dates.`);
             }
         }
     }

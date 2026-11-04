@@ -80,7 +80,8 @@
 import { getCookie, sanitizeInput } from '../../core/utils.js';
 import { provide, ref } from 'vue';
 import { useRoute } from 'vue-router';
-const ToastKey = Symbol('toast');
+import { ToastKey } from '../../core/keys.js';
+import { store } from '../../core/store.js';
 import AppHeader from '../../components/main/AppHeader.vue';
 import AppFooter from '../../components/main/AppFooter.vue';
 import ProfileInfo from '../../components/profile/ProfileInfo.vue';
@@ -161,34 +162,19 @@ export default {
         },
         async loadHuddleData() {
             const userId = getCookie('currentUser') || 'User1';
-            const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
-            const invitations = JSON.parse(localStorage.getItem(`invitations_${userId}`)) || [];
+            const invitations = store.invitations[userId] || [];
 
             // Huddles where user is a participant
-            this.myHuddles = huddles.filter(huddle =>
-                huddle.owner === userId ||
-                (huddle.participants && huddle.participants.includes(userId))
-            );
+            this.myHuddles = store.huddles.forMember(userId);
 
             // Pending invitations for this user
             this.pendingInvitations = invitations.filter(inv => inv.to === userId);
         },
         async acceptInvitation(invitation) {
-            const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
-            const huddle = huddles.find(huddle => huddle.id === invitation.huddleId);
+            const huddle = store.huddles.findById(invitation.huddleId);
             if (huddle) {
                 const userId = getCookie('currentUser') || 'User1';
-                if (!huddle.participants) {
-                    huddle.participants = [huddle.owner];
-                }
-                if (!huddle.participants.includes(userId)) {
-                    huddle.participants.push(userId);
-                }
-                // Remove from pending invites list
-                if (huddle.pendingInvites) {
-                    huddle.pendingInvites = huddle.pendingInvites.filter(id => id !== userId);
-                }
-                localStorage.setItem('huddles', JSON.stringify(huddles));
+                huddle.addParticipant(userId);
 
                 // Remove invitation
                 this.removeInvitation(invitation);
@@ -197,14 +183,10 @@ export default {
             }
         },
         async declineInvitation(invitation) {
-            const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
-            const huddle = huddles.find(huddle => huddle.id === invitation.huddleId);
+            const huddle = store.huddles.findById(invitation.huddleId);
             if (huddle) {
                 const userId = getCookie('currentUser') || 'User1';
-                if (huddle.pendingInvites) {
-                    huddle.pendingInvites = huddle.pendingInvites.filter(id => id !== userId);
-                }
-                localStorage.setItem('huddles', JSON.stringify(huddles));
+                huddle.pendingInvites = huddle.pendingInvites.filter(id => id !== userId);
             }
             this.removeInvitation(invitation);
             await this.loadHuddleData();
@@ -212,9 +194,8 @@ export default {
         },
         removeInvitation(invitation) {
             const userId = getCookie('currentUser') || 'User1';
-            let invitations = JSON.parse(localStorage.getItem(`invitations_${userId}`)) || [];
-            invitations = invitations.filter(inv => inv.id !== invitation.id);
-            localStorage.setItem(`invitations_${userId}`, JSON.stringify(invitations));
+            if (!store.invitations[userId]) return;
+            store.invitations[userId] = store.invitations[userId].filter(inv => inv.id !== invitation.id);
         },
         async joinHuddleFromProfile() {
             const code = sanitizeInput(this.joinHuddleCode.trim());
@@ -223,20 +204,16 @@ export default {
                 return;
             }
 
-            const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
-            const huddle = huddles.find(huddle => huddle.code === code);
+            const userId = getCookie('currentUser') || 'User1';
+            const { huddle, joined } = store.huddles.joinByCode(code, userId);
             if (huddle) {
-                const userId = getCookie('currentUser') || 'User1';
-                if (!huddle.participants) {
-                    huddle.participants = [huddle.owner];
-                }
-                if (!huddle.participants.includes(userId)) {
-                    huddle.participants.push(userId);
-                }
-                localStorage.setItem('huddles', JSON.stringify(huddles));
                 this.joinHuddleCode = '';
                 await this.loadHuddleData();
-                this.toast.success(`Joined "${huddle.name}"!`);
+                if (joined) {
+                    this.toast.success(`Joined "${huddle.name}"!`);
+                } else {
+                    this.toast.info('You are already a member of this huddle.');
+                }
             } else {
                 this.toast.error('Invalid huddle code!');
             }

@@ -27,7 +27,7 @@
 
 <script>
 import { inject } from 'vue';
-const ToastKey = Symbol('toast');
+import { ToastKey } from '../../core/keys.js';
 
 export default {
     name: 'UnifiedModal',
