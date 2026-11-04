@@ -1,6 +1,7 @@
 /**
  * A group event that users join to coordinate a date.
  */
+import { toRaw } from 'vue';
 import { BaseModel } from './BaseModel.js';
 import { DateRange } from './DateRange.js';
 import { formatDate } from '../core/utils.js';
@@ -165,4 +166,28 @@ export class Huddle extends BaseModel {
 
     /** @returns {boolean} */
     isValid() { return Object.values(this.validate()).every(e => !e); }
+
+    /**
+     * Clone this huddle, rebuilding the MessageCollection so methods are preserved.
+     * {@link BaseModel.clone} would turn the collection into a plain object via structuredClone.
+     * @returns {Huddle}
+     */
+    clone() {
+        const raw = toRaw(this);
+        return new Huddle({
+            id: raw.id,
+            name: raw.name,
+            description: raw.description,
+            location: raw.location,
+            status: raw.status,
+            code: raw.code,
+            owner: raw.owner,
+            participants: [...(raw.participants || [])],
+            pendingInvites: [...(raw.pendingInvites || [])],
+            selectedDates: [...(raw.selectedDates || [])],
+            messages: structuredClone(raw.messages.items),
+            startDate: raw.startDate,
+            endDate: raw.endDate
+        });
+    }
 }
