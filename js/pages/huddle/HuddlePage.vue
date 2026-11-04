@@ -7,7 +7,7 @@
                     <div class="card mb-4">
                         <div class="card-header">Huddle Schedule</div>
                         <div class="card-body">
-                            <ScheduleCalendar :month-info="monthInfo" :displayed-days="displayedDays" :is-current-month="isCurrentMonth" :interactive="false" :overlay-status="getOverlayStatus" :selected-dates="huddle.selectedDates || []" @change-month="changeMonth" @day-click="handleDayClick"></ScheduleCalendar>
+                            <ScheduleCalendar :month-info="calendar.info" :displayed-days="calendar.days" :is-current-month="calendar.isCurrentMonth" :interactive="false" :overlay-status="getOverlayStatus" :selected-dates="huddle.selectedDates || []" @change-month="changeMonth" @day-click="handleDayClick"></ScheduleCalendar>
                         </div>
                     </div>
                     <div v-if="huddle.selectedDates && huddle.selectedDates.length > 0" class="card mb-4">
@@ -78,12 +78,14 @@
 </template>
 
 <script>
-import { getCookie, buildParticipantsDisplay, getDateKey, isSameDay, formatDate } from '../../core/utils.js';
+import { getCookie, buildParticipantsDisplay, formatDate } from '../../core/utils.js';
 import { provide, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ToastKey } from '../../core/keys.js';
 import { store } from '../../core/store.js';
 import { Huddle } from '../../models/Huddle.js';
+import { CalendarMonth } from '../../models/CalendarMonth.js';
+import { DateRange } from '../../models/DateRange.js';
 import AppHeader from '../../components/main/AppHeader.vue';
 import AppFooter from '../../components/main/AppFooter.vue';
 import ScheduleCalendar from '../../components/schedule/ScheduleCalendar.vue';
@@ -168,80 +170,9 @@ export default {
         allParticipants() {
             return buildParticipantsDisplay(this.huddle.allParticipantIds);
         },
-        // Schedule computed properties
-        isCurrentMonth() {
-            return this.currentMonthView.getFullYear() === this.today.getFullYear() &&
-                   this.currentMonthView.getMonth() === this.today.getMonth();
-        },
-        monthInfo() {
-            const year = this.currentMonthView.getFullYear();
-            const monthIndex = this.currentMonthView.getMonth();
-            const firstDayOfMonth = new Date(year, monthIndex, 1);
-            const lastDayOfMonth = new Date(year, monthIndex + 1, 0);
-            const firstDayOfWeek = firstDayOfMonth.getDay(); // 0 = Sunday, 1 = Monday, etc.
-            const monthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(this.currentMonthView);
-            
-            return {
-                year,
-                monthIndex,
-                monthName,
-                month: monthIndex + 1,
-                firstDayOfWeek,
-                lastDay: lastDayOfMonth.getDate()
-            };
-        },
-        displayedDays() {
-            const { firstDayOfWeek, lastDay, year, monthIndex } = this.monthInfo;
-            const days = [];
-
-            const startDate = this.huddle.startDate ? new Date(this.huddle.startDate) : null;
-            const endDate = this.huddle.endDate ? new Date(this.huddle.endDate) : null;
-
-            // Add filler days for previous month
-            for (let i = 0; i < firstDayOfWeek; i++) {
-                days.push({ type: 'filler', date: null });
-            }
-
-            const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate()).getTime();
-
-            // Add actual days of the current month
-            for (let day = 1; day <= lastDay; day++) {
-                const dateObj = new Date(year, monthIndex, day);
-                const dateKey = getDateKey(dateObj);
-                const isToday = isSameDay(dateObj, this.today);
-                const isPast = dateObj.getTime() < todayStart;
-                
-                // Check if the date is within the huddle's time frame if provided
-                let isWithinFrame = true;
-                if (startDate && dateObj < startDate) {
-                    isWithinFrame = false;
-                }
-                if (endDate && dateObj > endDate) {
-                    isWithinFrame = false;
-                }
-
-                // Only add days that are within the proper timeline
-                if (isWithinFrame) {
-                    days.push({
-                        type: 'actual',
-                        day: day,
-                        date: dateObj,
-                        dateKey: dateKey,
-                        isToday,
-                        isPast,
-                        ...this.schedules[dateKey] || { mode: null, startTime: '', endTime: '' }
-                    });
-                } else {
-                    // Show a "disabled" placeholder for days outside the time frame
-                    days.push({ 
-                        type: 'outside-frame', 
-                        date: dateObj,
-                        disabled: true
-                    }); 
-                }
-            }
-
-            return days;
+        calendar() {
+            const range = new DateRange(this.huddle.startDate, this.huddle.endDate);
+            return new CalendarMonth(this.currentMonthView, { range, schedule: this.schedules, today: this.today });
         },
         filteredInviteFriends() {
             if (!this.inviteSearch) return this.friends;
@@ -267,42 +198,8 @@ export default {
 
         // Schedule methods
         changeMonth(offset) {
-            const newDate = new Date(this.currentMonthView.getFullYear(), this.currentMonthView.getMonth() + offset, 1);
-            
-            // Validate against huddle time frame — only restrict if BOTH start and end are set
-            if (this.huddle.startDate && this.huddle.endDate) {
-                const minDate = new Date(this.huddle.startDate);
-                minDate.setDate(1);  // Set to first day of the month
-                
-                const maxDate = new Date(this.huddle.endDate);
-                // Set to last day of the month so we can still navigate to the end month
-                maxDate.setMonth(maxDate.getMonth() + 1);
-                maxDate.setDate(0);
-                
-                if (offset < 0 && newDate < minDate) {
-                    return;
-                }
-                if (offset > 0 && newDate > maxDate) {
-                    return;
-                }
-            } else if (this.huddle.startDate) {
-                // Only start date set — don't go before it
-                const minDate = new Date(this.huddle.startDate);
-                minDate.setDate(1);
-                if (offset < 0 && newDate < minDate) {
-                    return;
-                }
-            } else if (this.huddle.endDate) {
-                // Only end date set — don't go after it
-                const maxDate = new Date(this.huddle.endDate);
-                maxDate.setMonth(maxDate.getMonth() + 1);
-                maxDate.setDate(0);
-                if (offset > 0 && newDate > maxDate) {
-                    return;
-                }
-            }
-            
-            this.currentMonthView = newDate;
+            const newCalendar = this.calendar.shift(offset);
+            this.currentMonthView = newCalendar.viewDate;
         },
         // Leave huddle (non-owners only)
         leaveHuddle() {

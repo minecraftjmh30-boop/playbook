@@ -2,6 +2,7 @@
  * A group event that users join to coordinate a date.
  */
 import { BaseModel } from './BaseModel.js';
+import { DateRange } from './DateRange.js';
 import { formatDate } from '../core/utils.js';
 import { MessageCollection } from '../collections/MessageCollection.js';
 
@@ -40,6 +41,9 @@ export class Huddle extends BaseModel {
     static generateCode() {
         return Math.random().toString(36).substring(2, 7).toUpperCase();
     }
+
+    /** @returns {DateRange} The optional time frame of the huddle. */
+    get timeFrame() { return new DateRange(this.startDate, this.endDate); }
 
     /** @param {string} userId @returns {boolean} */
     isOwner(userId) { return !!userId && this.owner === userId; }

@@ -3,7 +3,7 @@
         <AppHeader></AppHeader>
         <main class="container my-4 flex-grow-1">
             <ScheduleTools :mode="mode" @set-mode="setMode"></ScheduleTools>
-            <ScheduleCalendar :month-info="monthInfo" :displayed-days="displayedDays" :is-current-month="isCurrentMonth" :interactive="true" @change-month="changeMonth" @day-click="handleDayClick"></ScheduleCalendar>
+            <ScheduleCalendar :month-info="calendar.info" :displayed-days="calendar.days" :is-current-month="calendar.isCurrentMonth" :interactive="true" @change-month="changeMonth" @day-click="handleDayClick"></ScheduleCalendar>
             <section class="row justify-content-center gap-2 mt-4">
                 <button class="btn btn-secondary col-auto px-4 rounded-pill" type="button" @click="resetSchedule">Reset</button>
                 <button class="btn btn-primary col-auto px-4 rounded-pill" type="button" @click="saveSchedule">Save</button>
@@ -16,10 +16,12 @@
 </template>
 
 <script>
-import { getCookie, getDateKey, isSameDay } from '../../core/utils.js';
+import { getCookie, getDateKey } from '../../core/utils.js';
 import { provide, ref } from 'vue';
 import { ToastKey } from '../../core/keys.js';
 import { store } from '../../core/store.js';
+import { CalendarMonth } from '../../models/CalendarMonth.js';
+import { DateRange } from '../../models/DateRange.js';
 import AppHeader from '../../components/main/AppHeader.vue';
 import AppFooter from '../../components/main/AppFooter.vue';
 import ScheduleTools from '../../components/schedule/ScheduleTools.vue';
@@ -55,57 +57,11 @@ export default {
         await this.loadSchedule();
     },
     computed: {
-        isCurrentMonth() {
-            return this.currentMonthView.getFullYear() === this.today.getFullYear() &&
-                   this.currentMonthView.getMonth() === this.today.getMonth();
-        },
-        monthInfo() {
-            const year = this.currentMonthView.getFullYear();
-            const monthIndex = this.currentMonthView.getMonth();
-            const firstDayOfMonth = new Date(year, monthIndex, 1);
-            const lastDayOfMonth = new Date(year, monthIndex + 1, 0);
-            const firstDayOfWeek = firstDayOfMonth.getDay(); // 0 = Sunday, 1 = Monday, etc.
-            const monthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(this.currentMonthView);
-            
-            return {
-                year,
-                monthIndex,
-                monthName,
-                month: monthIndex + 1,
-                firstDayOfWeek,
-                lastDay: lastDayOfMonth.getDate()
-            };
-        },
-        displayedDays() {
-            const { firstDayOfWeek, lastDay, year, monthIndex } = this.monthInfo;
-            const days = [];
-
-            // Add filler days for previous month
-            for (let i = 0; i < firstDayOfWeek; i++) {
-                days.push({ type: 'filler', date: null });
-            }
-
-            const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate()).getTime();
-
-            // Add actual days of the current month
-            for (let day = 1; day <= lastDay; day++) {
-                const dateObj = new Date(year, monthIndex, day);
-                const dateKey = getDateKey(dateObj);
-                const isToday = isSameDay(dateObj, this.today);
-                const isPast = dateObj.getTime() < todayStart;
-
-                days.push({
-                    type: 'actual',
-                    day: day,
-                    date: dateObj,
-                    dateKey: dateKey,
-                    isToday,
-                    isPast,
-                    ...this.schedules[dateKey] || { mode: null, startTime: '', endTime: '' }
-                });
-            }
-
-            return days;
+        calendar() {
+            // SchedulePage can't go before the current month
+            const startOfThisMonth = new Date(this.today.getFullYear(), this.today.getMonth(), 1);
+            const range = new DateRange(startOfThisMonth, null);
+            return new CalendarMonth(this.currentMonthView, { range, schedule: this.schedules, today: this.today });
         }
     },
     methods: {
@@ -155,14 +111,8 @@ export default {
             console.log('Simulated upload to schedule.csv:', this.schedules);
         },
         changeMonth(offset) {
-            const newDate = new Date(this.currentMonthView.getFullYear(), this.currentMonthView.getMonth() + offset, 1);
-            if (offset < 0) {
-                const minDate = new Date(this.today.getFullYear(), this.today.getMonth(), 1);
-                if (newDate < minDate) {
-                    return;
-                }
-            }
-            this.currentMonthView = newDate;
+            const newCalendar = this.calendar.shift(offset);
+            this.currentMonthView = newCalendar.viewDate;
         },
         setMode(newMode) {
             this.mode = (this.mode === newMode) ? null : newMode;
