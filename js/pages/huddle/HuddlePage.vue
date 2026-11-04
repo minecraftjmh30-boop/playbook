@@ -20,7 +20,7 @@
                 </div>
                 <div class="col-md-8">
                     <HuddleDetails :huddle="huddle" :current-user="currentUser" @save="saveHuddleData"></HuddleDetails>
-                    <HuddleChat :messages="messages" :current-user="currentUser" :owner-id="huddle.owner" @send-message="sendMessage" @delete-message="deleteMessage"></HuddleChat>
+                    <HuddleChat :messages="huddle.messages.items" :current-user="currentUser" :owner-id="huddle.owner" @send-message="sendMessage" @delete-message="deleteMessage"></HuddleChat>
                 </div>
             </div>
         </main>
@@ -121,9 +121,12 @@ export default {
 
         const currentUser = getCookie('currentUser');
 
-        // If accessing via code and user is not already a participant, add them
+        // If accessing via code, use the collection join method
         if (idParam && huddleData.code === idParam && currentUser && huddleData.name !== 'Huddle Not Found') {
-            huddleData.addParticipant(currentUser);
+            const result = store.huddles.joinByCode(idParam, currentUser);
+            if (result.huddle) {
+                huddleData = result.huddle;
+            }
         }
 
         // Build participants list from huddle data
@@ -377,8 +380,3 @@ export default {
 };
 </script>
 
-<style scoped>
-.modal-overlay {
-    background-color: rgba(0, 0, 0, 0.5);
-}
-</style>

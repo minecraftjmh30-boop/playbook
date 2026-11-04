@@ -119,6 +119,22 @@ function getTheme() {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
+/**
+ * Map an email address to a user ID.
+ * Used to convert the email entered during login to the internal user ID format.
+ * @param {string} email - User email address
+ * @returns {string|null} User ID or null if not found
+ */
+function getUserIdByEmail(email) {
+    const userMap = {
+        'user1@example.com': 'User1',
+        'user2@example.com': 'User2',
+        'user3@example.com': 'User3',
+        'user4@example.com': 'User4'
+    };
+    return userMap[email.toLowerCase()] || null;
+}
+
 export {
     formatDate,
     sanitizeInput,
@@ -128,5 +144,6 @@ export {
     isSameDay,
     createSystemMessage,
     buildParticipantsDisplay,
-    getTheme
+    getTheme,
+    getUserIdByEmail
 };

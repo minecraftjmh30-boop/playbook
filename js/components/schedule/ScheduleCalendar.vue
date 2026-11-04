@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="row justify-content-center align-items-center mb-3">
-            <button class="btn btn-sm btn-outline-secondary col-auto px-2 rounded-pill" :class="{ invisible: isCurrentMonth }" @click="$emit('change-month', -1)"> &#8592; </button>
+            <button class="btn btn-sm btn-outline-secondary col-auto px-2 rounded-pill" @click="$emit('change-month', -1)"> &#8592; </button>
             <h6 v-if="!interactive" class="col-auto text-center mx-2 my-0">{{ monthInfo.monthName }} {{ monthInfo.year }}</h6>
             <h3 v-else class="col-auto text-center mx-3 my-0">{{ monthInfo.monthName }} {{ monthInfo.year }}</h3>
             <button class="btn btn-sm btn-outline-secondary col-auto px-2 rounded-pill" @click="$emit('change-month', 1)"> &#8594; </button>
