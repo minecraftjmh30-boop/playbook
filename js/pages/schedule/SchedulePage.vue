@@ -22,6 +22,7 @@ import { ToastKey } from '../../core/keys.js';
 import { store } from '../../core/store.js';
 import { CalendarMonth } from '../../models/CalendarMonth.js';
 import { DateRange } from '../../models/DateRange.js';
+import { Schedule } from '../../collections/Schedule.js';
 import AppHeader from '../../components/main/AppHeader.vue';
 import AppFooter from '../../components/main/AppFooter.vue';
 import ScheduleTools from '../../components/schedule/ScheduleTools.vue';
@@ -50,7 +51,7 @@ export default {
                 endTime: ''
             },
             // Mock data for schedules
-            schedules: {} 
+            schedules: new Schedule()
         };
     },
     async mounted() {
@@ -68,33 +69,21 @@ export default {
         async loadSchedule() {
             const userId = getCookie('currentUser') || 'User1';
             const storageKey = `schedule_${userId}`;
-            
+
             // Check store first
             if (store.schedules[storageKey]) {
                 this.schedules = store.schedules[storageKey];
                 return;
             }
-            
+
             // Load from CSV if not in store
             const url = `/debug/debugLogins/${userId}/schedule.csv`;
             try {
                 const response = await fetch(url);
                 if (response.ok) {
                     const text = await response.text();
-                    const lines = text.trim().split('\n');
-                    const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate()).getTime();
-                    const newSchedules = {};
-                    for (const line of lines) {
-                        if (!line.trim()) continue;
-                        const [dateStr, mode, startTime, endTime] = line.split(',');
-                        const [year, month, day] = dateStr.split('-').map(Number);
-                        const dateObj = new Date(year, month - 1, day);
-                        if (dateObj.getTime() >= todayStart) {
-                            newSchedules[dateStr] = { mode, startTime, endTime };
-                        }
-                    }
-                    this.schedules = newSchedules;
-                    store.schedules[storageKey] = newSchedules;
+                    this.schedules = Schedule.fromCSV(text, this.today);
+                    store.schedules[storageKey] = this.schedules;
 // localStorage disabled - store.schedules is reactive
                 }
             } catch (e) {
@@ -104,11 +93,11 @@ export default {
         async saveSchedule() {
             const userId = getCookie('currentUser') || 'User1';
             const storageKey = `schedule_${userId}`;
-            
+
             store.schedules[storageKey] = this.schedules;
 // localStorage disabled - store.schedules is reactive
             this.toast.success('Schedule saved successfully!');
-            console.log('Simulated upload to schedule.csv:', this.schedules);
+            console.log('Simulated upload to schedule.csv:', this.schedules.toPlain());
         },
         changeMonth(offset) {
             const newCalendar = this.calendar.shift(offset);
@@ -121,25 +110,26 @@ export default {
             if (dayObj.isPast) return;
 
             if (this.mode === 'remove') {
-                delete this.schedules[dayObj.dateKey];
+                this.schedules.remove(dayObj.dateKey);
             } else if (this.mode) {
                 // Quick action: Apply mode directly to the day
-                this.schedules[dayObj.dateKey] = {
+                this.schedules.set(dayObj.dateKey, {
                     mode: this.mode,
                     startTime: '',
                     endTime: ''
-                };
+                });
             } else {
                 // Open modal for detailed time setting
                 this.openTimeModal(dayObj);
             }
         },
         openTimeModal(dayObj) {
+            const entry = this.schedules.get(dayObj.dateKey);
             this.modalData = {
                 date: dayObj.date,
-                mode: dayObj.mode || 'free',
-                startTime: dayObj.startTime || '',
-                endTime: dayObj.endTime || ''
+                mode: entry ? entry.mode : 'free',
+                startTime: entry ? entry.startTime : '',
+                endTime: entry ? entry.endTime : ''
             };
             this.showTimeModal = true;
         },
@@ -152,15 +142,15 @@ export default {
                 return;
             }
             const key = getDateKey(this.modalData.date);
-            this.schedules[key] = {
+            this.schedules.set(key, {
                 mode: this.modalData.mode,
                 startTime: this.modalData.startTime,
                 endTime: this.modalData.endTime
-            };
+            });
             this.closeModal();
         },
         resetSchedule() {
-            this.schedules = {};
+            this.schedules.clear();
         }
     }
 };

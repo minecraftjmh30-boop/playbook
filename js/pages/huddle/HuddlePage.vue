@@ -86,6 +86,8 @@ import { store } from '../../core/store.js';
 import { Huddle } from '../../models/Huddle.js';
 import { CalendarMonth } from '../../models/CalendarMonth.js';
 import { DateRange } from '../../models/DateRange.js';
+import { ScheduleOverlay } from '../../models/ScheduleOverlay.js';
+import { Schedule } from '../../collections/Schedule.js';
 import AppHeader from '../../components/main/AppHeader.vue';
 import AppFooter from '../../components/main/AppFooter.vue';
 import ScheduleCalendar from '../../components/schedule/ScheduleCalendar.vue';
@@ -177,6 +179,24 @@ export default {
             const range = new DateRange(this.huddle.startDate, this.huddle.endDate);
             return new CalendarMonth(this.currentMonthView, { range, schedule: this.schedules, today: this.today });
         },
+        /**
+         * Build the schedule overlay once and reuse it for all calendar cells.
+         * Replaces the per-cell buildHuddleScheduleOverlay() call.
+         */
+        overlay() {
+            // Gather schedules for all participants from the store
+            const schedulesByUser = {};
+            const participantIds = this.huddle.allParticipantIds;
+            participantIds.forEach(pid => {
+                const scheduleKey = `schedule_${pid}`;
+                const raw = store.schedules[scheduleKey];
+                if (raw) {
+                    // Wrap plain objects in Schedule; keep Schedule instances as-is
+                    schedulesByUser[pid] = raw instanceof Schedule ? raw : new Schedule(raw);
+                }
+            });
+            return new ScheduleOverlay(schedulesByUser);
+        },
         filteredInviteFriends() {
             if (!this.inviteSearch) return this.friends;
             const search = this.inviteSearch.toLowerCase();
@@ -240,57 +260,16 @@ export default {
             this.huddle.togglePlannedDate(dateKey, this.currentUser);
             this.saveHuddleData();
         },
-        // Build huddle schedule overlay from all participants' schedules
-        buildHuddleScheduleOverlay() {
-            const participantIds = this.huddle.participants || [this.huddle.owner];
-            const overlay = {};
-            
-            participantIds.forEach(pid => {
-                const scheduleKey = `schedule_${pid}`;
-                // localStorage disabled - use store.schedules instead
-                const schedules = store.schedules[scheduleKey];
-                if (schedules) {
-                    Object.keys(schedules).forEach(dateKey => {
-                        if (!overlay[dateKey]) {
-                            overlay[dateKey] = { free: 0, busy: 0, undetermined: 0, details: [] };
-                        }
-                        overlay[dateKey].details.push({ participant: pid, ...schedules[dateKey] });
-                        if (schedules[dateKey].mode === 'free') {
-                            overlay[dateKey].free++;
-                        } else if (schedules[dateKey].mode === 'busy') {
-                            overlay[dateKey].busy++;
-                        } else {
-                            overlay[dateKey].undetermined++;
-                        }
-                    });
-                }
-            });
-            
-            return overlay;
-        },
-        // Get overlay status for a date: 'green', 'yellow', or 'red'
+        // Get overlay status for a date using the computed overlay (built once)
         getOverlayStatus(dateKey) {
-            const overlay = this.buildHuddleScheduleOverlay();
-            const data = overlay[dateKey];
-            if (!data) return null;
-            
-            const total = data.free + data.busy;
-            if (total === 0) return null;
-            
-            // Green: everyone is free (no busy)
-            if (data.busy === 0) return 'green';
-            // Red: more than half are busy
-            if (data.busy > total / 2) return 'red';
-            // Yellow: less than half are busy
-            return 'yellow';
+            return this.overlay.statusFor(dateKey);
         },
         // Show overlay modal for a clicked date
         showScheduleOverlay(day) {
             if (!day || !day.dateKey) return;
-            
-            const overlay = this.buildHuddleScheduleOverlay();
+
             this.overlayDate = day.dateKey;
-            this.overlayData = overlay[day.dateKey] ? overlay[day.dateKey].details : [];
+            this.overlayData = this.overlay.detailsFor(day.dateKey);
             this.showOverlayModal = true;
         },
         closeOverlayModal() {

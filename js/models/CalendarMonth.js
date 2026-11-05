@@ -67,6 +67,22 @@ export class CalendarMonth {
     }
 
     /**
+     * Look up a schedule entry, supporting both plain objects and Schedule instances.
+     * @param {string} dateKey
+     * @returns {object|undefined}
+     * @private
+     */
+    _getScheduleEntry(dateKey) {
+        if (!this.schedule) return undefined;
+        // Schedule collection instance with get() method
+        if (typeof this.schedule.get === 'function') {
+            return this.schedule.get(dateKey);
+        }
+        // Plain object (legacy / store format)
+        return this.schedule[dateKey];
+    }
+
+    /**
      * @returns {Array<object>} Filler, actual and outside-frame day objects.
      */
     get days() {
@@ -89,6 +105,7 @@ export class CalendarMonth {
 
             // Check if the date is within the allowed range
             if (this.range.contains(dateObj)) {
+                const entry = this._getScheduleEntry(dateKey);
                 days.push({
                     type: 'actual',
                     day: day,
@@ -96,7 +113,7 @@ export class CalendarMonth {
                     dateKey: dateKey,
                     isToday,
                     isPast,
-                    ...this.schedule?.[dateKey] || { mode: null, startTime: '', endTime: '' }
+                    ...(entry || { mode: null, startTime: '', endTime: '' })
                 });
             } else {
                 // Show a "disabled" placeholder for days outside the range
