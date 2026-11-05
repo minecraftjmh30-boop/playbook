@@ -31,20 +31,7 @@
             </section>
             <ChoiceModal :show="showChoiceModal" @close="showChoiceModal = false" @open-join="showChoiceModal = false; openJoinModal()"></ChoiceModal>
             <JoinHuddleModal :show="showJoinModal" v-model="joinCode" @close="showJoinModal = false" @join="joinHuddle"></JoinHuddleModal>
-            <div v-if="showDeleteModal" class="modal fade show d-block modal-overlay" tabindex="-1">
-                <div class="modal-dialog"><div class="modal-content">
-                    <div class="modal-header"><h5 class="modal-title">{{ confirmAction === 'delete' ? 'Delete Huddle' : 'Leave Huddle' }}</h5><button type="button" class="btn-close" @click="showDeleteModal = false"></button></div>
-                    <div class="modal-body">
-                        <p v-if="confirmAction === 'delete'">Are you sure you want to delete "{{ confirmHuddle?.name }}"? This action cannot be undone.</p>
-                        <p v-else>Are you sure you want to leave "{{ confirmHuddle?.name }}"?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" @click="showDeleteModal = false">Cancel</button>
-                        <button v-if="confirmAction === 'delete'" type="button" class="btn btn-danger" @click="executeConfirmAction">Delete</button>
-                        <button v-else type="button" class="btn btn-primary" @click="executeConfirmAction">Leave</button>
-                    </div>
-                </div></div>
-            </div>
+            <ConfirmModal ref="confirm" />
         </main>
         <AppFooter></AppFooter>
         <ToastComponent ref="toast" />
@@ -63,11 +50,12 @@ import AppHero from '../../components/main/AppHero.vue';
 import HuddleCard from '../../components/huddle/HuddleCard.vue';
 import ChoiceModal from '../../components/modals/ChoiceModal.vue';
 import JoinHuddleModal from '../../components/modals/JoinHuddleModal.vue';
+import ConfirmModal from '../../components/modals/ConfirmModal.vue';
 import ToastComponent from '../../components/ui/Toast.vue';
 
 export default {
     name: 'HomePage',
-    components: { AppHeader, AppFooter, AppHero, HuddleCard, ChoiceModal, JoinHuddleModal, ToastComponent },
+    components: { AppHeader, AppFooter, AppHero, HuddleCard, ChoiceModal, JoinHuddleModal, ConfirmModal, ToastComponent },
     setup() {
         const toast = ref(null);
         const router = useRouter();
@@ -81,10 +69,7 @@ export default {
             joinCode: '',
             currentUser: getCookie('currentUser') || null,
             showMyHuddlesOnly: false,
-            searchQuery: '',
-            showDeleteModal: false,
-            confirmAction: null,
-            confirmHuddle: null
+            searchQuery: ''
         };
     },
     computed: {
@@ -140,28 +125,29 @@ export default {
 
             // Only the owner should be able to delete
             if (huddleToDelete.isOwner(this.currentUser)) {
-                this.confirmAction = 'delete';
-                this.confirmHuddle = huddleToDelete;
-                this.showDeleteModal = true;
+                this.$refs.confirm.open({
+                    title: 'Delete Huddle',
+                    message: `Are you sure you want to delete "${huddleToDelete.name}"? This action cannot be undone.`,
+                    confirmText: 'Delete',
+                    onConfirm: () => {
+                        store.huddles.removeById(huddleToDelete.id);
+                        this.toast.success('Huddle deleted successfully!');
+                    }
+                });
             } else {
                 this.toast.error('You must be the owner to delete this huddle.');
             }
         },
         leaveHuddle(huddle) {
-            this.confirmAction = 'leave';
-            this.confirmHuddle = huddle;
-            this.showDeleteModal = true;
-        },
-        executeConfirmAction() {
-            if (this.confirmAction === 'delete') {
-                store.huddles.removeById(this.confirmHuddle.id);
-                this.toast.success('Huddle deleted successfully!');
-            } else if (this.confirmAction === 'leave') {
-                this.confirmHuddle.removeParticipant(this.currentUser);
-            }
-            this.showDeleteModal = false;
-            this.confirmAction = null;
-            this.confirmHuddle = null;
+            this.$refs.confirm.open({
+                title: 'Leave Huddle',
+                message: `Are you sure you want to leave "${huddle.name}"?`,
+                confirmText: 'Leave',
+                variant: 'primary',
+                onConfirm: () => {
+                    huddle.removeParticipant(this.currentUser);
+                }
+            });
         },
         toggleMyHuddles() {
             this.showMyHuddlesOnly = !this.showMyHuddlesOnly;

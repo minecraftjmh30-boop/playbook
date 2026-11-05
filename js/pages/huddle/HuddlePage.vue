@@ -62,16 +62,7 @@
                 <div class="modal-footer"><button type="button" class="btn btn-secondary" @click="closeInviteModal">Close</button></div>
             </div></div>
         </div>
-        <div v-if="showConfirmModal" class="modal fade show d-block modal-overlay" tabindex="-1">
-            <div class="modal-dialog"><div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title">{{ confirmTitle }}</h5><button type="button" class="btn-close" @click="closeConfirmModal"></button></div>
-                <div class="modal-body"><p>{{ confirmMessage }}</p></div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @click="closeConfirmModal">Cancel</button>
-                    <button type="button" class="btn btn-danger" @click="executeConfirmAction">Confirm</button>
-                </div>
-            </div></div>
-        </div>
+        <ConfirmModal ref="confirm" />
         <AppFooter></AppFooter>
         <ToastComponent ref="toast" />
     </div>
@@ -97,10 +88,11 @@ import HuddleParticipants from '../../components/huddle/HuddleParticipants.vue';
 import HuddleDetails from '../../components/huddle/HuddleDetails.vue';
 import HuddleChat from '../../components/huddle/HuddleChat.vue';
 import ToastComponent from '../../components/ui/Toast.vue';
+import ConfirmModal from '../../components/modals/ConfirmModal.vue';
 
 export default {
     name: 'HuddlePage',
-    components: { AppHeader, AppFooter, ScheduleCalendar, HuddleParticipants, HuddleDetails, HuddleChat, ToastComponent },
+    components: { AppHeader, AppFooter, ScheduleCalendar, HuddleParticipants, HuddleDetails, HuddleChat, ToastComponent, ConfirmModal },
     setup() {
         const toast = ref(null);
         const route = useRoute();
@@ -165,11 +157,7 @@ export default {
             friends: [],
             inviteSearch: '',
 
-            // Confirmation modal
-            showConfirmModal: false,
-            confirmTitle: '',
-            confirmMessage: '',
-            confirmCallback: null
+            // Confirmation modal (handled by ConfirmModal component)
         };
     },
     computed: {
@@ -229,17 +217,20 @@ export default {
         // Leave huddle (non-owners only)
         leaveHuddle() {
             if (this.currentUser && !this.huddle.isOwner(this.currentUser)) {
-                this.confirmTitle = 'Leave Huddle';
-                this.confirmMessage = 'Are you sure you want to leave this huddle?';
-                this.confirmCallback = () => {
-                    this.huddle.removeParticipant(this.currentUser);
-                    this.saveHuddleData();
-                    this.toast.info('You have left the huddle.');
-                    setTimeout(() => {
-                        this.router.push('/');
-                    }, 1000);
-                };
-                this.showConfirmModal = true;
+                this.$refs.confirm.open({
+                    title: 'Leave Huddle',
+                    message: 'Are you sure you want to leave this huddle?',
+                    confirmText: 'Leave',
+                    variant: 'primary',
+                    onConfirm: () => {
+                        this.huddle.removeParticipant(this.currentUser);
+                        this.saveHuddleData();
+                        this.toast.info('You have left the huddle.');
+                        setTimeout(() => {
+                            this.router.push('/');
+                        }, 1000);
+                    }
+                });
             }
         },
         // Remove participant from huddle (owners only)
@@ -248,14 +239,15 @@ export default {
                 this.toast.error('Only the owner can remove participants.');
                 return;
             }
-            this.confirmTitle = 'Remove Participant';
-            this.confirmMessage = 'Are you sure you want to remove this participant?';
-            this.confirmCallback = () => {
-                this.huddle.removeParticipant(participantId, this.currentUser);
-                this.saveHuddleData();
-                this.toast.success(`${participantId} has been removed from the huddle.`);
-            };
-            this.showConfirmModal = true;
+            this.$refs.confirm.open({
+                title: 'Remove Participant',
+                message: 'Are you sure you want to remove this participant?',
+                onConfirm: () => {
+                    this.huddle.removeParticipant(participantId, this.currentUser);
+                    this.saveHuddleData();
+                    this.toast.success(`${participantId} has been removed from the huddle.`);
+                }
+            });
         },
         // Select dates for huddle from schedule (owners only)
         selectHuddleDate(dateKey) {
@@ -295,16 +287,6 @@ export default {
         closeInviteModal() {
             this.showInviteModal = false;
             this.inviteSearch = '';
-        },
-        closeConfirmModal() {
-            this.showConfirmModal = false;
-            this.confirmCallback = null;
-        },
-        executeConfirmAction() {
-            if (this.confirmCallback) {
-                this.confirmCallback();
-            }
-            this.closeConfirmModal();
         },
         // Invite a friend to the huddle — creates a pending invitation
         inviteFriend(friendId) {
