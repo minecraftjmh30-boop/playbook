@@ -44,6 +44,7 @@ import { provide, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { ToastKey } from '../../core/keys.js';
 import { store } from '../../core/store.js';
+import { requireOwner, withConfirm } from '../../decorators/guards.js';
 import AppHeader from '../../components/main/AppHeader.vue';
 import AppFooter from '../../components/main/AppFooter.vue';
 import AppHero from '../../components/main/AppHero.vue';
@@ -111,33 +112,32 @@ export default {
                 this.toast.error('Invalid huddle code!');
             }
         },
-        editHuddle(huddle) {
-            // Only the owner should be able to edit
-            if (huddle.isOwner(this.currentUser)) {
+        editHuddle: requireOwner(
+            function (huddle) { return huddle; },
+            'You must be the owner to edit this huddle.',
+            function (huddle) {
                 this.router.push({ path: '/create-huddle', query: { id: huddle.id } });
-            } else {
-                this.toast.error('You must be the owner to edit this huddle.');
             }
-        },
-        deleteHuddle(id) {
-            const huddleToDelete = store.huddles.findById(id);
-            if (!huddleToDelete) return;
-
-            // Only the owner should be able to delete
-            if (huddleToDelete.isOwner(this.currentUser)) {
-                this.$refs.confirm.open({
-                    title: 'Delete Huddle',
-                    message: `Are you sure you want to delete "${huddleToDelete.name}"? This action cannot be undone.`,
-                    confirmText: 'Delete',
-                    onConfirm: () => {
-                        store.huddles.removeById(huddleToDelete.id);
-                        this.toast.success('Huddle deleted successfully!');
-                    }
-                });
-            } else {
-                this.toast.error('You must be the owner to delete this huddle.');
-            }
-        },
+        ),
+        deleteHuddle: requireOwner(
+            function (id) {
+                const huddle = store.huddles.findById(id);
+                if (!huddle) return null;
+                return huddle;
+            },
+            'You must be the owner to delete this huddle.',
+            withConfirm(
+                'Delete Huddle',
+                function (id) {
+                    const huddle = store.huddles.findById(id);
+                    return `Are you sure you want to delete "${huddle.name}"? This action cannot be undone.`;
+                },
+                function (id) {
+                    store.huddles.removeById(id);
+                    this.toast.success('Huddle deleted successfully!');
+                }
+            )
+        ),
         leaveHuddle(huddle) {
             this.$refs.confirm.open({
                 title: 'Leave Huddle',

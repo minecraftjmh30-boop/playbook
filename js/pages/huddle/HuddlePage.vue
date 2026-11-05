@@ -38,6 +38,7 @@ import { provide, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ToastKey } from '../../core/keys.js';
 import { store } from '../../core/store.js';
+import { requireOwner, withConfirm } from '../../decorators/guards.js';
 import { Huddle } from '../../models/Huddle.js';
 import { User } from '../../models/User.js';
 import { Invitation } from '../../models/Invitation.js';
@@ -188,21 +189,19 @@ export default {
             }
         },
         // Remove participant from huddle (owners only)
-        removeParticipant(participantId) {
-            if (!this.huddle.isOwner(this.currentUser)) {
-                this.toast.error('Only the owner can remove participants.');
-                return;
-            }
-            this.$refs.confirm.open({
-                title: 'Remove Participant',
-                message: 'Are you sure you want to remove this participant?',
-                onConfirm: () => {
+        removeParticipant: requireOwner(
+            function () { return this.huddle; },
+            'Only the owner can remove participants.',
+            withConfirm(
+                'Remove Participant',
+                'Are you sure you want to remove this participant?',
+                function (participantId) {
                     this.huddle.removeParticipant(participantId, this.currentUser);
                     this.saveHuddleData();
                     this.toast.success(`${participantId} has been removed from the huddle.`);
                 }
-            });
-        },
+            )
+        ),
         // Select dates for huddle from schedule (owners only)
         selectHuddleDate(dateKey) {
             this.huddle.togglePlannedDate(dateKey, this.currentUser);
@@ -277,19 +276,19 @@ export default {
             this.showScheduleOverlay(day);
         },
         // Owner selects a date as planned date via button
-        selectDateAsPlanned(dateKey) {
-            if (!this.currentUser || !this.huddle.isOwner(this.currentUser)) {
-                this.toast.error('Only the owner can select planned dates.');
-                return;
+        selectDateAsPlanned: requireOwner(
+            function () { return this.huddle; },
+            'Only the owner can select planned dates.',
+            function (dateKey) {
+                const isNowPlanned = this.huddle.togglePlannedDate(dateKey, this.currentUser);
+                this.saveHuddleData();
+                if (isNowPlanned) {
+                    this.toast.success(`${formatDate(dateKey)} added to planned dates.`);
+                } else {
+                    this.toast.info(`${formatDate(dateKey)} removed from planned dates.`);
+                }
             }
-            const isNowPlanned = this.huddle.togglePlannedDate(dateKey, this.currentUser);
-            this.saveHuddleData();
-            if (isNowPlanned) {
-                this.toast.success(`${formatDate(dateKey)} added to planned dates.`);
-            } else {
-                this.toast.info(`${formatDate(dateKey)} removed from planned dates.`);
-            }
-        }
+        )
     }
 };
 </script>
