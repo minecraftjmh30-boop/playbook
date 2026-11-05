@@ -84,6 +84,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { ToastKey } from '../../core/keys.js';
 import { store } from '../../core/store.js';
 import { Huddle } from '../../models/Huddle.js';
+import { User } from '../../models/User.js';
+import { Invitation } from '../../models/Invitation.js';
 import { CalendarMonth } from '../../models/CalendarMonth.js';
 import { DateRange } from '../../models/DateRange.js';
 import { ScheduleOverlay } from '../../models/ScheduleOverlay.js';
@@ -275,15 +277,11 @@ export default {
         closeOverlayModal() {
             this.showOverlayModal = false;
         },
-        // Load friends for current user from the same API source as ProfilePage
+        // Load friends for current user using the User model
         async loadFriends() {
             try {
-                const response = await fetch(`/debug/debugLogins/${this.currentUser}/userInfo.json`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch user info');
-                }
-                const data = await response.json();
-                this.friends = (data.friends || []).map(fName => ({ id: fName, name: fName }));
+                const user = await User.load(this.currentUser);
+                this.friends = user.searchFriends('');
             } catch (e) {
                 console.warn('Failed to load friends:', e);
                 this.friends = [];
@@ -319,17 +317,15 @@ export default {
                 this.toast.info(`${friendId} already has a pending invitation.`);
                 return;
             }
-            // Create pending invitation record in store
-            const invitation = {
+            // Create pending invitation record using the Invitation model
+            const invitation = new Invitation({
                 id: `inv_${Date.now()}_${friendId}`,
                 huddleId: this.huddle.id,
                 huddleName: this.huddle.name,
                 invitedBy: this.currentUser,
-                to: friendId,
-                timestamp: new Date().toISOString()
-            };
-            if (!store.invitations[friendId]) store.invitations[friendId] = [];
-            store.invitations[friendId].push(invitation);
+                to: friendId
+            });
+            store.invitations.add(invitation);
 // localStorage disabled - store.invitations is reactive
             this.saveHuddleData();
             this.toast.success(`Invitation sent to ${friendId}!`);

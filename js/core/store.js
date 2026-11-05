@@ -8,12 +8,13 @@
 import { reactive } from 'vue';
 import { Huddle } from '../models/Huddle.js';
 import { HuddleCollection } from '../collections/HuddleCollection.js';
+import { InvitationCollection } from '../collections/InvitationCollection.js';
 
 /**
  * Reactive store holding all application data.
  *
  * @property {HuddleCollection} huddles - Collection of Huddle instances.
- * @property {Object<string, Array>} invitations - Invitations keyed by user ID.
+ * @property {InvitationCollection} invitations - All pending invitations.
  * @property {Object<string, Object>} schedules - Schedules keyed by user ID.
  */
 export const store = reactive({
@@ -27,6 +28,6 @@ export const store = reactive({
             participants: ['User1', 'User2']
         })
     ]),
-    invitations: {},
+    invitations: new InvitationCollection(),
     schedules: {}
 });

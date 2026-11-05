@@ -82,6 +82,8 @@ import { provide, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { ToastKey } from '../../core/keys.js';
 import { store } from '../../core/store.js';
+import { User } from '../../models/User.js';
+import { Invitation } from '../../models/Invitation.js';
 import AppHeader from '../../components/main/AppHeader.vue';
 import AppFooter from '../../components/main/AppFooter.vue';
 import ProfileInfo from '../../components/profile/ProfileInfo.vue';
@@ -137,20 +139,14 @@ export default {
         async loadUserData() {
             const userId = getCookie('currentUser') || 'User1';
             try {
-                const response = await fetch(`/debug/debugLogins/${userId}/userInfo.json`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch user info');
-                }
-                const data = await response.json();
-
+                const user = await User.load(userId);
                 this.userInfo = {
-                    name: data.name,
-                    email: data.email,
-                    dateJoined: data.dateJoined
+                    name: user.name,
+                    email: user.email,
+                    dateJoined: user.dateJoined
                 };
-                this.friendCode = data.friendCode;
-                this.friends = data.friends.map(fName => ({ id: fName, name: fName }));
-
+                this.friendCode = user.friendCode;
+                this.friends = user.searchFriends('');
             } catch (error) {
                 console.error('Error loading user data:', error);
                 this.userInfo = {
@@ -162,40 +158,30 @@ export default {
         },
         async loadHuddleData() {
             const userId = getCookie('currentUser') || 'User1';
-            const invitations = store.invitations[userId] || [];
 
             // Huddles where user is a participant
             this.myHuddles = store.huddles.forMember(userId);
 
             // Pending invitations for this user
-            this.pendingInvitations = invitations.filter(inv => inv.to === userId);
+            this.pendingInvitations = store.invitations.forUser(userId);
         },
         async acceptInvitation(invitation) {
             const huddle = store.huddles.findById(invitation.huddleId);
             if (huddle) {
-                const userId = getCookie('currentUser') || 'User1';
-                huddle.addParticipant(userId);
-
-                // Remove invitation
+                invitation.accept(store.huddles);
                 this.removeInvitation(invitation);
                 await this.loadHuddleData();
                 this.toast.success(`You accepted the invitation to "${huddle.name}".`);
             }
         },
         async declineInvitation(invitation) {
-            const huddle = store.huddles.findById(invitation.huddleId);
-            if (huddle) {
-                const userId = getCookie('currentUser') || 'User1';
-                huddle.pendingInvites = huddle.pendingInvites.filter(id => id !== userId);
-            }
+            invitation.decline(store.huddles);
             this.removeInvitation(invitation);
             await this.loadHuddleData();
             this.toast.info('Invitation declined.');
         },
         removeInvitation(invitation) {
-            const userId = getCookie('currentUser') || 'User1';
-            if (!store.invitations[userId]) return;
-            store.invitations[userId] = store.invitations[userId].filter(inv => inv.id !== invitation.id);
+            store.invitations.removeById(invitation.id);
         },
         async joinHuddleFromProfile() {
             const code = sanitizeInput(this.joinHuddleCode.trim());
