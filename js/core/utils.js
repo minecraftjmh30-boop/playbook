@@ -68,20 +68,6 @@ function isSameDay(dateOne, dateTwo) {
 }
 
 /**
- * Create a system message object for chat
- * @param {string} text - Message text
- * @returns {object} System message object
- */
-function createSystemMessage(text) {
-    return {
-        user: 'System',
-        text: text,
-        time: new Date().toLocaleTimeString(),
-        system: true
-    };
-}
-
-/**
  * Rebuild participants display array from participant IDs
  * @param {Array<string>} participantIds - Array of participant IDs
  * @returns {Array<object>} Array of {name, id} objects
@@ -142,7 +128,6 @@ export {
     getCookie,
     getDateKey,
     isSameDay,
-    createSystemMessage,
     buildParticipantsDisplay,
     getTheme,
     getUserIdByEmail

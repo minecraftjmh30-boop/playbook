@@ -57,7 +57,6 @@
 
 <script>
 import { useRouter } from 'vue-router';
-import { getCookie } from '../../core/utils.js';
 
 export default {
     name: 'AppHeader',
