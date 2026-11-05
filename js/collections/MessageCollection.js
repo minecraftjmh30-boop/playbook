@@ -25,24 +25,39 @@ export class MessageCollection {
         return msg;
     }
 
-    /** @param {string} user @param {string} text @returns {ChatMessage} */
+    /**
+     * Add a chat message from a user.
+     * @param {string} user - User ID.
+     * @param {string} text - Message text.
+     * @returns {ChatMessage} The created message.
+     */
     addChat(user, text) {
         return this.add({ user, text });
     }
 
-    /** @param {string} text @returns {SystemMessage} */
+    /**
+     * Add a system message (join, leave, invite, etc.).
+     * @param {string} text - Message text.
+     * @returns {SystemMessage} The created message.
+     */
     addSystem(text) {
         return this.add({ text, system: true });
     }
 
-    /** @param {number} index */
+    /**
+     * Remove a message at a specific index.
+     * @param {number} index - Zero-based index.
+     */
     removeAt(index) {
         if (index >= 0 && index < this.items.length) {
             this.items.splice(index, 1);
         }
     }
 
-    /** @returns {number} */
+    /**
+     * Number of messages in the collection.
+     * @returns {number}
+     */
     get size() { return this.items.length; }
 
     /** Allows `for...of` and `v-for` over the collection. */

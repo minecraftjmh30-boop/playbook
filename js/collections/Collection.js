@@ -13,23 +13,41 @@ export class Collection {
         items.forEach(item => this.add(item));
     }
 
-    /** @param {T|object} item @returns {T} The added model. */
+    /**
+     * Add an item to the collection, hydrating plain objects if a Model is set.
+     * @param {T|object} item - Model instance or plain object.
+     * @returns {T} The added model.
+     */
     add(item) {
         const model = this.Model && !(item instanceof this.Model) ? new this.Model(item) : item;
         this.items.push(model);
         return model;
     }
 
-    /** @param {(item: T) => boolean} predicate */
+    /**
+     * Remove items matching a predicate.
+     * @param {(item: T) => boolean} predicate - Test function.
+     */
     remove(predicate) { this.items = this.items.filter(i => !predicate(i)); }
 
-    /** @param {number} index */
+    /**
+     * Remove the item at a specific index.
+     * @param {number} index - Zero-based index.
+     */
     removeAt(index) { if (index >= 0 && index < this.items.length) this.items.splice(index, 1); }
 
-    /** @param {(item: T) => boolean} predicate @returns {T|undefined} */
+    /**
+     * Find the first item matching a predicate.
+     * @param {(item: T) => boolean} predicate - Test function.
+     * @returns {T|undefined} The first matching item.
+     */
     find(predicate) { return this.items.find(predicate); }
 
-    /** @param {(item: T) => boolean} predicate @returns {T[]} */
+    /**
+     * Return all items matching a predicate.
+     * @param {(item: T) => boolean} predicate - Test function.
+     * @returns {T[]} Matching items.
+     */
     filter(predicate) { return this.items.filter(predicate); }
 
     /**
@@ -43,7 +61,10 @@ export class Collection {
         return [...this.items].sort((a, b) => (a[key] > b[key] ? m : a[key] < b[key] ? -m : 0));
     }
 
-    /** @returns {number} */
+    /**
+     * Number of items in the collection.
+     * @returns {number}
+     */
     get size() { return this.items.length; }
 
     /** Allows `for...of` and `v-for` over the collection. */

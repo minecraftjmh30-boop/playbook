@@ -38,21 +38,39 @@ export class Huddle extends BaseModel {
         this.messages = new MessageCollection(messages);
     }
 
-    /** @returns {string} Random 5-character join code. */
+    /**
+     * Generate a random 5-character uppercase join code.
+     * @returns {string} Random join code.
+     */
     static generateCode() {
         return Math.random().toString(36).substring(2, 7).toUpperCase();
     }
 
-    /** @returns {DateRange} The optional time frame of the huddle. */
+    /**
+     * Get the optional time frame of the huddle.
+     * @returns {DateRange} The date range for the huddle.
+     */
     get timeFrame() { return new DateRange(this.startDate, this.endDate); }
 
-    /** @param {string} userId @returns {boolean} */
+    /**
+     * Check if a user is the owner of this huddle.
+     * @param {string} userId - The user ID to check.
+     * @returns {boolean} True if the user is the owner.
+     */
     isOwner(userId) { return !!userId && this.owner === userId; }
 
-    /** @param {string} userId @returns {boolean} True if owner or participant. */
+    /**
+     * Check if a user is a member (owner or participant).
+     * @param {string} userId - The user ID to check.
+     * @returns {boolean} True if the user is a member.
+     */
     isMember(userId) { return this.isOwner(userId) || this.participants.includes(userId); }
 
-    /** @param {string} userId @returns {boolean} */
+    /**
+     * Check if a user has a pending invitation.
+     * @param {string} userId - The user ID to check.
+     * @returns {boolean} True if the user has a pending invite.
+     */
     isPending(userId) { return this.pendingInvites.includes(userId); }
 
     /**
@@ -114,10 +132,17 @@ export class Huddle extends BaseModel {
         return true;
     }
 
-    /** @returns {string[]} Participants plus pending invitees, without duplicates. */
+    /**
+     * Get all participant IDs including pending invitees, without duplicates.
+     * @returns {string[]} Unique participant IDs.
+     */
     get allParticipantIds() { return [...new Set([...this.participants, ...this.pendingInvites])]; }
 
-    /** @returns {string} Badge text (moved out of HuddleCard). */
+    /**
+     * Get the status label for display as a badge.
+     * Returns dates selected, time frame, or status.
+     * @returns {string} Status label text.
+     */
     get statusLabel() {
         if (this.selectedDates && this.selectedDates.length > 0) {
             const dates = this.selectedDates;
@@ -132,7 +157,10 @@ export class Huddle extends BaseModel {
         return this.status || 'Ongoing';
     }
 
-    /** @returns {string} Bootstrap badge class (moved out of HuddleCard). */
+    /**
+     * Get the Bootstrap badge class for the status.
+     * @returns {string} CSS class name.
+     */
     get statusBadgeClass() {
         if (this.selectedDates && this.selectedDates.length > 0) return 'bg-primary';
         if (this.status === 'Online') return 'bg-success';
@@ -164,7 +192,10 @@ export class Huddle extends BaseModel {
         };
     }
 
-    /** @returns {boolean} */
+    /**
+     * Check if all fields pass validation.
+     * @returns {boolean} True if the huddle is valid.
+     */
     isValid() { return Object.values(this.validate()).every(e => !e); }
 
     /**
