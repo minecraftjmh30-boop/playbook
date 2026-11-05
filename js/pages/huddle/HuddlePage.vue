@@ -24,44 +24,8 @@
                 </div>
             </div>
         </main>
-        <div v-if="showOverlayModal" class="modal fade show d-block modal-overlay" tabindex="-1">
-            <div class="modal-dialog"><div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title">Schedule for {{ formatDate(overlayDate) }}</h5><button type="button" class="btn-close" @click="closeOverlayModal"></button></div>
-                <div class="modal-body">
-                    <div v-if="overlayData.length === 0" class="text-muted text-center">No schedule data available for this date.</div>
-                    <div v-else>
-                        <div v-for="(detail, index) in overlayData" :key="index" class="mb-2 p-2 border rounded">
-                            <strong>{{ detail.participant }}</strong>
-                            <span :class="['badge', detail.mode === 'free' ? 'bg-success' : detail.mode === 'busy' ? 'bg-danger' : 'bg-secondary']">{{ detail.mode || 'undetermined' }}</span>
-                            <span v-if="detail.startTime" class="ms-2">{{ detail.startTime }} - {{ detail.endTime }}</span>
-                            <span v-else class="ms-2 text-muted">All Day</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @click="closeOverlayModal">Close</button>
-                    <button v-if="currentUser && huddle.owner === currentUser" type="button" class="btn btn-primary" @click="selectDateAsPlanned(overlayDate); closeOverlayModal()">{{ huddle.selectedDates && huddle.selectedDates.includes(overlayDate) ? 'Remove from Planned Dates' : 'Add to Planned Dates' }}</button>
-                </div>
-            </div></div>
-        </div>
-        <div v-if="showInviteModal" class="modal fade show d-block modal-overlay" tabindex="-1">
-            <div class="modal-dialog"><div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title">Invite Friends</h5><button type="button" class="btn-close" @click="closeInviteModal"></button></div>
-                <div class="modal-body">
-                    <input type="text" class="form-control form-control-sm mb-3" placeholder="Search friends..." :value="inviteSearch" @input="inviteSearch = $event.target.value">
-                    <div v-if="friends.length === 0" class="text-muted text-center">No friends found. Add friends from your profile first.</div>
-                    <ul class="list-group">
-                        <li v-for="friend in filteredInviteFriends" :key="friend.id" class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>{{ friend.name }}</span>
-                            <span v-if="huddle.participants && huddle.participants.includes(friend.id)" class="badge bg-success">Participant</span>
-                            <span v-else-if="huddle.pendingInvites && huddle.pendingInvites.includes(friend.id)" class="badge bg-info">Pending</span>
-                            <button v-else class="btn btn-sm btn-primary" @click="inviteFriend(friend.id)">Invite</button>
-                        </li>
-                    </ul>
-                </div>
-                <div class="modal-footer"><button type="button" class="btn btn-secondary" @click="closeInviteModal">Close</button></div>
-            </div></div>
-        </div>
+        <ScheduleOverlayModal ref="scheduleOverlay" />
+        <InviteFriendsModal ref="inviteFriends" />
         <ConfirmModal ref="confirm" />
         <AppFooter></AppFooter>
         <ToastComponent ref="toast" />
@@ -89,10 +53,12 @@ import HuddleDetails from '../../components/huddle/HuddleDetails.vue';
 import HuddleChat from '../../components/huddle/HuddleChat.vue';
 import ToastComponent from '../../components/ui/Toast.vue';
 import ConfirmModal from '../../components/modals/ConfirmModal.vue';
+import ScheduleOverlayModal from '../../components/modals/ScheduleOverlayModal.vue';
+import InviteFriendsModal from '../../components/modals/InviteFriendsModal.vue';
 
 export default {
     name: 'HuddlePage',
-    components: { AppHeader, AppFooter, ScheduleCalendar, HuddleParticipants, HuddleDetails, HuddleChat, ToastComponent, ConfirmModal },
+    components: { AppHeader, AppFooter, ScheduleCalendar, HuddleParticipants, HuddleDetails, HuddleChat, ToastComponent, ConfirmModal, ScheduleOverlayModal, InviteFriendsModal },
     setup() {
         const toast = ref(null);
         const route = useRoute();
@@ -147,15 +113,8 @@ export default {
             currentMonthView: initialMonthView,
             schedules: {},
 
-            // Huddle schedule overlay modal
-            showOverlayModal: false,
-            overlayDate: null,
-            overlayData: [],
-
-            // Invite friends modal
-            showInviteModal: false,
+            // Invite friends modal (handled by InviteFriendsModal component)
             friends: [],
-            inviteSearch: '',
 
             // Confirmation modal (handled by ConfirmModal component)
         };
@@ -187,11 +146,6 @@ export default {
             });
             return new ScheduleOverlay(schedulesByUser);
         },
-        filteredInviteFriends() {
-            if (!this.inviteSearch) return this.friends;
-            const search = this.inviteSearch.toLowerCase();
-            return this.friends.filter(friend => friend.name.toLowerCase().includes(search));
-        }
     },
     methods: {
         sendMessage(text) {
@@ -262,12 +216,14 @@ export default {
         showScheduleOverlay(day) {
             if (!day || !day.dateKey) return;
 
-            this.overlayDate = day.dateKey;
-            this.overlayData = this.overlay.detailsFor(day.dateKey);
-            this.showOverlayModal = true;
-        },
-        closeOverlayModal() {
-            this.showOverlayModal = false;
+            this.$refs.scheduleOverlay.open({
+                dateKey: day.dateKey,
+                title: `Schedule for ${this.formatDate(day.dateKey)}`,
+                details: this.overlay.detailsFor(day.dateKey),
+                selectedDates: this.huddle.selectedDates || [],
+                canSelectDate: !!(this.currentUser && this.huddle.isOwner(this.currentUser)),
+                onTogglePlanned: (dateKey) => this.selectDateAsPlanned(dateKey)
+            });
         },
         // Load friends for current user using the User model
         async loadFriends() {
@@ -282,11 +238,12 @@ export default {
         // Open invite friends modal
         async openInviteModal() {
             await this.loadFriends();
-            this.showInviteModal = true;
-        },
-        closeInviteModal() {
-            this.showInviteModal = false;
-            this.inviteSearch = '';
+            this.$refs.inviteFriends.open({
+                friends: this.friends,
+                participantIds: this.huddle.participants || [],
+                pendingIds: this.huddle.pendingInvites || [],
+                onInvite: (friendId) => this.inviteFriend(friendId)
+            });
         },
         // Invite a friend to the huddle — creates a pending invitation
         inviteFriend(friendId) {
