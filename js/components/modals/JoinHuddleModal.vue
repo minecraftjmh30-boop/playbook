@@ -37,9 +37,3 @@ export default {
     emits: ['close', 'join', 'update:modelValue'],
 };
 </script>
-
-<style scoped>
-.modal-overlay {
-    background-color: rgba(0, 0, 0, 0.5);
-}
-</style>

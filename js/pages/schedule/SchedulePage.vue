@@ -3,7 +3,7 @@
         <AppHeader></AppHeader>
         <main class="container my-4 flex-grow-1">
             <ScheduleTools :mode="mode" @set-mode="setMode"></ScheduleTools>
-            <ScheduleCalendar :month-info="monthInfo" :displayed-days="displayedDays" :is-current-month="isCurrentMonth" :interactive="true" @change-month="changeMonth" @day-click="handleDayClick"></ScheduleCalendar>
+            <ScheduleCalendar :month-info="calendar.info" :displayed-days="calendar.days" :is-current-month="calendar.isCurrentMonth" :interactive="true" @change-month="changeMonth" @day-click="handleDayClick"></ScheduleCalendar>
             <section class="row justify-content-center gap-2 mt-4">
                 <button class="btn btn-secondary col-auto px-4 rounded-pill" type="button" @click="resetSchedule">Reset</button>
                 <button class="btn btn-primary col-auto px-4 rounded-pill" type="button" @click="saveSchedule">Save</button>
@@ -16,9 +16,13 @@
 </template>
 
 <script>
-import { getCookie, getDateKey, isSameDay } from '../../core/utils.js';
+import { getCookie, getDateKey } from '../../core/utils.js';
 import { provide, ref } from 'vue';
-const ToastKey = Symbol('toast');
+import { ToastKey } from '../../core/keys.js';
+import { store } from '../../core/store.js';
+import { CalendarMonth } from '../../models/CalendarMonth.js';
+import { DateRange } from '../../models/DateRange.js';
+import { Schedule } from '../../collections/Schedule.js';
 import AppHeader from '../../components/main/AppHeader.vue';
 import AppFooter from '../../components/main/AppFooter.vue';
 import ScheduleTools from '../../components/schedule/ScheduleTools.vue';
@@ -47,126 +51,57 @@ export default {
                 endTime: ''
             },
             // Mock data for schedules
-            schedules: {} 
+            schedules: new Schedule()
         };
     },
     async mounted() {
         await this.loadSchedule();
     },
     computed: {
-        isCurrentMonth() {
-            return this.currentMonthView.getFullYear() === this.today.getFullYear() &&
-                   this.currentMonthView.getMonth() === this.today.getMonth();
-        },
-        monthInfo() {
-            const year = this.currentMonthView.getFullYear();
-            const monthIndex = this.currentMonthView.getMonth();
-            const firstDayOfMonth = new Date(year, monthIndex, 1);
-            const lastDayOfMonth = new Date(year, monthIndex + 1, 0);
-            const firstDayOfWeek = firstDayOfMonth.getDay(); // 0 = Sunday, 1 = Monday, etc.
-            const monthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(this.currentMonthView);
-            
-            return {
-                year,
-                monthIndex,
-                monthName,
-                month: monthIndex + 1,
-                firstDayOfWeek,
-                lastDay: lastDayOfMonth.getDate()
-            };
-        },
-        displayedDays() {
-            const { firstDayOfWeek, lastDay, year, monthIndex } = this.monthInfo;
-            const days = [];
-
-            // Add filler days for previous month
-            for (let i = 0; i < firstDayOfWeek; i++) {
-                days.push({ type: 'filler', date: null });
-            }
-
-            const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate()).getTime();
-
-            // Add actual days of the current month
-            for (let day = 1; day <= lastDay; day++) {
-                const dateObj = new Date(year, monthIndex, day);
-                const dateKey = getDateKey(dateObj);
-                const isToday = isSameDay(dateObj, this.today);
-                const isPast = dateObj.getTime() < todayStart;
-
-                days.push({
-                    type: 'actual',
-                    day: day,
-                    date: dateObj,
-                    dateKey: dateKey,
-                    isToday,
-                    isPast,
-                    ...this.schedules[dateKey] || { mode: null, startTime: '', endTime: '' }
-                });
-            }
-
-            return days;
+        calendar() {
+            // SchedulePage can't go before the current month
+            const startOfThisMonth = new Date(this.today.getFullYear(), this.today.getMonth(), 1);
+            const range = new DateRange(startOfThisMonth, null);
+            return new CalendarMonth(this.currentMonthView, { range, schedule: this.schedules, today: this.today });
         }
     },
     methods: {
         async loadSchedule() {
             const userId = getCookie('currentUser') || 'User1';
             const storageKey = `schedule_${userId}`;
-            
+
+            // Check store first
+            if (store.schedules[storageKey]) {
+                this.schedules = store.schedules[storageKey];
+                return;
+            }
+
+            // Load from CSV if not in store
+            const url = `/debug/debugLogins/${userId}/schedule.csv`;
             try {
-                const savedData = localStorage.getItem(storageKey);
-                if (savedData) {
-                    this.schedules = JSON.parse(savedData);
-                } else {
-                    const url = `/debug/debugLogins/${userId}/schedule.csv`;
-                    try {
-                        const response = await fetch(url);
-                        if (response.ok) {
-                            const text = await response.text();
-                            const lines = text.trim().split('\n');
-                            const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), this.today.getDate()).getTime();
-                            const newSchedules = {};
-                            for (const line of lines) {
-                                if (!line.trim()) continue;
-                                const [dateStr, mode, startTime, endTime] = line.split(',');
-                                const [year, month, day] = dateStr.split('-').map(Number);
-                                const dateObj = new Date(year, month - 1, day);
-                                if (dateObj.getTime() >= todayStart) {
-                                    newSchedules[dateStr] = { mode, startTime, endTime };
-                                }
-                            }
-                            this.schedules = newSchedules;
-                            localStorage.setItem(storageKey, JSON.stringify(this.schedules));
-                        }
-                    } catch (e) {
-                        console.warn('CSV fetch failed, starting with empty schedule.');
-                    }
+                const response = await fetch(url);
+                if (response.ok) {
+                    const text = await response.text();
+                    this.schedules = Schedule.fromCSV(text, this.today);
+                    store.schedules[storageKey] = this.schedules;
+// localStorage disabled - store.schedules is reactive
                 }
-            } catch (error) {
-                console.error('Error loading schedule:', error);
+            } catch (e) {
+                console.warn('CSV fetch failed, starting with empty schedule.');
             }
         },
         async saveSchedule() {
             const userId = getCookie('currentUser') || 'User1';
             const storageKey = `schedule_${userId}`;
-            
-            try {
-                localStorage.setItem(storageKey, JSON.stringify(this.schedules));
-                this.toast.success('Schedule saved successfully!');
-                console.log('Simulated upload to schedule.csv:', this.schedules);
-            } catch (error) {
-                console.error('Error saving schedule:', error);
-                this.toast.error('Error saving schedule.');
-            }
+
+            store.schedules[storageKey] = this.schedules;
+// localStorage disabled - store.schedules is reactive
+            this.toast.success('Schedule saved successfully!');
+            console.log('Simulated upload to schedule.csv:', this.schedules.toPlain());
         },
         changeMonth(offset) {
-            const newDate = new Date(this.currentMonthView.getFullYear(), this.currentMonthView.getMonth() + offset, 1);
-            if (offset < 0) {
-                const minDate = new Date(this.today.getFullYear(), this.today.getMonth(), 1);
-                if (newDate < minDate) {
-                    return;
-                }
-            }
-            this.currentMonthView = newDate;
+            const newCalendar = this.calendar.shift(offset);
+            this.currentMonthView = newCalendar.viewDate;
         },
         setMode(newMode) {
             this.mode = (this.mode === newMode) ? null : newMode;
@@ -175,25 +110,26 @@ export default {
             if (dayObj.isPast) return;
 
             if (this.mode === 'remove') {
-                delete this.schedules[dayObj.dateKey];
+                this.schedules.remove(dayObj.dateKey);
             } else if (this.mode) {
                 // Quick action: Apply mode directly to the day
-                this.schedules[dayObj.dateKey] = {
+                this.schedules.set(dayObj.dateKey, {
                     mode: this.mode,
                     startTime: '',
                     endTime: ''
-                };
+                });
             } else {
                 // Open modal for detailed time setting
                 this.openTimeModal(dayObj);
             }
         },
         openTimeModal(dayObj) {
+            const entry = this.schedules.get(dayObj.dateKey);
             this.modalData = {
                 date: dayObj.date,
-                mode: dayObj.mode || 'free',
-                startTime: dayObj.startTime || '',
-                endTime: dayObj.endTime || ''
+                mode: entry ? entry.mode : 'free',
+                startTime: entry ? entry.startTime : '',
+                endTime: entry ? entry.endTime : ''
             };
             this.showTimeModal = true;
         },
@@ -206,15 +142,15 @@ export default {
                 return;
             }
             const key = getDateKey(this.modalData.date);
-            this.schedules[key] = {
+            this.schedules.set(key, {
                 mode: this.modalData.mode,
                 startTime: this.modalData.startTime,
                 endTime: this.modalData.endTime
-            };
+            });
             this.closeModal();
         },
         resetSchedule() {
-            this.schedules = {};
+            this.schedules.clear();
         }
     }
 };

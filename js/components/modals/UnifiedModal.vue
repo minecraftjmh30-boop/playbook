@@ -27,7 +27,7 @@
 
 <script>
 import { inject } from 'vue';
-const ToastKey = Symbol('toast');
+import { ToastKey } from '../../core/keys.js';
 
 export default {
     name: 'UnifiedModal',
@@ -86,9 +86,3 @@ export default {
     },
 };
 </script>
-
-<style scoped>
-.modal-overlay {
-    background-color: rgba(0, 0, 0, 0.5);
-}
-</style>

@@ -49,7 +49,9 @@
 import { getCookie, sanitizeInput } from '../../core/utils.js';
 import { provide, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-const ToastKey = Symbol('toast');
+import { ToastKey } from '../../core/keys.js';
+import { store } from '../../core/store.js';
+import { Huddle } from '../../models/Huddle.js';
 import AppHeader from '../../components/main/AppHeader.vue';
 import AppFooter from '../../components/main/AppFooter.vue';
 import ToastComponent from '../../components/ui/Toast.vue';
@@ -67,19 +69,14 @@ export default {
     data() {
         const rawId = this.route.query.id;
         const editId = rawId ? Number(rawId) : null;
-        
-        const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
-        const existingHuddle = (editId !== null && !isNaN(editId)) ? huddles.find(currentHuddle => currentHuddle.id === editId) : null;
-        
+
+        const existingHuddle = (editId !== null && !isNaN(editId))
+            ? store.huddles.findById(editId)
+            : null;
+
         return {
             editId: editId,
-            huddle: {
-                name: existingHuddle ? existingHuddle.name : '',
-                description: existingHuddle ? existingHuddle.description : '',
-                location: existingHuddle ? existingHuddle.location : '',
-                startDate: existingHuddle ? (existingHuddle.startDate || '') : '',
-                endDate: existingHuddle ? (existingHuddle.endDate || '') : ''
-            },
+            huddle: existingHuddle ? existingHuddle.clone() : new Huddle(),
             formErrors: {
                 name: '',
                 description: '',
@@ -95,58 +92,34 @@ export default {
     },
     methods: {
         validateForm() {
-            let isValid = true;
-            this.formErrors = { name: '', description: '', location: '' };
-            
-            // Validate name
-            if (!this.huddle.name || !this.huddle.name.trim()) {
-                this.formErrors.name = 'Huddle name is required.';
-                isValid = false;
-            } else if (this.huddle.name.trim().length < 3) {
-                this.formErrors.name = 'Name must be at least 3 characters.';
-                isValid = false;
-            }
-            
-            // Validate description
-            if (!this.huddle.description || !this.huddle.description.trim()) {
-                this.formErrors.description = 'Description is required.';
-                isValid = false;
-            }
-            
-            // Validate location
-            if (!this.huddle.location || !this.huddle.location.trim()) {
-                this.formErrors.location = 'Location is required.';
-                isValid = false;
-            }
-            
-            return isValid;
+            this.formErrors = this.huddle.validate();
+            return this.huddle.isValid();
         },
         handleSubmit() {
             this.submitted = true;
-            
+
             if (!this.validateForm()) {
                 this.toast.error('Please fill in all required fields correctly.');
                 return;
             }
-            
+
             const currentUser = getCookie('currentUser') || 'Anonymous';
-            const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
-            
+
             // Sanitize inputs
             const sanitizedName = sanitizeInput(this.huddle.name.trim());
             const sanitizedDescription = sanitizeInput(this.huddle.description.trim());
             const sanitizedLocation = sanitizeInput(this.huddle.location.trim());
-            
+
             if (this.isEditMode) {
-                // Update existing huddle
-                const index = huddles.findIndex(huddle => huddle.id === this.editId);
-                if (index !== -1 && huddles[index].owner === currentUser) {
-                    huddles[index].name = sanitizedName;
-                    huddles[index].description = sanitizedDescription;
-                    huddles[index].location = sanitizedLocation || 'Virtual';
-                    huddles[index].startDate = this.huddle.startDate || null;
-                    huddles[index].endDate = this.huddle.endDate || null;
-                    localStorage.setItem('huddles', JSON.stringify(huddles));
+                // Update existing huddle — edit a clone, then replace it
+                const existing = store.huddles.findById(this.editId);
+                if (existing && existing.isOwner(currentUser)) {
+                    this.huddle.name = sanitizedName;
+                    this.huddle.description = sanitizedDescription;
+                    this.huddle.location = sanitizedLocation || 'Virtual';
+                    this.huddle.startDate = this.huddle.startDate || null;
+                    this.huddle.endDate = this.huddle.endDate || null;
+                    store.huddles.replace(this.huddle);
                     this.toast.success(`Huddle "${sanitizedName}" updated successfully!`);
                     setTimeout(() => {
                         this.router.push({ path: '/huddle', query: { id: this.editId } });
@@ -156,27 +129,18 @@ export default {
                 }
             } else {
                 // Create a new huddle
-                const newId = huddles.length > 0 ? Math.max(...huddles.map(huddle => huddle.id)) + 1 : 1;
-                const newCode = Math.random().toString(36).substring(2, 7).toUpperCase();
-                
-                const newHuddle = {
-                    id: newId,
+                const newHuddle = new Huddle({
                     name: sanitizedName,
                     description: sanitizedDescription,
                     location: sanitizedLocation || 'Virtual',
-                    status: 'Online',
-                    code: newCode,
                     owner: currentUser,
                     startDate: this.huddle.startDate || null,
                     endDate: this.huddle.endDate || null,
-                    participants: [currentUser],
-                    messages: [],
-                    selectedDates: []
-                };
-                
-                huddles.push(newHuddle);
-                localStorage.setItem('huddles', JSON.stringify(huddles));
-                
+                    participants: [currentUser]
+                });
+
+                store.huddles.add(newHuddle);
+
                 this.toast.success(`Huddle "${sanitizedName}" created successfully!`);
                 setTimeout(() => {
                     this.router.push('/');

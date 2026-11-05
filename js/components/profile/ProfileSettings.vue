@@ -23,7 +23,7 @@
 <script>
 import { inject } from 'vue';
 import { useRouter } from 'vue-router';
-const ToastKey = Symbol('toast');
+import { ToastKey } from '../../core/keys.js';
 import UnifiedModal from '../modals/UnifiedModal.vue';
 
 export default {

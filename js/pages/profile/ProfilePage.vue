@@ -63,16 +63,7 @@
         </main>
         <AppFooter></AppFooter>
         <ToastComponent ref="toast" />
-        <div v-if="showConfirmModal" class="modal fade show d-block modal-overlay" tabindex="-1">
-            <div class="modal-dialog"><div class="modal-content">
-                <div class="modal-header"><h5 class="modal-title">{{ confirmTitle }}</h5><button type="button" class="btn-close" @click="closeConfirmModal"></button></div>
-                <div class="modal-body"><p>{{ confirmMessage }}</p></div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @click="closeConfirmModal">Cancel</button>
-                    <button type="button" class="btn btn-danger" @click="executeConfirmAction">Confirm</button>
-                </div>
-            </div></div>
-        </div>
+        <ConfirmModal ref="confirm" />
     </div>
 </template>
 
@@ -80,17 +71,21 @@
 import { getCookie, sanitizeInput } from '../../core/utils.js';
 import { provide, ref } from 'vue';
 import { useRoute } from 'vue-router';
-const ToastKey = Symbol('toast');
+import { ToastKey } from '../../core/keys.js';
+import { store } from '../../core/store.js';
+import { User } from '../../models/User.js';
+import { Invitation } from '../../models/Invitation.js';
 import AppHeader from '../../components/main/AppHeader.vue';
 import AppFooter from '../../components/main/AppFooter.vue';
 import ProfileInfo from '../../components/profile/ProfileInfo.vue';
 import ProfileFriends from '../../components/profile/ProfileFriends.vue';
 import ProfileSettings from '../../components/profile/ProfileSettings.vue';
 import ToastComponent from '../../components/ui/Toast.vue';
+import ConfirmModal from '../../components/modals/ConfirmModal.vue';
 
 export default {
     name: 'ProfilePage',
-    components: { AppHeader, AppFooter, ProfileInfo, ProfileFriends, ProfileSettings, ToastComponent },
+    components: { AppHeader, AppFooter, ProfileInfo, ProfileFriends, ProfileSettings, ToastComponent, ConfirmModal },
     setup() {
         const toast = ref(null);
         const route = useRoute();
@@ -111,11 +106,7 @@ export default {
             myHuddles: [],
             pendingInvitations: [],
             joinHuddleCode: '',
-            // Confirmation modal
-            showConfirmModal: false,
-            confirmTitle: '',
-            confirmMessage: '',
-            confirmCallback: null
+            // Confirmation modal (handled by ConfirmModal component)
         };
     },
     async mounted() {
@@ -136,20 +127,14 @@ export default {
         async loadUserData() {
             const userId = getCookie('currentUser') || 'User1';
             try {
-                const response = await fetch(`/debug/debugLogins/${userId}/userInfo.json`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch user info');
-                }
-                const data = await response.json();
-
+                const user = await User.load(userId);
                 this.userInfo = {
-                    name: data.name,
-                    email: data.email,
-                    dateJoined: data.dateJoined
+                    name: user.name,
+                    email: user.email,
+                    dateJoined: user.dateJoined
                 };
-                this.friendCode = data.friendCode;
-                this.friends = data.friends.map(fName => ({ id: fName, name: fName }));
-
+                this.friendCode = user.friendCode;
+                this.friends = user.searchFriends('');
             } catch (error) {
                 console.error('Error loading user data:', error);
                 this.userInfo = {
@@ -161,60 +146,30 @@ export default {
         },
         async loadHuddleData() {
             const userId = getCookie('currentUser') || 'User1';
-            const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
-            const invitations = JSON.parse(localStorage.getItem(`invitations_${userId}`)) || [];
 
             // Huddles where user is a participant
-            this.myHuddles = huddles.filter(huddle =>
-                huddle.owner === userId ||
-                (huddle.participants && huddle.participants.includes(userId))
-            );
+            this.myHuddles = store.huddles.forMember(userId);
 
             // Pending invitations for this user
-            this.pendingInvitations = invitations.filter(inv => inv.to === userId);
+            this.pendingInvitations = store.invitations.forUser(userId);
         },
         async acceptInvitation(invitation) {
-            const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
-            const huddle = huddles.find(huddle => huddle.id === invitation.huddleId);
+            const huddle = store.huddles.findById(invitation.huddleId);
             if (huddle) {
-                const userId = getCookie('currentUser') || 'User1';
-                if (!huddle.participants) {
-                    huddle.participants = [huddle.owner];
-                }
-                if (!huddle.participants.includes(userId)) {
-                    huddle.participants.push(userId);
-                }
-                // Remove from pending invites list
-                if (huddle.pendingInvites) {
-                    huddle.pendingInvites = huddle.pendingInvites.filter(id => id !== userId);
-                }
-                localStorage.setItem('huddles', JSON.stringify(huddles));
-
-                // Remove invitation
+                invitation.accept(store.huddles);
                 this.removeInvitation(invitation);
                 await this.loadHuddleData();
                 this.toast.success(`You accepted the invitation to "${huddle.name}".`);
             }
         },
         async declineInvitation(invitation) {
-            const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
-            const huddle = huddles.find(huddle => huddle.id === invitation.huddleId);
-            if (huddle) {
-                const userId = getCookie('currentUser') || 'User1';
-                if (huddle.pendingInvites) {
-                    huddle.pendingInvites = huddle.pendingInvites.filter(id => id !== userId);
-                }
-                localStorage.setItem('huddles', JSON.stringify(huddles));
-            }
+            invitation.decline(store.huddles);
             this.removeInvitation(invitation);
             await this.loadHuddleData();
             this.toast.info('Invitation declined.');
         },
         removeInvitation(invitation) {
-            const userId = getCookie('currentUser') || 'User1';
-            let invitations = JSON.parse(localStorage.getItem(`invitations_${userId}`)) || [];
-            invitations = invitations.filter(inv => inv.id !== invitation.id);
-            localStorage.setItem(`invitations_${userId}`, JSON.stringify(invitations));
+            store.invitations.removeById(invitation.id);
         },
         async joinHuddleFromProfile() {
             const code = sanitizeInput(this.joinHuddleCode.trim());
@@ -223,42 +178,29 @@ export default {
                 return;
             }
 
-            const huddles = JSON.parse(localStorage.getItem('huddles')) || [];
-            const huddle = huddles.find(huddle => huddle.code === code);
+            const userId = getCookie('currentUser') || 'User1';
+            const { huddle, joined } = store.huddles.joinByCode(code, userId);
             if (huddle) {
-                const userId = getCookie('currentUser') || 'User1';
-                if (!huddle.participants) {
-                    huddle.participants = [huddle.owner];
-                }
-                if (!huddle.participants.includes(userId)) {
-                    huddle.participants.push(userId);
-                }
-                localStorage.setItem('huddles', JSON.stringify(huddles));
                 this.joinHuddleCode = '';
                 await this.loadHuddleData();
-                this.toast.success(`Joined "${huddle.name}"!`);
+                if (joined) {
+                    this.toast.success(`Joined "${huddle.name}"!`);
+                } else {
+                    this.toast.info('You are already a member of this huddle.');
+                }
             } else {
                 this.toast.error('Invalid huddle code!');
             }
         },
         removeFriend(id) {
-            this.confirmTitle = 'Remove Friend';
-            this.confirmMessage = 'Are you sure you want to remove this friend?';
-            this.confirmCallback = () => {
-                this.friends = this.friends.filter(friend => friend.id !== id);
-                this.toast.info('Friend removed.');
-            };
-            this.showConfirmModal = true;
-        },
-        closeConfirmModal() {
-            this.showConfirmModal = false;
-            this.confirmCallback = null;
-        },
-        executeConfirmAction() {
-            if (this.confirmCallback) {
-                this.confirmCallback();
-            }
-            this.closeConfirmModal();
+            this.$refs.confirm.open({
+                title: 'Remove Friend',
+                message: 'Are you sure you want to remove this friend?',
+                onConfirm: () => {
+                    this.friends = this.friends.filter(friend => friend.id !== id);
+                    this.toast.info('Friend removed.');
+                }
+            });
         },
         handlePendingRequest(id, action) {
             if (action === 'add') {

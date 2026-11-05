@@ -35,7 +35,7 @@
 <script>
 import { inject } from 'vue';
 import { formatDate, sanitizeInput } from '../../core/utils.js';
-const ToastKey = Symbol('toast');
+import { ToastKey } from '../../core/keys.js';
 
 export default {
     name: 'HuddleDetails',

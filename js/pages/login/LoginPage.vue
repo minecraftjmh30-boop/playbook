@@ -25,10 +25,10 @@
 </template>
 
 <script>
-import { sanitizeInput, setCookie } from '../../core/utils.js';
+import { sanitizeInput, setCookie, getUserIdByEmail } from '../../core/utils.js';
 import { provide, ref } from 'vue';
 import { useRouter } from 'vue-router';
-const ToastKey = Symbol('toast');
+import { ToastKey } from '../../core/keys.js';
 import AppFooter from '../../components/main/AppFooter.vue';
 import ToastComponent from '../../components/ui/Toast.vue';
 
@@ -86,10 +86,17 @@ export default {
             const sanitizedEmail = sanitizeInput(this.email.trim());
             console.log('Logging in with:', sanitizedEmail);
             
-            // Set the currentUser cookie so other pages can read the logged-in user
-            setCookie('currentUser', sanitizedEmail);
+            // Map email to user ID and store in cookie
+            const userId = getUserIdByEmail(sanitizedEmail);
+            if (userId) {
+                setCookie('currentUser', userId);
+                this.toast.success(`Logged in as ${userId}`);
+            } else {
+                // Fallback: use email if user ID not found
+                setCookie('currentUser', sanitizedEmail);
+                this.toast.success(`Logged in as ${sanitizedEmail}`);
+            }
             
-            this.toast.success(`Logged in as ${sanitizedEmail}`);
             this.router.push('/');
         },
         handleSignup() {

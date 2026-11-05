@@ -68,20 +68,6 @@ function isSameDay(dateOne, dateTwo) {
 }
 
 /**
- * Create a system message object for chat
- * @param {string} text - Message text
- * @returns {object} System message object
- */
-function createSystemMessage(text) {
-    return {
-        user: 'System',
-        text: text,
-        time: new Date().toLocaleTimeString(),
-        system: true
-    };
-}
-
-/**
  * Rebuild participants display array from participant IDs
  * @param {Array<string>} participantIds - Array of participant IDs
  * @returns {Array<object>} Array of {name, id} objects
@@ -119,6 +105,22 @@ function getTheme() {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
+/**
+ * Map an email address to a user ID.
+ * Used to convert the email entered during login to the internal user ID format.
+ * @param {string} email - User email address
+ * @returns {string|null} User ID or null if not found
+ */
+function getUserIdByEmail(email) {
+    const userMap = {
+        'user1@example.com': 'User1',
+        'user2@example.com': 'User2',
+        'user3@example.com': 'User3',
+        'user4@example.com': 'User4'
+    };
+    return userMap[email.toLowerCase()] || null;
+}
+
 export {
     formatDate,
     sanitizeInput,
@@ -126,7 +128,7 @@ export {
     getCookie,
     getDateKey,
     isSameDay,
-    createSystemMessage,
     buildParticipantsDisplay,
-    getTheme
+    getTheme,
+    getUserIdByEmail
 };

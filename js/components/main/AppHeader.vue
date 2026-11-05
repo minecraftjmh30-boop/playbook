@@ -20,9 +20,9 @@
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Profile</a>
                 <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="#" @click.prevent="navigateToProfile('main-tab')" role="button">My Profile</a></li>
-                  <li><a class="dropdown-item" href="#" @click.prevent="navigateToProfile('friends-tab')" role="button">Add Friends</a></li>
-                  <li><a class="dropdown-item" href="#" @click.prevent="navigateToProfile('settings-tab')" role="button">Settings</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="navigateToProfile('profile-main')" role="button">My Profile</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="navigateToProfile('profile-friends')" role="button">Add Friends</a></li>
+                  <li><a class="dropdown-item" href="#" @click.prevent="navigateToProfile('profile-settings')" role="button">Settings</a></li>
                   <li><a class="dropdown-item" href="#" @click.prevent="logout" role="button">Logout</a></li>
                 </ul>
               </li>
@@ -57,7 +57,6 @@
 
 <script>
 import { useRouter } from 'vue-router';
-import { getCookie } from '../../core/utils.js';
 
 export default {
     name: 'AppHeader',
